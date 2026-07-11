@@ -29,7 +29,11 @@ function buildNewTaskForm(item: BacklogItem, rerender: () => void): HTMLElement 
 
   const submit = () => {
     try {
-      taskService.create({ backlogItemId: item.id, title: title.value, assignedTo: assignee.value });
+      taskService.create({
+        backlogItemId: item.id,
+        title: title.value,
+        assignedTo: assignee.value
+      });
       rerender();
     } catch (e) {
       error.textContent = (e as Error).message;

@@ -19,7 +19,6 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
   { value: "critical", label: "Crítica" }
 ];
 
-export type ReleaseStatus = "planned" | "released";
 export type TaskStatus = "todo" | "doing" | "done";
 
 export interface Product {
@@ -37,7 +36,6 @@ export interface BacklogItem {
   priority: Priority;
   status: KanbanStatus;
   storyPoints: number;
-  releaseId: ID | null;
 }
 
 export interface Task {
@@ -46,15 +44,6 @@ export interface Task {
   title: string;
   status: TaskStatus;
   assignedTo: string;
-}
-
-export interface Release {
-  id: ID;
-  productId: ID;
-  name: string;
-  version: string;
-  releaseDate: ISODate | null;
-  status: ReleaseStatus;
 }
 
 export interface EstimationLog {
@@ -69,7 +58,6 @@ export interface AppState {
   products: Product[];
   backlogItems: BacklogItem[];
   tasks: Task[];
-  releases: Release[];
   estimations: EstimationLog[];
 }
 
@@ -78,7 +66,6 @@ export function emptyState(): AppState {
     products: [],
     backlogItems: [],
     tasks: [],
-    releases: [],
     estimations: []
   };
 }

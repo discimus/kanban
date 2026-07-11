@@ -61,15 +61,6 @@ export const backlogService = {
     return updated;
   },
 
-  assignRelease(id: string, releaseId: string | null): BacklogItem {
-    const existing = backlogRepository.findById(id);
-    if (!existing) throw new Error("Item de backlog não encontrado.");
-    const updated: BacklogItem = { ...existing, releaseId };
-    backlogRepository.save(updated);
-    eventBus.emit("backlog:updated", updated);
-    return updated;
-  },
-
   delete(id: string): void {
     backlogRepository.remove(id);
     eventBus.emit("backlog:deleted", id);

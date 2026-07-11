@@ -31,7 +31,6 @@ export const productRepository = {
       const removedTasks = s.tasks.filter((t) => removedItems.includes(t.backlogItemId)).map((t) => t.id);
       s.tasks = s.tasks.filter((t) => !removedItems.includes(t.backlogItemId));
       s.estimations = s.estimations.filter((e) => !removedTasks.includes(e.taskId));
-      s.releases = s.releases.filter((r) => r.productId !== id);
     });
   }
 };

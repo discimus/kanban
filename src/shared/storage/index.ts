@@ -11,7 +11,6 @@ function reviveState(raw: unknown): AppState {
     products: Array.isArray(data.products) ? data.products : base.products,
     backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems : base.backlogItems,
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
-    releases: Array.isArray(data.releases) ? data.releases : base.releases,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };
 }

@@ -32,8 +32,6 @@ src/
 │   └── utils/           # ids, datas
 ├── contexts/
 │   ├── product/         # Product Management (Product + BacklogItem)
-│   ├── sprint/          # Sprint Planning
-│   ├── release/         # Release Planning
 │   ├── task/            # Task Management
 │   └── estimation/      # Estimation (histórico)
 └── ui/
@@ -47,8 +45,6 @@ src/
 | Contexto | Responsabilidade |
 |----------|------------------|
 | Product Management | Produto e backlog |
-| Sprint Planning | Planejamento de sprints |
-| Release Planning | Planejamento de releases |
 | Task Management | Gerenciamento de tarefas |
 | Estimation | Histórico de estimativas |
 
@@ -63,7 +59,5 @@ O `Store` (`shared/storage`) é a única fonte de verdade. Os *repositories* de 
 3. **Kanban** com colunas Todo · Doing · Review · Done
 4. **Drag-and-drop** entre colunas
 5. Criar **Tasks** por item (status + responsável)
-6. Criar / iniciar / encerrar **Sprints** e associar itens
-7. Criar / finalizar **Releases** e agendar itens
-8. Registrar e consultar histórico de **estimativas**
-9. Persistência automática via `localStorage`
+6. Registrar e consultar histórico de **estimativas**
+7. Persistência automática via `localStorage`

@@ -20,8 +20,7 @@ export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
     description: props.description?.trim() ?? "",
     priority: props.priority ?? "medium",
     status: "todo",
-    storyPoints: Math.max(0, props.storyPoints ?? 0),
-    releaseId: null
+    storyPoints: Math.max(0, props.storyPoints ?? 0)
   };
 }
 

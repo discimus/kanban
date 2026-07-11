@@ -1,7 +1,6 @@
 import { el, icon } from "@ui/components/dom";
 import { BacklogItem, PRIORITIES } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
-import { releaseService } from "@contexts/release/application/release.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { openItemDetail } from "@ui/modal/item-detail";
@@ -12,7 +11,6 @@ function priorityLabel(p: BacklogItem["priority"]): string {
 
 export function backlogCard(item: BacklogItem): HTMLElement {
   const taskCount = taskService.byBacklogItem(item.id).length;
-  const release = item.releaseId ? releaseService.get(item.releaseId) : undefined;
 
   const card = el("article", { class: "card", draggable: "true", "data-id": item.id }, [
     el("div", { class: "card__top" }, [
@@ -22,7 +20,6 @@ export function backlogCard(item: BacklogItem): HTMLElement {
     el("h4", { class: "card__title" }, [item.title]),
     item.description ? el("p", { class: "card__desc" }, [item.description]) : null,
     el("div", { class: "card__meta" }, [
-      release ? el("span", { class: "chip chip--release" }, [icon("rocket_launch"), release.name]) : null,
       taskCount > 0 ? el("span", { class: "chip" }, [icon("checklist"), `${taskCount} tarefas`]) : null
     ]),
     el("div", { class: "card__actions" }, [

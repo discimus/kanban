@@ -3,6 +3,7 @@ import { productService } from "@contexts/product/application/product.service";
 import { renderSidebar } from "@ui/components/sidebar";
 import { renderProductHeader } from "@ui/components/planning";
 import { renderBoard } from "@ui/board/board";
+import { renderThemeMenu } from "@ui/components/theme-menu";
 
 let selectedProductId: string | null = null;
 
@@ -43,5 +44,5 @@ export function renderApp(root: HTMLElement): void {
     }
   }
 
-  root.append(el("div", { class: "layout" }, [sidebar, content]));
+  root.append(el("div", { class: "layout" }, [sidebar, content]), renderThemeMenu());
 }
