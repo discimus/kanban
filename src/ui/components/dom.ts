@@ -35,6 +35,14 @@ export function clear(node: HTMLElement): void {
   while (node.firstChild) node.removeChild(node.firstChild);
 }
 
+/**
+ * Renders a Material Symbols (Outlined) icon. Decorative by default so it is
+ * ignored by assistive tech; pair with adjacent text labels for meaning.
+ */
+export function icon(name: string, extraClass = ""): HTMLSpanElement {
+  return el("span", { class: `material-symbols-outlined ${extraClass}`.trim(), "aria-hidden": "true" }, [name]);
+}
+
 export function on<K extends keyof HTMLElementEventMap>(
   node: HTMLElement,
   event: K,

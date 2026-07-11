@@ -1,4 +1,4 @@
-import { el } from "@ui/components/dom";
+import { el, icon } from "@ui/components/dom";
 import { BacklogItem, PRIORITIES } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { releaseService } from "@contexts/release/application/release.service";
@@ -22,22 +22,22 @@ export function backlogCard(item: BacklogItem): HTMLElement {
     el("h4", { class: "card__title" }, [item.title]),
     item.description ? el("p", { class: "card__desc" }, [item.description]) : null,
     el("div", { class: "card__meta" }, [
-      release ? el("span", { class: "chip chip--release" }, [`🚀 ${release.name}`]) : null,
-      taskCount > 0 ? el("span", { class: "chip" }, [`✓ ${taskCount} tarefas`]) : null
+      release ? el("span", { class: "chip chip--release" }, [icon("rocket_launch"), release.name]) : null,
+      taskCount > 0 ? el("span", { class: "chip" }, [icon("checklist"), `${taskCount} tarefas`]) : null
     ]),
     el("div", { class: "card__actions" }, [
       (() => {
-        const b = el("button", { class: "btn btn--ghost btn--sm" }, ["Detalhes"]);
+        const b = el("button", { class: "btn btn--ghost btn--sm" }, [icon("visibility"), "Detalhes"]);
         b.addEventListener("click", () => openItemDetail(item));
         return b;
       })(),
       (() => {
-        const b = el("button", { class: "btn btn--ghost btn--sm" }, ["Editar"]);
+        const b = el("button", { class: "btn btn--ghost btn--sm" }, [icon("edit"), "Editar"]);
         b.addEventListener("click", () => openBacklogForm(item.productId, item));
         return b;
       })(),
       (() => {
-        const b = el("button", { class: "btn btn--danger btn--sm" }, ["Excluir"]);
+        const b = el("button", { class: "btn btn--danger btn--sm" }, [icon("delete"), "Excluir"]);
         b.addEventListener("click", () => {
           if (confirm(`Excluir "${item.title}"?`)) backlogService.delete(item.id);
         });

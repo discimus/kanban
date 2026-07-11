@@ -1,4 +1,4 @@
-import { el, clear } from "@ui/components/dom";
+import { el, clear, icon } from "@ui/components/dom";
 
 let overlay: HTMLDivElement | null = null;
 let pendingOnClose: (() => void) | null = null;
@@ -11,7 +11,7 @@ export interface ModalOptions {
 
 export function openModal(options: ModalOptions): void {
   closeModal();
-  const closeBtn = el("button", { class: "modal__close", "aria-label": "Fechar" }, ["×"]);
+  const closeBtn = el("button", { class: "modal__close", "aria-label": "Fechar" }, [icon("close")]);
   closeBtn.addEventListener("click", () => closeModal());
 
   const dialog = el("div", { class: "modal" }, [

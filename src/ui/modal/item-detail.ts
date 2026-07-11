@@ -1,4 +1,4 @@
-import { el, clear } from "@ui/components/dom";
+import { el, clear, icon } from "@ui/components/dom";
 import { field, textInput, numberInput, select, formActions, errorText } from "@ui/components/forms";
 import { openModal } from "../modal";
 import { BacklogItem, Task, TaskStatus } from "@shared/types";
@@ -73,13 +73,13 @@ function buildTaskRow(task: Task, rerender: () => void): HTMLElement {
     taskService.assign(task.id, assignee.value);
   });
 
-  const del = el("button", { class: "btn btn--danger btn--sm" }, ["Excluir"]);
+  const del = el("button", { class: "btn btn--danger btn--sm" }, [icon("delete"), "Excluir"]);
   del.addEventListener("click", () => {
     taskService.delete(task.id);
     rerender();
   });
 
-  const estimateBtn = el("button", { class: "btn btn--ghost btn--sm" }, ["Estimativas"]);
+  const estimateBtn = el("button", { class: "btn btn--ghost btn--sm" }, [icon("insights"), "Estimativas"]);
   const estimatePanel = el("div", { class: "estimation" }, []);
   let open = false;
   estimateBtn.addEventListener("click", () => {

@@ -1,4 +1,4 @@
-import { el } from "@ui/components/dom";
+import { el, icon } from "@ui/components/dom";
 import { Product } from "@shared/types";
 import { releaseService } from "@contexts/release/application/release.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
@@ -27,11 +27,11 @@ function buildReleases(product: Product): HTMLElement {
     const actions = el("div", { class: "planning__actions" }, []);
 
     if (release.status === "planned") {
-      const finalize = el("button", { class: "btn btn--sm btn--ghost" }, ["Finalizar"]);
+      const finalize = el("button", { class: "btn btn--sm btn--ghost" }, [icon("check"), "Finalizar"]);
       finalize.addEventListener("click", () => releaseService.finalize(release.id));
       actions.append(finalize);
     }
-    const del = el("button", { class: "btn btn--sm btn--danger" }, ["×"]);
+    const del = el("button", { class: "btn btn--sm btn--danger", "aria-label": "Excluir release" }, [icon("delete")]);
     del.addEventListener("click", () => {
       if (confirm(`Excluir release "${release.name}"?`)) releaseService.delete(release.id);
     });
@@ -49,24 +49,24 @@ function buildReleases(product: Product): HTMLElement {
     );
   }
 
-  const add = el("button", { class: "btn btn--sm btn--block" }, ["+ Nova release"]);
+  const add = el("button", { class: "btn btn--sm btn--block" }, [icon("add"), "Nova release"]);
   add.addEventListener("click", () => openReleaseForm(product.id));
 
   return el("section", { class: "planning__group" }, [el("h3", {}, ["Releases"]), list, add]);
 }
 
 export function renderProductHeader(product: Product): HTMLElement {
-  const editBtn = el("button", { class: "btn btn--ghost btn--sm" }, ["Editar"]);
+  const editBtn = el("button", { class: "btn btn--ghost btn--sm" }, [icon("edit"), "Editar"]);
   editBtn.addEventListener("click", () => openProductForm(product));
 
-  const deleteBtn = el("button", { class: "btn btn--danger btn--sm" }, ["Excluir"]);
+  const deleteBtn = el("button", { class: "btn btn--danger btn--sm" }, [icon("delete"), "Excluir"]);
   deleteBtn.addEventListener("click", () => {
     if (confirm(`Excluir produto "${product.name}" e todos os seus dados?`)) {
       productService.delete(product.id);
     }
   });
 
-  const addItem = el("button", { class: "btn btn--primary btn--sm" }, ["+ Item de backlog"]);
+  const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), "Item de backlog"]);
   addItem.addEventListener("click", () => openBacklogForm(product.id));
 
   const header = el("header", { class: "content__header" }, [
