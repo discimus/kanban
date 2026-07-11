@@ -1,0 +1,38 @@
+export type DomainEvent =
+  | "state:changed"
+  | "product:created"
+  | "product:updated"
+  | "product:deleted"
+  | "backlog:created"
+  | "backlog:updated"
+  | "backlog:moved"
+  | "backlog:deleted"
+  | "release:created"
+  | "release:finalized"
+  | "task:created"
+  | "task:updated"
+  | "estimation:logged";
+
+type Handler = (payload?: unknown) => void;
+
+class EventBus {
+  private handlers = new Map<DomainEvent, Set<Handler>>();
+
+  on(event: DomainEvent, handler: Handler): () => void {
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, new Set());
+    }
+    this.handlers.get(event)!.add(handler);
+    return () => this.off(event, handler);
+  }
+
+  off(event: DomainEvent, handler: Handler): void {
+    this.handlers.get(event)?.delete(handler);
+  }
+
+  emit(event: DomainEvent, payload?: unknown): void {
+    this.handlers.get(event)?.forEach((h) => h(payload));
+  }
+}
+
+export const eventBus = new EventBus();
