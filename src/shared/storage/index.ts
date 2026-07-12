@@ -5,14 +5,14 @@ const STORAGE_KEY = "kanban-ddd-state";
 
 const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea"];
 
-function normalizeBacklogItem(item: BacklogItem): BacklogItem {
+export function normalizeBacklogItem(item: BacklogItem): BacklogItem {
   if (!VALID_CLASSIFICATIONS.includes(item.classification)) {
     return { ...item, classification: "task" };
   }
   return item;
 }
 
-function reviveState(raw: unknown): AppState {
+export function reviveState(raw: unknown): AppState {
   const base = emptyState();
   if (!raw || typeof raw !== "object") return base;
   const data = raw as Partial<AppState>;
@@ -27,7 +27,7 @@ function reviveState(raw: unknown): AppState {
 
 const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 
-function normalizeProduct(product: Product): Product {
+export function normalizeProduct(product: Product): Product {
   const normalized: Product = {
     ...product,
     showPriority: product.showPriority !== false

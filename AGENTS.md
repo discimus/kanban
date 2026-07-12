@@ -19,6 +19,67 @@ Este documento orienta agentes de IA sobre a estrutura, convenções e padrões 
 npm run dev        # http://localhost:5173
 npm run build      # tsc + vite build
 npm run typecheck  # apenas tsc --noEmit
+npm run test       # vitest (testes unitários)
+npm run test:watch # vitest em modo watch
+```
+
+**SEMPRE execute após implementar novas funcionalidades:**
+```bash
+npm run build && npm run test
+```
+> O build valida tipos (tsc) + empacotamento (vite). Os testes garantem que regressões e migrações de dados não foram quebradas.
+
+## Política de testes
+
+### Testes existentes — NUNCA alterar
+
+1. **Proibido modificar testes existentes.** Se uma mudança quebrar um teste existente, a mudança está errada — não o teste.
+2. **Exceção única**: refatoração do teste (ex: trocar `test` por `it`, renomear describe, extrair helper) **sem alterar a lógica do assert**.
+3. **Caso um teste existente esteja falhando por motivo externo** (ex: API deprecada, ambiente), usar `it.skip` com comentário documentando o motivo:
+
+```typescript
+// skip: aguardando migração do endpoint X (issue #123)
+it.skip("faz algo com API legada", () => { ... });
+```
+
+4. **Nunca remover um teste.** Se o cenário deixou de existir, usar `it.skip` com justificativa.
+
+### Testes novos — SEMPRE adicionar
+
+Ao implementar nova funcionalidade:
+
+1. **Nova entidade** → testes de domínio (factory, validações, pure functions)
+2. **Novo método em service** → teste no `.service.test.ts` correspondente
+3. **Novo campo em entidade existente** → adicionar teste de migração em `storage/index.test.ts`
+4. **Nova validação de import** → adicionar caso em `export.service.test.ts`
+
+### Estrutura de testes
+
+```
+src/
+├── shared/
+│   ├── storage/index.test.ts    # migrate, reviveState, normalize*
+│   ├── events/index.test.ts     # EventBus
+│   └── utils/index.test.ts      # uuid, dates
+├── contexts/
+│   ├── product/
+│   │   ├── domain/product.test.ts
+│   │   ├── domain/backlog-item.test.ts
+│   │   └── application/
+│   │       ├── product.service.test.ts
+│   │       ├── backlog.service.test.ts
+│   │       └── export.service.test.ts
+│   ├── task/
+│   │   ├── domain/task.test.ts
+│   │   └── application/task.service.test.ts
+│   ├── link/
+│   │   ├── domain/link.test.ts
+│   │   └── application/link.service.test.ts
+│   └── estimation/
+│       ├── domain/estimation-log.test.ts
+│       └── application/estimation.service.test.ts
+└── test/
+    └── mocks.ts                  # createMockStore, createMockEventBus
 ```
 
 ## Estrutura (DDD + Bounded Contexts)
@@ -174,5 +235,5 @@ setXpto(id: string, value: X): Entity {
 4. **Prefira `edit` sobre `write`** — exceto para arquivos novos.
 5. **Consulte `shared/types/index.ts` primeiro** — contém todas as interfaces, tipos e constantes.
 6. **Siga o padrão existente** — copie a estrutura de um service/repository vizinho em vez de descrevê-la.
-7. **`npm run typecheck`** é a única verificação necessária após mudanças (sem testes automatizados).
+7. **`npm run build && npm test`** após cada funcionalidade — valida tipos, build e regressões.
 8. **Não crie documentação não solicitada** — o código é a documentação.
