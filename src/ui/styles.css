@@ -1321,8 +1321,16 @@ h4 {
     transform: none;
   }
 
-  /* Touch devices: expose an explicit save button for new subtasks */
+  /* Touch devices: expose save and delete buttons for subtasks */
   .card__subtask-save {
+    display: inline-flex;
+  }
+
+  .card__task-delete {
+    opacity: 1;
+  }
+
+  .quick-add__save {
     display: inline-flex;
   }
 }
