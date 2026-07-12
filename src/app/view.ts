@@ -31,7 +31,6 @@ export function renderApp(root: HTMLElement): void {
   };
 
   const products = productService.list();
-
   const sidebar = renderSidebar(products, selectedProductId, (id) => {
     selectedProductId = id;
     setDrawer(false);
