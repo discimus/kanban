@@ -5,7 +5,7 @@ import { productService } from "@contexts/product/application/product.service";
 import { Product } from "@shared/types";
 
 export function openProductForm(existing?: Product): void {
-  const name = textInput(existing?.name ?? "", "Nome do produto");
+  const name = textInput(existing?.name ?? "", "Nome do Projeto");
   const description = textArea(existing?.description ?? "", "Descrição");
   const error = errorText();
 
@@ -26,8 +26,8 @@ export function openProductForm(existing?: Product): void {
     field("Nome", name),
     field("Descrição", description),
     error,
-    formActions(existing ? "Salvar" : "Criar produto", submit)
+    formActions(existing ? "Salvar" : "Criar Projeto", submit)
   ]);
 
-  openModal({ title: existing ? "Editar produto" : "Novo produto", body });
+  openModal({ title: existing ? "Editar Projeto" : "Novo Projeto", body });
 }

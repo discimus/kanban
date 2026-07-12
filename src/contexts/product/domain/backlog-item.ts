@@ -11,7 +11,7 @@ export interface CreateBacklogItemProps {
 
 export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
   const title = props.title?.trim();
-  if (!props.productId) throw new Error("O item precisa pertencer a um produto.");
+  if (!props.productId) throw new Error("O item precisa pertencer a um Projeto.");
   if (!title) throw new Error("O título do item é obrigatório.");
   return {
     id: uuid(),

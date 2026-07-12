@@ -50,3 +50,63 @@ export function on<K extends keyof HTMLElementEventMap>(
 ): void {
   node.addEventListener(event, handler);
 }
+
+export interface MenuItem {
+  label: string;
+  icon: string;
+  danger?: boolean;
+  action: () => void;
+}
+
+/**
+ * Overflow actions menu: a "more_vert" trigger that toggles a dropdown of
+ * items. Closes on item click or when clicking outside the container.
+ */
+export function actionsMenu(items: MenuItem[]): HTMLElement {
+  const trigger = el("button", { class: "actions-menu__trigger", "aria-label": "Mais ações" }, [icon("more_vert")]);
+
+  const container = el("div", { class: "actions-menu" }, [trigger]);
+
+  let outsideHandler: ((ev: Event) => void) | null = null;
+
+  const closeMenu = (): void => {
+    container.classList.remove("actions-menu--open");
+    if (outsideHandler) {
+      document.removeEventListener("click", outsideHandler);
+      outsideHandler = null;
+    }
+  };
+
+  const dropdown = el(
+    "div",
+    { class: "actions-menu__dropdown" },
+    items.map((item) => {
+      const btn = el("button", { class: `actions-menu__item${item.danger ? " actions-menu__item--danger" : ""}` }, [
+        icon(item.icon),
+        item.label
+      ]);
+      btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        closeMenu();
+        item.action();
+      });
+      return btn;
+    })
+  );
+  container.append(dropdown);
+
+  trigger.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    const isOpen = container.classList.toggle("actions-menu--open");
+    if (isOpen) {
+      outsideHandler = (e: Event) => {
+        if (!container.contains(e.target as Node)) closeMenu();
+      };
+      setTimeout(() => document.addEventListener("click", outsideHandler!), 0);
+    } else {
+      closeMenu();
+    }
+  });
+
+  return container;
+}

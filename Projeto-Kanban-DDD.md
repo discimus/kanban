@@ -18,7 +18,7 @@ Desenvolver uma SPA de gerenciamento ágil baseada em Scrum com persistência em
 
 | Contexto | Responsabilidade |
 |----------|------------------|
-| Product Management | Produto e backlog |
+| Product Management | Projeto e backlog |
 | Sprint Planning | Planejamento de sprints |
 | Release Planning | Planejamento de releases |
 | Task Management | Gerenciamento de tarefas |

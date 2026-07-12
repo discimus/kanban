@@ -6,7 +6,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   const list = el("div", { class: "product-list" }, []);
 
   if (products.length === 0) {
-    list.append(el("p", { class: "muted" }, ["Nenhum produto. Crie o primeiro!"]));
+    list.append(el("p", { class: "muted" }, ["Nenhum Projeto. Crie o primeiro!"]));
   }
 
   for (const product of products) {
@@ -19,14 +19,14 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     list.append(item);
   }
 
-  const addBtn = el("button", { class: "btn btn--primary btn--block" }, [icon("add"), "Novo produto"]);
+  const addBtn = el("button", { class: "btn btn--primary btn--block" }, [icon("add"), "Novo Projeto"]);
   addBtn.addEventListener("click", () => openProductForm());
 
   return el("aside", { class: "sidebar" }, [
-    el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban DDD"]),
+    el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban"]),
     el("p", { class: "sidebar__subtitle" }, ["Gestão ágil Scrum"]),
     addBtn,
-    el("h2", { class: "sidebar__section" }, ["Produtos"]),
+    el("h2", { class: "sidebar__section" }, ["Projetos"]),
     list
   ]);
 }

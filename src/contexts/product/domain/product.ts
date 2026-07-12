@@ -9,7 +9,7 @@ export interface CreateProductProps {
 export function createProduct(props: CreateProductProps): Product {
   const name = props.name?.trim();
   if (!name) {
-    throw new Error("O nome do produto é obrigatório.");
+    throw new Error("O nome do Projeto é obrigatório.");
   }
   return {
     id: uuid(),
@@ -21,6 +21,6 @@ export function createProduct(props: CreateProductProps): Product {
 
 export function assertValidProductName(name: string): void {
   if (!name.trim()) {
-    throw new Error("O nome do produto é obrigatório.");
+    throw new Error("O nome do Projeto é obrigatório.");
   }
 }

@@ -44,7 +44,7 @@ src/
 
 | Contexto | Responsabilidade |
 |----------|------------------|
-| Product Management | Produto e backlog |
+| Product Management | Projeto e backlog |
 | Task Management | Gerenciamento de tarefas |
 | Estimation | Histórico de estimativas |
 

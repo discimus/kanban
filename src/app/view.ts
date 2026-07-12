@@ -33,8 +33,8 @@ export function renderApp(root: HTMLElement): void {
   if (!selectedProductId) {
     content.append(
       el("div", { class: "empty-state" }, [
-        el("h2", {}, ["Bem-vindo ao Kanban DDD"]),
-        el("p", { class: "muted" }, ["Crie um produto na barra lateral para começar."])
+        el("h2", {}, ["Bem-vindo ao Kanban"]),
+        el("p", { class: "muted" }, ["Crie um Projeto na barra lateral para começar."])
       ])
     );
   } else {

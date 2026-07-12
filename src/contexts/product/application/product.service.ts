@@ -21,7 +21,7 @@ export const productService = {
 
   edit(id: string, changes: { name: string; description: string }): Product {
     const existing = productRepository.findById(id);
-    if (!existing) throw new Error("Produto não encontrado.");
+    if (!existing) throw new Error("Projeto não encontrado.");
     assertValidProductName(changes.name);
     const updated: Product = {
       ...existing,
