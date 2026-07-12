@@ -1,10 +1,11 @@
 import { store } from "@shared/storage";
-import { AppState, Product, BacklogItem, Task, EstimationLog } from "@shared/types";
+import { AppState, Product, BacklogItem, Task, EstimationLog, TaskClassification } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
 const VALID_PRIORITIES = ["low", "medium", "high", "critical"];
 const VALID_TASK_STATUSES = ["todo", "doing", "done"];
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea"];
 
 interface ExportResult {
   success: boolean;
@@ -123,6 +124,9 @@ export function validateAndImport(jsonString: string): ExportResult {
       }
       if (!VALID_PRIORITIES.includes(bi.priority)) {
         return { success: false, error: `Prioridade inválida no item "${bi.title}": ${bi.priority}.` };
+      }
+      if (bi.classification && !VALID_CLASSIFICATIONS.includes(bi.classification as TaskClassification)) {
+        return { success: false, error: `Classificação inválida no item "${bi.title}": ${bi.classification}. Valores válidos: ${VALID_CLASSIFICATIONS.join(", ")}` };
       }
     }
   }

@@ -3,7 +3,7 @@ import { field, textInput, textArea, numberInput, select, formActions, errorText
 import { openModal, closeModal } from "../modal";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { taskService } from "@contexts/task/application/task.service";
-import { BacklogItem, Priority, PRIORITIES } from "@shared/types";
+import { BacklogItem, Priority, PRIORITIES, TASK_CLASSIFICATIONS, TaskClassification } from "@shared/types";
 
 export function openBacklogForm(productId: string, existing?: BacklogItem): void {
   const title = textInput(existing?.title ?? "", "Título do item");
@@ -13,6 +13,10 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     existing?.priority ?? "medium"
   );
   const points = numberInput(existing?.storyPoints ?? 0, 0);
+  const classification = select(
+    TASK_CLASSIFICATIONS.map((c) => ({ value: c.value, label: c.label })),
+    existing?.classification ?? "task"
+  );
   const error = errorText();
 
   const subtaskInputs: { taskId: string; input: HTMLInputElement }[] = [];
@@ -29,7 +33,8 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
           title: title.value,
           description: description.value,
           priority: priority.value as Priority,
-          storyPoints: Number(points.value)
+          storyPoints: Number(points.value),
+          classification: classification.value as TaskClassification
         });
       } else {
         backlogService.create({
@@ -37,7 +42,8 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
           title: title.value,
           description: description.value,
           priority: priority.value as Priority,
-          storyPoints: Number(points.value)
+          storyPoints: Number(points.value),
+          classification: classification.value as TaskClassification
         });
       }
       closeModal();
@@ -50,6 +56,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     field("Título", title),
     field("Descrição", description),
     el("div", { class: "form__row" }, [field("Prioridade", priority), field("Story Points", points)]),
+    field("Classificação", classification),
     subtasksSection,
     error,
     formActions(existing ? "Salvar" : "Criar item", submit)

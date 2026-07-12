@@ -1,5 +1,5 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
-import { BacklogItem, PRIORITIES, KANBAN_COLUMNS } from "@shared/types";
+import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, TASK_CLASSIFICATIONS, TaskClassification } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
@@ -7,6 +7,27 @@ import { showAlert, showConfirm } from "@ui/components/dialog";
 
 function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
+}
+
+function classificationLabel(c: TaskClassification): string {
+  return TASK_CLASSIFICATIONS.find((x) => x.value === c)?.label ?? c;
+}
+
+function classificationIcon(c: TaskClassification): string {
+  return TASK_CLASSIFICATIONS.find((x) => x.value === c)?.icon ?? "help";
+}
+
+function nextClassification(current: TaskClassification): TaskClassification {
+  const idx = TASK_CLASSIFICATIONS.findIndex((c) => c.value === current);
+  return TASK_CLASSIFICATIONS[(idx + 1) % TASK_CLASSIFICATIONS.length].value;
+}
+
+const FIBONACCI = [1, 2, 3, 5, 8];
+
+function nextFibonacci(current: number): number {
+  const idx = FIBONACCI.indexOf(current);
+  if (idx === -1 || idx === FIBONACCI.length - 1) return FIBONACCI[0];
+  return FIBONACCI[idx + 1];
 }
 
 export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
@@ -141,11 +162,39 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
     }
   ]);
 
+  const classifyChip = el("button", {
+    class: `chip chip--${item.classification}`,
+    type: "button",
+    "aria-label": `Classificação: ${classificationLabel(item.classification)}`
+  }, [
+    icon(classificationIcon(item.classification)),
+    el("span", {}, [classificationLabel(item.classification)])
+  ]);
+  if (!locked) {
+    classifyChip.addEventListener("click", () => {
+      backlogService.classify(item.id, nextClassification(item.classification));
+    });
+  }
+
+  const pointsBtn = el("button", {
+    class: "card__points",
+    type: "button",
+    "aria-label": `${item.storyPoints} story points`
+  }, [`${item.storyPoints} pts`]);
+  if (!locked) {
+    pointsBtn.addEventListener("click", () => {
+      backlogService.setStoryPoints(item.id, nextFibonacci(item.storyPoints));
+    });
+  }
+
   const card = el("article", { class: `card${locked ? " card--locked" : ""}`, draggable: locked ? "false" : "true", "data-id": item.id }, [
     menu,
     el("div", { class: "card__top" }, [
-      el("span", { class: `badge badge--${item.priority}` }, [priorityLabel(item.priority)]),
-      el("span", { class: "card__points" }, [`${item.storyPoints} pts`])
+      el("div", { class: "card__badges" }, [
+        classifyChip,
+        el("span", { class: `badge badge--${item.priority}` }, [priorityLabel(item.priority)])
+      ]),
+      pointsBtn
     ]),
     el("h4", { class: "card__title" }, [item.title]),
     item.description ? el("p", { class: "card__desc" }, [item.description]) : null,

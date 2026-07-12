@@ -1,7 +1,16 @@
-import { AppState, Product, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, TaskClassification, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
+
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea"];
+
+function normalizeBacklogItem(item: BacklogItem): BacklogItem {
+  if (!VALID_CLASSIFICATIONS.includes(item.classification)) {
+    return { ...item, classification: "task" };
+  }
+  return item;
+}
 
 function reviveState(raw: unknown): AppState {
   const base = emptyState();
@@ -9,7 +18,7 @@ function reviveState(raw: unknown): AppState {
   const data = raw as Partial<AppState>;
   return {
     products: Array.isArray(data.products) ? data.products.map(normalizeProduct) : base.products,
-    backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems : base.backlogItems,
+    backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems.map(normalizeBacklogItem) : base.backlogItems,
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };

@@ -1,4 +1,4 @@
-import { BacklogItem, KanbanStatus, Priority } from "@shared/types";
+import { BacklogItem, KanbanStatus, Priority, TaskClassification } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { createBacklogItem, CreateBacklogItemProps } from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
@@ -34,7 +34,7 @@ export const backlogService = {
 
   edit(
     id: string,
-    changes: { title: string; description: string; priority: Priority; storyPoints: number }
+    changes: { title: string; description: string; priority: Priority; storyPoints: number; classification: TaskClassification }
   ): BacklogItem {
     const existing = backlogRepository.findById(id);
     if (!existing) throw new Error("Item de backlog não encontrado.");
@@ -45,8 +45,30 @@ export const backlogService = {
       title: changes.title.trim(),
       description: changes.description.trim(),
       priority: changes.priority,
-      storyPoints: Math.max(0, changes.storyPoints)
+      storyPoints: Math.max(0, changes.storyPoints),
+      classification: changes.classification
     };
+    backlogRepository.save(updated);
+    eventBus.emit("backlog:updated", updated);
+    return updated;
+  },
+
+  classify(id: string, classification: TaskClassification): BacklogItem {
+    const existing = backlogRepository.findById(id);
+    if (!existing) throw new Error("Item de backlog não encontrado.");
+    assertProductEditable(existing.productId);
+    if (existing.classification === classification) return existing;
+    const updated: BacklogItem = { ...existing, classification };
+    backlogRepository.save(updated);
+    eventBus.emit("backlog:updated", updated);
+    return updated;
+  },
+
+  setStoryPoints(id: string, points: number): BacklogItem {
+    const existing = backlogRepository.findById(id);
+    if (!existing) throw new Error("Item de backlog não encontrado.");
+    assertProductEditable(existing.productId);
+    const updated: BacklogItem = { ...existing, storyPoints: points };
     backlogRepository.save(updated);
     eventBus.emit("backlog:updated", updated);
     return updated;

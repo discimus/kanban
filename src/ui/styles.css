@@ -504,9 +504,16 @@ body {
 .card__top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 8px;
   padding-right: 40px;
+}
+
+.card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
 }
 
 .card > .actions-menu {
@@ -519,6 +526,23 @@ body {
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+button.card__points {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  padding: 2px 8px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+button.card__points:hover {
+  background: var(--md-surface-container-highest);
+  border-color: var(--md-outline);
+  color: var(--text);
 }
 
 .card__title {
@@ -550,10 +574,52 @@ body {
   color: var(--text-muted);
   border-radius: 8px;
   padding: 3px 8px;
+  font-family: inherit;
 }
 
 .chip .material-symbols-outlined {
   font-size: 0.95rem;
+}
+
+button.chip {
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+button.chip:hover {
+  border-color: var(--md-outline);
+  background: var(--md-surface-container-highest);
+}
+
+.chip--task {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+button.chip--task:hover {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+}
+
+.chip--bug {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
+}
+
+button.chip--bug:hover {
+  background: var(--md-error);
+  color: var(--md-on-error);
+}
+
+.chip--idea {
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+}
+
+button.chip--idea:hover {
+  background: #5b3049;
+  color: #ffd8e8;
 }
 
 .card__actions {

@@ -19,6 +19,14 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
   { value: "critical", label: "Crítica" }
 ];
 
+export type TaskClassification = "task" | "bug" | "idea";
+
+export const TASK_CLASSIFICATIONS: { value: TaskClassification; label: string; icon: string }[] = [
+  { value: "task", label: "Tarefa", icon: "task" },
+  { value: "bug", label: "Bug", icon: "bug_report" },
+  { value: "idea", label: "Idealização", icon: "lightbulb" }
+];
+
 export type TaskStatus = "todo" | "doing" | "done";
 
 export type ProductStatus = "backlog" | "in_progress" | "completed" | "canceled";
@@ -46,6 +54,7 @@ export interface BacklogItem {
   priority: Priority;
   status: KanbanStatus;
   storyPoints: number;
+  classification: TaskClassification;
 }
 
 export interface Task {

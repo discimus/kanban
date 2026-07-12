@@ -1,4 +1,4 @@
-import { BacklogItem, KanbanStatus, Priority } from "@shared/types";
+import { BacklogItem, KanbanStatus, Priority, TaskClassification } from "@shared/types";
 import { uuid } from "@shared/utils";
 
 export interface CreateBacklogItemProps {
@@ -7,6 +7,7 @@ export interface CreateBacklogItemProps {
   description?: string;
   priority?: Priority;
   storyPoints?: number;
+  classification?: TaskClassification;
 }
 
 export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
@@ -20,7 +21,8 @@ export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
     description: props.description?.trim() ?? "",
     priority: props.priority ?? "medium",
     status: "todo",
-    storyPoints: Math.max(0, props.storyPoints ?? 0)
+    storyPoints: Math.max(0, props.storyPoints ?? 0),
+    classification: props.classification ?? "task"
   };
 }
 
