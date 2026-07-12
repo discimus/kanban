@@ -1,4 +1,4 @@
-import { el, clear } from "@ui/components/dom";
+import { el, clear, icon } from "@ui/components/dom";
 import { productService } from "@contexts/product/application/product.service";
 import { renderSidebar } from "@ui/components/sidebar";
 import { renderProductHeader } from "@ui/components/planning";
@@ -6,6 +6,7 @@ import { renderBoard } from "@ui/board/board";
 import { renderThemeMenu } from "@ui/components/theme-menu";
 
 let selectedProductId: string | null = null;
+let drawerOpen = false;
 
 function ensureSelection(): void {
   const products = productService.list();
@@ -22,13 +23,27 @@ export function renderApp(root: HTMLElement): void {
   ensureSelection();
   clear(root);
 
+  const layout = el("div", { class: `layout${drawerOpen ? " layout--drawer-open" : ""}` }, []);
+
+  const setDrawer = (open: boolean): void => {
+    drawerOpen = open;
+    layout.classList.toggle("layout--drawer-open", open);
+  };
+
   const products = productService.list();
   const sidebar = renderSidebar(products, selectedProductId, (id) => {
     selectedProductId = id;
+    setDrawer(false);
     renderApp(root);
   });
 
-  const content = el("main", { class: "content" }, []);
+  const scrim = el("div", { class: "drawer-scrim", "aria-hidden": "true" }, []);
+  scrim.addEventListener("click", () => setDrawer(false));
+
+  const hamburger = el("button", { class: "hamburger", "aria-label": "Abrir menu de projetos" }, [icon("menu")]);
+  hamburger.addEventListener("click", () => setDrawer(!drawerOpen));
+
+  const content = el("main", { class: "content" }, [hamburger]);
 
   if (!selectedProductId) {
     content.append(
@@ -44,5 +59,6 @@ export function renderApp(root: HTMLElement): void {
     }
   }
 
-  root.append(el("div", { class: "layout" }, [sidebar, content]), renderThemeMenu());
+  layout.append(sidebar, scrim, content);
+  root.append(layout, renderThemeMenu());
 }

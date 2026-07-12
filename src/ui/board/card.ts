@@ -1,5 +1,5 @@
-import { el, icon, clear, actionsMenu } from "@ui/components/dom";
-import { BacklogItem, PRIORITIES } from "@shared/types";
+import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
+import { BacklogItem, PRIORITIES, KANBAN_COLUMNS } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
@@ -49,18 +49,39 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
   renderTasks();
 
   const addSubtask = (): void => {
-    if (taskList.querySelector(".card__task-input")) return;
+    if (taskList.querySelector(".card__subtask-add")) return;
+
     const input = el("input", { class: "card__task-input", type: "text", placeholder: "Nova subtarefa…" }) as HTMLInputElement;
-    input.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") {
-        const title = input.value.trim();
-        if (title) taskService.create({ backlogItemId: item.id, title });
-      } else if (ev.key === "Escape") {
-        input.remove();
+
+    const save = el("button", { class: "card__subtask-save", "aria-label": "Salvar subtarefa", type: "button" }, [
+      icon("check")
+    ]);
+
+    const row = el("div", { class: "card__subtask-add" }, [input, save]);
+
+    let done = false;
+    const commit = (): void => {
+      if (done) return;
+      const title = input.value.trim();
+      if (title) {
+        done = true;
+        taskService.create({ backlogItemId: item.id, title });
       }
+    };
+    const cancel = (): void => {
+      done = true;
+      row.remove();
+    };
+
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") commit();
+      else if (ev.key === "Escape") cancel();
     });
-    input.addEventListener("blur", () => setTimeout(() => input.remove(), 150));
-    taskList.append(input);
+    input.addEventListener("blur", () => setTimeout(() => !done && row.remove(), 150));
+    save.addEventListener("mousedown", (ev) => ev.preventDefault());
+    save.addEventListener("click", commit);
+
+    taskList.append(row);
     input.focus();
   };
 
@@ -70,8 +91,37 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
     );
   };
 
+  const currentIndex = KANBAN_COLUMNS.findIndex((c) => c.status === item.status);
+  const prevColumn = currentIndex > 0 ? KANBAN_COLUMNS[currentIndex - 1] : null;
+  const nextColumn = currentIndex < KANBAN_COLUMNS.length - 1 ? KANBAN_COLUMNS[currentIndex + 1] : null;
+
+  const moveTo = (status: (typeof KANBAN_COLUMNS)[number]["status"]): void => {
+    try {
+      backlogService.move(item.id, status);
+    } catch (e) {
+      showAlert((e as Error).message);
+    }
+  };
+
+  const moveItems: MenuItem[] = [];
+  if (nextColumn) {
+    moveItems.push({
+      label: `Avançar para "${nextColumn.label}"`,
+      icon: "arrow_forward",
+      action: locked ? lockedAlert : () => moveTo(nextColumn.status)
+    });
+  }
+  if (prevColumn) {
+    moveItems.push({
+      label: `Voltar para "${prevColumn.label}"`,
+      icon: "arrow_back",
+      action: locked ? lockedAlert : () => moveTo(prevColumn.status)
+    });
+  }
+
   const menu = actionsMenu([
     { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+    ...moveItems,
     {
       label: "Editar",
       icon: "edit",
