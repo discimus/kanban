@@ -1,5 +1,7 @@
 # Kanban Board — DDD + Bounded Contexts
 
+ℹ️ Disclosure: This application was developed using AI (vibecoding).
+
 SPA de gerenciamento ágil (Scrum) construída com **Vite + TypeScript**, sem frameworks de UI, seguindo **Domain-Driven Design** com bounded contexts isolados e persistência automática em `localStorage`.
 
 ## Stack
