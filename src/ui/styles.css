@@ -434,6 +434,8 @@ body {
 
 .card--locked {
   cursor: default;
+  opacity: 0.55;
+  filter: grayscale(0.5);
 }
 
 .card__top {

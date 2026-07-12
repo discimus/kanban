@@ -4,6 +4,13 @@ import { createBacklogItem, CreateBacklogItemProps } from "../domain/backlog-ite
 import { backlogRepository } from "../infrastructure/backlog.repository";
 import { productService } from "./product.service";
 
+function assertProductEditable(productId: string): void {
+  const product = productService.get(productId);
+  if (product && (product.status === "completed" || product.status === "canceled")) {
+    throw new Error("O projeto está concluído ou cancelado. Não é possível modificar os itens.");
+  }
+}
+
 export const backlogService = {
   list(): BacklogItem[] {
     return backlogRepository.all();
@@ -18,6 +25,7 @@ export const backlogService = {
   },
 
   create(props: CreateBacklogItemProps): BacklogItem {
+    assertProductEditable(props.productId);
     const item = createBacklogItem(props);
     backlogRepository.add(item);
     eventBus.emit("backlog:created", item);
@@ -30,6 +38,7 @@ export const backlogService = {
   ): BacklogItem {
     const existing = backlogRepository.findById(id);
     if (!existing) throw new Error("Item de backlog não encontrado.");
+    assertProductEditable(existing.productId);
     if (!changes.title.trim()) throw new Error("O título do item é obrigatório.");
     const updated: BacklogItem = {
       ...existing,
@@ -68,6 +77,8 @@ export const backlogService = {
   },
 
   delete(id: string): void {
+    const existing = backlogRepository.findById(id);
+    if (existing) assertProductEditable(existing.productId);
     backlogRepository.remove(id);
     eventBus.emit("backlog:deleted", id);
   }

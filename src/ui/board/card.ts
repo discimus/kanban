@@ -19,14 +19,20 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
 
       const checkbox = el("input", { class: "card__task-check", type: "checkbox" }) as HTMLInputElement;
       checkbox.checked = done;
-      checkbox.addEventListener("change", () => {
-        taskService.changeStatus(task.id, checkbox.checked ? "done" : "todo");
-      });
+      checkbox.disabled = locked;
+      if (!locked) {
+        checkbox.addEventListener("change", () => {
+          taskService.changeStatus(task.id, checkbox.checked ? "done" : "todo");
+        });
+      }
 
       const del = el("button", { class: "card__task-delete", "aria-label": "Excluir subtarefa" }, [icon("close")]);
-      del.addEventListener("click", () => {
-        if (confirm(`Excluir subtarefa "${task.title}"?`)) taskService.delete(task.id);
-      });
+      del.disabled = locked;
+      if (!locked) {
+        del.addEventListener("click", () => {
+          if (confirm(`Excluir subtarefa "${task.title}"?`)) taskService.delete(task.id);
+        });
+      }
 
       taskList.append(
         el("label", { class: `card__task${done ? " card__task--done" : ""}` }, [
@@ -55,16 +61,28 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
     input.focus();
   };
 
+  const lockedAlert = (): void => {
+    alert(
+      'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
+    );
+  };
+
   const menu = actionsMenu([
-    { label: "Adicionar subtarefa", icon: "playlist_add", action: addSubtask },
-    { label: "Editar", icon: "edit", action: () => openBacklogForm(item.productId, item) },
+    { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+    {
+      label: "Editar",
+      icon: "edit",
+      action: locked ? lockedAlert : () => openBacklogForm(item.productId, item)
+    },
     {
       label: "Excluir",
       icon: "delete",
       danger: true,
-      action: () => {
-        if (confirm(`Excluir "${item.title}"?`)) backlogService.delete(item.id);
-      }
+      action: locked
+        ? lockedAlert
+        : () => {
+            if (confirm(`Excluir "${item.title}"?`)) backlogService.delete(item.id);
+          }
     }
   ]);
 
