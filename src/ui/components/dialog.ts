@@ -86,3 +86,14 @@ export function showConfirm(message: string, highlight?: string): Promise<boolea
     openDialog({ message, highlight, confirmLabel: "Confirmar", cancelLabel: "Cancelar", onResolve: resolve });
   });
 }
+
+export function showOnboarding(): Promise<boolean> {
+  return new Promise((resolve) => {
+    openDialog({
+      message: "Bem-vindo! Deseja carregar projetos de exemplo para explorar a aplicação?",
+      confirmLabel: "Carregar projetos exemplo",
+      cancelLabel: "Board em branco",
+      onResolve: resolve
+    });
+  });
+}
