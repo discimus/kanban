@@ -13,43 +13,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Configurar Git
-        run: |
+      - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Buscar todas as branches
-        run: git fetch origin
+      - run: git fetch origin
 
-      - name: Checkout da branch de publicação
+      - name: Criar branch de publicação a partir da main
         run: |
-          git checkout build/github-pages || git checkout -b build/github-pages origin/build/github-pages
+          git checkout -B build/github-pages origin/main
 
-      - name: Merge da main
-        run: |
-          git merge origin/main --no-edit
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Instalar dependências
-        run: npm ci
+      - run: npm ci
 
-      - name: Gerar build
-        run: npx vite build --outDir docs
+      - run: npx vite build --outDir docs
 
-      - name: Commitar alterações
+      - name: Commitar build
         run: |
           git add docs
-          git commit -m "Deploy GitHub Pages" || echo "Nenhuma alteração"
+          git commit -m "Deploy GitHub Pages" || echo "Sem alterações"
 
       - name: Publicar
-        run: git push origin build/github-pages
+        run: |
+          git push --force-with-lease origin build/github-pages
