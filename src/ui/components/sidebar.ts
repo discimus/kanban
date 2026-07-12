@@ -42,7 +42,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
 
   return el("aside", { class: "sidebar" }, [
     el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban"]),
-    el("p", { class: "sidebar__subtitle" }, ["Gestão ágil Scrum"]),
+    el("p", { class: "sidebar__subtitle" }, ["Dashboard de gestão de projetos"]),
     addBtn,
     el("h2", { class: "sidebar__section" }, ["Projetos"]),
     list
