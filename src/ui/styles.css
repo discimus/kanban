@@ -873,24 +873,33 @@ button.chip--refactor:hover {
 .stats {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 16px;
+  padding: 8px 0 16px;
 }
 
 .stats__title {
-  margin: 8px 0 0;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-muted);
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--md-on-surface-variant);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+}
+
+.stats__title:first-child {
+  margin-top: 0;
+}
+
+.stats__title:not(:first-child) {
+  margin-top: 8px;
 }
 
 .stats__row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.82rem;
+  min-height: 32px;
 }
 
 .stats__row-label {
@@ -902,7 +911,7 @@ button.chip--refactor:hover {
 
 .stats__bar {
   flex: 1;
-  height: 20px;
+  height: 24px;
   background: var(--md-surface-container-highest);
   border-radius: var(--radius-pill);
   overflow: hidden;
@@ -913,7 +922,7 @@ button.chip--refactor:hover {
   border-radius: var(--radius-pill);
   transition: width 0.3s ease;
   display: flex;
-  min-width: 2px;
+  min-width: 4px;
 }
 
 .stats__bar-segments {
@@ -955,19 +964,21 @@ button.chip--refactor:hover {
 .stats__badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  gap: 6px;
+  padding: 4px 12px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--md-on-primary);
-  background: var(--md-primary);
+  background: var(--md-surface-container-high);
+  color: var(--md-on-surface);
   border-radius: var(--radius-pill);
 }
 
 .stats__progress {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.8rem;
+  gap: 12px;
+  font-size: 0.82rem;
+  min-height: 28px;
 }
 
 .stats__progress-label {
@@ -978,17 +989,38 @@ button.chip--refactor:hover {
 
 .stats__progress-bar {
   flex: 1;
-  height: 8px;
+  height: 6px;
   background: var(--md-surface-container-highest);
-  border-radius: 4px;
+  border-radius: 999px;
   overflow: hidden;
 }
 
 .stats__progress-fill {
   height: 100%;
   background: var(--md-primary);
-  border-radius: 4px;
+  border-radius: 999px;
   transition: width 0.3s ease;
+}
+
+.stats__progress-text {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  min-width: 80px;
+  text-align: right;
+}
+
+.stats__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats__chip-pct {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-right: 4px;
 }
 
 .stats__progress-text {
