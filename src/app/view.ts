@@ -3,10 +3,12 @@ import { productService } from "@contexts/product/application/product.service";
 import { renderSidebar } from "@ui/components/sidebar";
 import { renderProductHeader } from "@ui/components/planning";
 import { renderBoard } from "@ui/board/board";
+import { renderStatistics } from "@ui/components/statistics";
 import { renderThemeMenu } from "@ui/components/theme-menu";
 
 let selectedProductId: string | null = null;
 let drawerOpen = false;
+let showStats = false;
 
 const LAST_PROJECT_KEY = "kanban-last-project";
 
@@ -79,7 +81,13 @@ export function renderApp(root: HTMLElement): void {
   } else {
     const product = productService.get(selectedProductId);
     if (product) {
-      content.append(renderProductHeader(product), renderBoard(product.id));
+      content.append(
+        renderProductHeader(product, showStats, () => {
+          showStats = !showStats;
+          renderApp(root);
+        }),
+        showStats ? renderStatistics(product.id) : renderBoard(product.id)
+      );
     }
   }
 

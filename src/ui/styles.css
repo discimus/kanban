@@ -870,6 +870,147 @@ button.chip--refactor:hover {
   font-size: 1rem;
 }
 
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.stats__title {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stats__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.stats__row-label {
+  width: 64px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.stats__bar {
+  flex: 1;
+  height: 20px;
+  background: var(--md-surface-container-highest);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.stats__bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+  display: flex;
+  min-width: 2px;
+}
+
+.stats__bar-segments {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.stats__bar-seg--task {
+  background: var(--md-primary-container);
+}
+
+.stats__bar-seg--bug {
+  background: var(--md-error-container);
+}
+
+.stats__bar-seg--idea {
+  background: var(--md-tertiary-container);
+}
+
+.stats__bar-seg--refactor {
+  background: var(--md-secondary-container);
+}
+
+.stats__row-value {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  min-width: 100px;
+  text-align: right;
+}
+
+.stats__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stats__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--md-on-primary);
+  background: var(--md-primary);
+  border-radius: var(--radius-pill);
+}
+
+.stats__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+}
+
+.stats__progress-label {
+  width: 140px;
+  flex-shrink: 0;
+  color: var(--text);
+}
+
+.stats__progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--md-surface-container-highest);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stats__progress-fill {
+  height: 100%;
+  background: var(--md-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.stats__progress-text {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  min-width: 80px;
+  text-align: right;
+}
+
+.stats__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.stats__chip-pct {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
 .badge {
   font-size: 0.7rem;
   font-weight: 500;
