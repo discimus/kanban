@@ -407,6 +407,31 @@ body {
   padding: 12px 0;
 }
 
+.quick-add {
+  margin-top: 2px;
+}
+
+.quick-add__btn {
+  justify-content: flex-start;
+  color: var(--text-muted);
+}
+
+.quick-add__btn:hover {
+  color: var(--primary);
+}
+
+.quick-add__input {
+  width: 100%;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--elevation-3);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  outline: none;
+}
+
 /* Card */
 .card {
   position: relative;

@@ -1,4 +1,4 @@
-import { el } from "@ui/components/dom";
+import { el, icon } from "@ui/components/dom";
 import { KANBAN_COLUMNS, KanbanStatus, BacklogItem } from "@shared/types";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
@@ -18,7 +18,7 @@ export function renderBoard(productId: string): HTMLElement {
 
   for (const column of KANBAN_COLUMNS) {
     const columnItems = items.filter((i) => i.status === column.status);
-    board.append(renderColumn(column.status, column.label, columnItems, locked));
+    board.append(renderColumn(column.status, column.label, columnItems, locked, productId));
   }
 
   return board;
@@ -28,13 +28,23 @@ function priorityRank(item: BacklogItem): number {
   return { low: 0, medium: 1, high: 2, critical: 3 }[item.priority];
 }
 
-function renderColumn(status: KanbanStatus, label: string, items: BacklogItem[], locked: boolean): HTMLElement {
+function renderColumn(
+  status: KanbanStatus,
+  label: string,
+  items: BacklogItem[],
+  locked: boolean,
+  productId: string
+): HTMLElement {
   const body = el("div", { class: "column__body", "data-status": status }, []);
 
   if (items.length === 0) {
     body.append(el("p", { class: "column__empty" }, ["Sem itens"]));
   } else {
     for (const item of items) body.append(backlogCard(item, locked));
+  }
+
+  if (status === "todo" && !locked) {
+    body.append(renderQuickAdd(productId));
   }
 
   if (!locked) {
@@ -65,4 +75,53 @@ function renderColumn(status: KanbanStatus, label: string, items: BacklogItem[],
     ]),
     body
   ]);
+}
+
+function renderQuickAdd(productId: string): HTMLElement {
+  const wrapper = el("div", { class: "quick-add" }, []);
+
+  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn" }, [
+    icon("add"),
+    "Adicionar tarefa"
+  ]);
+
+  const showInput = (): void => {
+    const input = el("input", {
+      class: "quick-add__input",
+      type: "text",
+      placeholder: "Título da tarefa…"
+    }) as HTMLInputElement;
+
+    let done = false;
+    const reset = (): void => {
+      if (done) return;
+      done = true;
+      wrapper.replaceChildren(addBtn);
+    };
+
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        const title = input.value.trim();
+        if (title) {
+          try {
+            backlogService.create({ productId, title, priority: "medium" });
+          } catch (e) {
+            showAlert((e as Error).message);
+          }
+        } else {
+          reset();
+        }
+      } else if (ev.key === "Escape") {
+        reset();
+      }
+    });
+    input.addEventListener("blur", () => setTimeout(reset, 150));
+
+    wrapper.replaceChildren(input);
+    input.focus();
+  };
+
+  addBtn.addEventListener("click", showInput);
+  wrapper.append(addBtn);
+  return wrapper;
 }
