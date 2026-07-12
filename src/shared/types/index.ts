@@ -66,6 +66,12 @@ export interface Task {
   assignedTo: string;
 }
 
+export interface Link {
+  id: ID;
+  backlogItemId: ID;
+  url: string;
+}
+
 export interface EstimationLog {
   id: ID;
   taskId: ID;
@@ -78,6 +84,7 @@ export interface AppState {
   products: Product[];
   backlogItems: BacklogItem[];
   tasks: Task[];
+  links: Link[];
   estimations: EstimationLog[];
 }
 
@@ -86,6 +93,7 @@ export function emptyState(): AppState {
     products: [],
     backlogItems: [],
     tasks: [],
+    links: [],
     estimations: []
   };
 }

@@ -1,5 +1,5 @@
 import { store } from "@shared/storage";
-import { AppState, Product, BacklogItem, Task, EstimationLog, TaskClassification } from "@shared/types";
+import { AppState, Product, BacklogItem, Task, Link, EstimationLog, TaskClassification } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
@@ -32,6 +32,7 @@ export function exportProductState(productId: string): AppState | null {
   const backlogItems = state.backlogItems.filter((bi) => bi.productId === productId);
   const backlogItemIds = new Set(backlogItems.map((bi) => bi.id));
   const tasks = state.tasks.filter((t) => backlogItemIds.has(t.backlogItemId));
+  const links = state.links.filter((l) => backlogItemIds.has(l.backlogItemId));
   const taskIds = new Set(tasks.map((t) => t.id));
   const estimations = state.estimations.filter((e) => taskIds.has(e.taskId));
 
@@ -39,6 +40,7 @@ export function exportProductState(productId: string): AppState | null {
     products: [product],
     backlogItems,
     tasks,
+    links,
     estimations
   };
 }
@@ -143,6 +145,15 @@ export function validateAndImport(jsonString: string): ExportResult {
     }
   }
 
+  if (obj.links !== undefined && !Array.isArray(obj.links)) {
+    return { success: false, error: '"links" deve ser um array.' };
+  }
+  if (Array.isArray(obj.links)) {
+    for (const l of obj.links as Link[]) {
+      if (!l.id || !l.backlogItemId || !l.url) return { success: false, error: "Cada link precisa de id, backlogItemId e url." };
+    }
+  }
+
   if (obj.estimations !== undefined && !Array.isArray(obj.estimations)) {
     return { success: false, error: '"estimations" deve ser um array.' };
   }
@@ -171,6 +182,11 @@ function doImport(data: AppState): void {
     for (const task of data.tasks) {
       if (!state.tasks.some((t) => t.id === task.id)) {
         state.tasks.push(task);
+      }
+    }
+    for (const link of data.links) {
+      if (!state.links.some((l) => l.id === link.id)) {
+        state.links.push(link);
       }
     }
     for (const est of data.estimations) {

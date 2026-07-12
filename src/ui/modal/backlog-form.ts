@@ -3,6 +3,7 @@ import { field, textInput, textArea, numberInput, select, formActions, errorText
 import { openModal, closeModal } from "../modal";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { taskService } from "@contexts/task/application/task.service";
+import { linkService } from "@contexts/link/application/link.service";
 import { BacklogItem, Priority, PRIORITIES, TASK_CLASSIFICATIONS, TaskClassification } from "@shared/types";
 
 export function openBacklogForm(productId: string, existing?: BacklogItem): void {
@@ -22,12 +23,19 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   const subtaskInputs: { taskId: string; input: HTMLInputElement }[] = [];
   const subtasksSection = existing ? buildSubtasksSection(existing.id, subtaskInputs) : null;
 
+  const linkInputs: { linkId: string; urlInput: HTMLInputElement }[] = [];
+  const linksSection = existing ? buildLinksSection(existing.id, linkInputs) : null;
+
   const submit = () => {
     try {
       if (existing) {
         for (const { taskId, input } of subtaskInputs) {
           const value = input.value.trim();
           if (value) taskService.rename(taskId, value);
+        }
+        for (const { linkId, urlInput } of linkInputs) {
+          const urlVal = urlInput.value.trim();
+          if (urlVal) linkService.changeUrl(linkId, urlVal);
         }
         backlogService.edit(existing.id, {
           title: title.value,
@@ -58,6 +66,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     el("div", { class: "form__row" }, [field("Prioridade", priority), field("Story Points", points)]),
     field("Classificação", classification),
     subtasksSection,
+    linksSection,
     error,
     formActions(existing ? "Salvar" : "Criar item", submit)
   ]);
@@ -80,6 +89,26 @@ function buildSubtasksSection(
 
   return el("div", { class: "field" }, [
     el("span", { class: "field__label" }, ["Subtarefas"]),
+    ...rows
+  ]);
+}
+
+function buildLinksSection(
+  backlogItemId: string,
+  linkInputs: { linkId: string; urlInput: HTMLInputElement }[]
+): HTMLElement | null {
+  const links = linkService.byBacklogItem(backlogItemId);
+  if (links.length === 0) return null;
+
+  const rows: HTMLElement[] = [];
+  for (const link of links) {
+    const urlInput = textInput(link.url, "URL");
+    linkInputs.push({ linkId: link.id, urlInput });
+    rows.push(urlInput);
+  }
+
+  return el("div", { class: "field" }, [
+    el("span", { class: "field__label" }, ["Links"]),
     ...rows
   ]);
 }

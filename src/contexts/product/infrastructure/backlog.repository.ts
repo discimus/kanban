@@ -32,6 +32,7 @@ export const backlogRepository = {
       s.backlogItems = s.backlogItems.filter((b) => b.id !== id);
       const removedTasks = s.tasks.filter((t) => t.backlogItemId === id).map((t) => t.id);
       s.tasks = s.tasks.filter((t) => t.backlogItemId !== id);
+      s.links = s.links.filter((l) => l.backlogItemId !== id);
       s.estimations = s.estimations.filter((e) => !removedTasks.includes(e.taskId));
     });
   }

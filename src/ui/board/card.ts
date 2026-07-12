@@ -1,6 +1,7 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
 import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, TASK_CLASSIFICATIONS, TaskClassification } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
+import { linkService } from "@contexts/link/application/link.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
@@ -52,14 +53,14 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       del.disabled = locked;
       if (!locked) {
         del.addEventListener("click", () => {
-          showConfirm(`Excluir subtarefa "${task.title}"?`).then((ok) => {
+          showConfirm('Excluir subtarefa "{{text}}"?', task.title).then((ok) => {
             if (ok) taskService.delete(task.id);
           });
         });
       }
 
       taskList.append(
-        el("label", { class: `card__task${done ? " card__task--done" : ""}` }, [
+        el("div", { class: `card__task${done ? " card__task--done" : ""}` }, [
           checkbox,
           el("span", { class: "card__task-text" }, [task.title]),
           del
@@ -68,6 +69,80 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
   };
   renderTasks();
+
+  const linkList = el("div", { class: "card__links" }, []);
+
+  const renderLinks = (): void => {
+    clear(linkList);
+    const links = linkService.byBacklogItem(item.id);
+    for (const link of links) {
+      const displayUrl = link.url.replace(/^https?:\/\//, "");
+
+      const linkBtn = el("a", {
+        class: "card__link-btn",
+        href: link.url,
+        target: "_blank",
+        rel: "noopener",
+        "aria-label": `Abrir ${link.url}`
+      }, [icon("link")]);
+
+      const del = el("button", { class: "card__task-delete", "aria-label": "Excluir link" }, [icon("close")]);
+      del.disabled = locked;
+      if (!locked) {
+        del.addEventListener("click", () => {
+          showConfirm('Excluir link "{{text}}"?', displayUrl).then((ok) => {
+            if (ok) linkService.delete(link.id);
+          });
+        });
+      }
+
+      linkList.append(
+        el("div", { class: "card__task" }, [
+          linkBtn,
+          el("span", { class: "card__task-text" }, [displayUrl]),
+          del
+        ])
+      );
+    }
+  };
+  renderLinks();
+
+  const addLink = (): void => {
+    if (linkList.querySelector(".card__subtask-add")) return;
+
+    const urlInput = el("input", { class: "card__task-input", type: "text", placeholder: "URL do link…" }) as HTMLInputElement;
+
+    const save = el("button", { class: "card__subtask-save", "aria-label": "Salvar link", type: "button" }, [
+      icon("check")
+    ]);
+
+    const row = el("div", { class: "card__subtask-add" }, [urlInput, save]);
+
+    let done = false;
+    const commit = (): void => {
+      if (done) return;
+      const url = urlInput.value.trim();
+      if (url) {
+        done = true;
+        linkService.create({ backlogItemId: item.id, url });
+      }
+    };
+    const cancel = (): void => {
+      done = true;
+      row.remove();
+    };
+
+    urlInput.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") commit();
+      else if (ev.key === "Escape") cancel();
+    });
+    urlInput.addEventListener("blur", () => setTimeout(() => !done && row.remove(), 150));
+    save.addEventListener("mousedown", (ev) => ev.preventDefault());
+    save.addEventListener("click", commit);
+
+    linkList.append(row);
+    urlInput.focus();
+  };
 
   const addSubtask = (): void => {
     if (taskList.querySelector(".card__subtask-add")) return;
@@ -142,6 +217,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   const menu = actionsMenu([
     { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+    { label: "Adicionar link", icon: "link", action: locked ? lockedAlert : addLink },
     ...moveItems,
     {
       label: "Editar",
@@ -155,7 +231,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       action: locked
         ? lockedAlert
         : () => {
-            showConfirm(`Excluir "${item.title}"?`).then((ok) => {
+            showConfirm('Excluir "{{text}}"?', item.title).then((ok) => {
               if (ok) backlogService.delete(item.id);
             });
           }
@@ -198,7 +274,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     ]),
     el("h4", { class: "card__title" }, [item.title]),
     item.description ? el("p", { class: "card__desc" }, [item.description]) : null,
-    taskList
+    taskList,
+    linkList
   ]);
 
   if (!locked) {

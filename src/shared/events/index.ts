@@ -9,6 +9,9 @@ export type DomainEvent =
   | "backlog:deleted"
   | "task:created"
   | "task:updated"
+  | "link:created"
+  | "link:updated"
+  | "link:deleted"
   | "estimation:logged";
 
 type Handler = (payload?: unknown) => void;

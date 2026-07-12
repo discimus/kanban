@@ -647,8 +647,8 @@ button.chip--idea:hover {
 
 .card__task-check {
   flex-shrink: 0;
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   margin: 0;
   accent-color: var(--primary);
   cursor: pointer;
@@ -666,6 +666,7 @@ button.chip--idea:hover {
   gap: 6px;
   min-width: 0;
   overflow-wrap: anywhere;
+  transition: color 0.15s;
 }
 
 .card__task-delete {
@@ -686,6 +687,14 @@ button.chip--idea:hover {
 
 .card__task:hover .card__task-delete {
   opacity: 1;
+}
+
+.card__task .card__link-btn:hover ~ .card__task-text {
+  color: var(--md-primary);
+}
+
+.card__task:has(.card__task-delete:hover) .card__task-text {
+  color: var(--md-error);
 }
 
 .card__task-delete:hover {
@@ -733,8 +742,50 @@ button.chip--idea:hover {
   cursor: pointer;
 }
 
-.card__subtask-save .material-symbols-outlined {
-  font-size: 1.1rem;
+.card__subtask-add--wide {
+  flex-wrap: wrap;
+}
+
+.card__subtask-add--wide .card__task-input {
+  flex: 1;
+  min-width: 80px;
+}
+
+.card__links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.card__link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--md-primary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.card__link-btn:hover {
+  background: var(--md-primary-container);
+}
+
+.card__link-btn--empty {
+  color: var(--text-muted);
+  cursor: default;
+  opacity: 0.3;
+}
+
+.card__link-btn .material-symbols-outlined {
+  font-size: 0.85rem;
 }
 
 .badge {
@@ -1015,6 +1066,13 @@ button.chip--idea:hover {
   font-size: 0.95rem;
   line-height: 1.5;
   color: var(--text);
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.dialog__highlight {
+  color: var(--md-primary);
+  font-weight: 600;
 }
 
 .dialog__actions {

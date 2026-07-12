@@ -16,9 +16,23 @@ function close(): void {
 
 interface DialogOptions {
   message: string;
+  highlight?: string;
   confirmLabel: string;
   cancelLabel?: string;
   onResolve: (value: boolean) => void;
+}
+
+function buildMessageParts(message: string, highlight?: string): (Node | HTMLElement)[] {
+  if (!highlight) return [document.createTextNode(message)];
+  const parts = message.split("{{text}}");
+  const children: (Node | HTMLElement)[] = [];
+  parts.forEach((part, i) => {
+    if (part) children.push(document.createTextNode(part));
+    if (i < parts.length - 1) {
+      children.push(el("strong", { class: "dialog__highlight" }, [highlight]));
+    }
+  });
+  return children;
 }
 
 function openDialog(options: DialogOptions): void {
@@ -42,7 +56,7 @@ function openDialog(options: DialogOptions): void {
   actions.append(confirmBtn);
 
   const dialog = el("div", { class: "dialog", role: "alertdialog", "aria-modal": "true" }, [
-    el("p", { class: "dialog__message" }, [options.message]),
+    el("p", { class: "dialog__message" }, buildMessageParts(options.message, options.highlight)),
     actions
   ]);
 
@@ -67,8 +81,8 @@ export function showAlert(message: string): Promise<void> {
   });
 }
 
-export function showConfirm(message: string): Promise<boolean> {
+export function showConfirm(message: string, highlight?: string): Promise<boolean> {
   return new Promise((resolve) => {
-    openDialog({ message, confirmLabel: "Confirmar", cancelLabel: "Cancelar", onResolve: resolve });
+    openDialog({ message, highlight, confirmLabel: "Confirmar", cancelLabel: "Cancelar", onResolve: resolve });
   });
 }

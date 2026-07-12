@@ -28,7 +28,7 @@ export function renderProductHeader(product: Product): HTMLElement {
       icon: "delete",
       danger: true,
       action: () => {
-        showConfirm(`Excluir Projeto "${product.name}" e todos os seus dados?`).then((ok) => {
+        showConfirm('Excluir Projeto "{{text}}" e todos os seus dados?', product.name).then((ok) => {
           if (ok) productService.delete(product.id);
         });
       }

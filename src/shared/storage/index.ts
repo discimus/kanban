@@ -20,6 +20,7 @@ function reviveState(raw: unknown): AppState {
     products: Array.isArray(data.products) ? data.products.map(normalizeProduct) : base.products,
     backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems.map(normalizeBacklogItem) : base.backlogItems,
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
+    links: Array.isArray(data.links) ? data.links : base.links,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };
 }
