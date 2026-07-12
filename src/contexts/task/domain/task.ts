@@ -27,3 +27,9 @@ export function changeStatus(task: Task, status: TaskStatus): Task {
 export function assign(task: Task, assignedTo: string): Task {
   return { ...task, assignedTo: assignedTo.trim() };
 }
+
+export function rename(task: Task, title: string): Task {
+  const trimmed = title?.trim();
+  if (!trimmed) throw new Error("O título da tarefa é obrigatório.");
+  return { ...task, title: trimmed };
+}
