@@ -624,7 +624,7 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, background-image 0.08s;
 }
 
 .btn .material-symbols-outlined {
@@ -633,6 +633,10 @@ body {
 
 .btn:hover {
   border-color: var(--md-outline);
+}
+
+.btn:active {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08));
 }
 
 .btn:focus-visible {
@@ -651,6 +655,10 @@ body {
   border-color: var(--primary-hover);
 }
 
+.btn--primary:active {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12));
+}
+
 .btn--danger {
   background: transparent;
   border-color: var(--md-outline);
@@ -663,6 +671,10 @@ body {
   color: var(--md-on-error-container);
 }
 
+.btn--danger:active {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08));
+}
+
 .btn--ghost {
   background: transparent;
   border-color: transparent;
@@ -672,6 +684,37 @@ body {
 .btn--ghost:hover {
   background: var(--md-primary-container);
   border-color: transparent;
+}
+
+.btn--ghost:active {
+  background-image: linear-gradient(rgba(79, 91, 213, 0.12), rgba(79, 91, 213, 0.12));
+}
+
+/* MD3 state layers adapt to dark scheme (overlay uses the surface's on-color) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .btn:active,
+  :root:not([data-theme="light"]) .btn--danger:active {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08));
+  }
+  :root:not([data-theme="light"]) .btn--primary:active {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12));
+  }
+  :root:not([data-theme="light"]) .btn--ghost:active {
+    background-image: linear-gradient(rgba(191, 194, 255, 0.12), rgba(191, 194, 255, 0.12));
+  }
+}
+
+:root[data-theme="dark"] .btn:active,
+:root[data-theme="dark"] .btn--danger:active {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08));
+}
+
+:root[data-theme="dark"] .btn--primary:active {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12));
+}
+
+:root[data-theme="dark"] .btn--ghost:active {
+  background-image: linear-gradient(rgba(191, 194, 255, 0.12), rgba(191, 194, 255, 0.12));
 }
 
 .btn--sm {
