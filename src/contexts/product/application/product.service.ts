@@ -1,7 +1,8 @@
-import { Product } from "@shared/types";
+import { Product, ProductStatus } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { createProduct, assertValidProductName } from "../domain/product";
 import { productRepository } from "../infrastructure/product.repository";
+import { backlogRepository } from "../infrastructure/backlog.repository";
 
 export const productService = {
   list(): Product[] {
@@ -31,6 +32,36 @@ export const productService = {
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);
     return updated;
+  },
+
+  setStatus(id: string, status: ProductStatus): Product {
+    const existing = productRepository.findById(id);
+    if (!existing) throw new Error("Projeto não encontrado.");
+    const updated: Product = { ...existing, status };
+    productRepository.save(updated);
+    eventBus.emit("product:updated", updated);
+    return updated;
+  },
+
+  recomputeStatus(productId: string): Product | undefined {
+    const existing = productRepository.findById(productId);
+    if (!existing) return undefined;
+    if (existing.status === "canceled") return existing;
+
+    const items = backlogRepository.byProduct(productId);
+    let next: ProductStatus;
+    if (items.length === 0 || items.every((i) => i.status === "todo")) {
+      next = "backlog";
+    } else if (items.every((i) => i.status === "done")) {
+      next = "completed";
+    } else {
+      next = "in_progress";
+    }
+
+    if (next !== existing.status) {
+      return this.setStatus(productId, next);
+    }
+    return existing;
   },
 
   delete(id: string): void {

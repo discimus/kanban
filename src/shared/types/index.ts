@@ -21,11 +21,21 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
 
 export type TaskStatus = "todo" | "doing" | "done";
 
+export type ProductStatus = "backlog" | "in_progress" | "completed" | "canceled";
+
+export const PRODUCT_STATUSES: { value: ProductStatus; label: string }[] = [
+  { value: "backlog", label: "Backlog" },
+  { value: "in_progress", label: "Em andamento" },
+  { value: "completed", label: "Concluído" },
+  { value: "canceled", label: "Cancelado" }
+];
+
 export interface Product {
   id: ID;
   name: string;
   description: string;
   createdAt: ISODate;
+  status: ProductStatus;
 }
 
 export interface BacklogItem {

@@ -8,7 +8,7 @@ function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
 }
 
-export function backlogCard(item: BacklogItem): HTMLElement {
+export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
   const taskList = el("div", { class: "card__tasks" }, []);
 
   const renderTasks = (): void => {
@@ -68,7 +68,7 @@ export function backlogCard(item: BacklogItem): HTMLElement {
     }
   ]);
 
-  const card = el("article", { class: "card", draggable: "true", "data-id": item.id }, [
+  const card = el("article", { class: `card${locked ? " card--locked" : ""}`, draggable: locked ? "false" : "true", "data-id": item.id }, [
     menu,
     el("div", { class: "card__top" }, [
       el("span", { class: `badge badge--${item.priority}` }, [priorityLabel(item.priority)]),
@@ -79,13 +79,15 @@ export function backlogCard(item: BacklogItem): HTMLElement {
     taskList
   ]);
 
-  card.addEventListener("dragstart", (ev) => {
-    ev.dataTransfer?.setData("text/plain", item.id);
-    card.classList.add("card--dragging");
-  });
-  card.addEventListener("dragend", () => {
-    card.classList.remove("card--dragging");
-  });
+  if (!locked) {
+    card.addEventListener("dragstart", (ev) => {
+      ev.dataTransfer?.setData("text/plain", item.id);
+      card.classList.add("card--dragging");
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("card--dragging");
+    });
+  }
 
   return card;
 }

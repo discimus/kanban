@@ -253,6 +253,51 @@ body {
 
 .product-item__name {
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.product-item__name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-item__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 500;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+}
+
+.product-item__status .material-symbols-outlined {
+  font-size: 0.85rem;
+}
+
+.product-item__status--backlog {
+  background: var(--md-surface-container-highest);
+  color: var(--text-muted);
+}
+
+.product-item__status--in_progress {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.product-item__status--completed {
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+}
+
+.product-item__status--canceled {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
 }
 
 .product-item__desc {
@@ -385,6 +430,10 @@ body {
 .card--dragging {
   opacity: 0.5;
   background: var(--elevation-4);
+}
+
+.card--locked {
+  cursor: default;
 }
 
 .card__top {
@@ -921,7 +970,7 @@ h4 {
 /* Theme toggle — fixed button in top-right corner */
 .theme-toggle {
   position: fixed;
-  top: 16px;
+  bottom: 16px;
   right: 16px;
   z-index: 90;
   display: inline-flex;

@@ -2,6 +2,7 @@ import { BacklogItem, KanbanStatus, Priority } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { createBacklogItem, CreateBacklogItemProps } from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
+import { productService } from "./product.service";
 
 export const backlogService = {
   list(): BacklogItem[] {
@@ -54,10 +55,15 @@ export const backlogService = {
   move(id: string, status: KanbanStatus): BacklogItem {
     const existing = backlogRepository.findById(id);
     if (!existing) throw new Error("Item de backlog não encontrado.");
+    const product = productService.get(existing.productId);
+    if (product && (product.status === "completed" || product.status === "canceled")) {
+      throw new Error("O projeto está concluído ou cancelado. Não é possível mover os itens.");
+    }
     if (existing.status === status) return existing;
     const updated: BacklogItem = { ...existing, status };
     backlogRepository.save(updated);
     eventBus.emit("backlog:moved", updated);
+    productService.recomputeStatus(updated.productId);
     return updated;
   },
 

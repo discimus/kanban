@@ -1,4 +1,4 @@
-import { AppState, emptyState } from "@shared/types";
+import { AppState, Product, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
@@ -8,11 +8,20 @@ function reviveState(raw: unknown): AppState {
   if (!raw || typeof raw !== "object") return base;
   const data = raw as Partial<AppState>;
   return {
-    products: Array.isArray(data.products) ? data.products : base.products,
+    products: Array.isArray(data.products) ? data.products.map(normalizeProduct) : base.products,
     backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems : base.backlogItems,
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };
+}
+
+const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
+
+function normalizeProduct(product: Product): Product {
+  if (!VALID_STATUSES.includes(product.status)) {
+    return { ...product, status: product.status === "completed" ? "completed" : "backlog" };
+  }
+  return product;
 }
 
 /**

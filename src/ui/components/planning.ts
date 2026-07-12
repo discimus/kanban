@@ -5,8 +5,18 @@ import { openProductForm } from "@ui/modal/product-form";
 import { productService } from "@contexts/product/application/product.service";
 
 export function renderProductHeader(product: Product): HTMLElement {
+  const isLocked = product.status === "completed" || product.status === "canceled";
+
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), "Item de backlog"]);
-  addItem.addEventListener("click", () => openBacklogForm(product.id));
+  addItem.addEventListener("click", () => {
+    if (isLocked) {
+      alert(
+        'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" para adicionar novos itens.'
+      );
+      return;
+    }
+    openBacklogForm(product.id);
+  });
 
   const menu = actionsMenu([
     { label: "Editar", icon: "edit", action: () => openProductForm(product) },
