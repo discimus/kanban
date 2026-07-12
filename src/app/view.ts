@@ -69,7 +69,7 @@ export function renderApp(root: HTMLElement): void {
   const hamburger = el("button", { class: "hamburger", "aria-label": "Abrir menu de projetos" }, [icon("menu")]);
   hamburger.addEventListener("click", () => setDrawer(!drawerOpen));
 
-  const content = el("main", { class: "content" }, [hamburger]);
+  const content = el("main", { class: "content" }, []);
 
   if (!selectedProductId) {
     content.append(
@@ -85,7 +85,7 @@ export function renderApp(root: HTMLElement): void {
         renderProductHeader(product, showStats, () => {
           showStats = !showStats;
           renderApp(root);
-        }),
+        }, hamburger),
         showStats ? renderStatistics(product.id) : renderBoard(product.id)
       );
     }

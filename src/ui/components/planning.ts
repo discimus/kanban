@@ -6,7 +6,7 @@ import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { downloadExportProduct } from "@contexts/product/application/export.service";
 
-export function renderProductHeader(product: Product, showStats = false, onToggleView?: () => void): HTMLElement {
+export function renderProductHeader(product: Product, showStats = false, onToggleView?: () => void, hamburger?: HTMLElement): HTMLElement {
   const isLocked = product.status === "completed" || product.status === "canceled";
 
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), "Adicionar tarefa"]);
@@ -45,11 +45,14 @@ export function renderProductHeader(product: Product, showStats = false, onToggl
     }
   ]);
 
-  return el("header", { class: "content__header" }, [
-    el("div", {}, [
-      el("h2", { class: "content__title" }, [product.name]),
-      el("p", { class: "content__subtitle" }, [product.description || "Sem descrição"])
-    ]),
+  const topBar = el("div", { class: "content__topbar" }, [
+    hamburger,
+    el("h2", { class: "content__title" }, [product.name]),
     el("div", { class: "content__actions" }, [addItem, statBtn, menu].filter(Boolean) as HTMLElement[])
+  ].filter(Boolean) as HTMLElement[]);
+
+  return el("header", { class: "content__header" }, [
+    topBar,
+    el("p", { class: "content__subtitle" }, [product.description || "Sem descrição"])
   ]);
 }

@@ -391,11 +391,14 @@ body {
 }
 
 .content__header {
+  margin-bottom: 16px;
+}
+
+.content__topbar {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 16px;
 }
 
 .content__title {
@@ -1764,6 +1767,8 @@ h4 {
 
   .hamburger {
     display: inline-flex;
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
 
   .sidebar {
@@ -1807,24 +1812,63 @@ h4 {
 
   .content {
     padding: 16px;
+    padding-top: 68px;
+    overflow: visible;
   }
 
-  .content__header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+  .content__topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    z-index: 30;
+    background: var(--md-surface);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .content__title {
-    font-size: 1.4rem;
+  .content__topbar .content__title {
+    flex: 1;
+    font-size: 1.15rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .content__subtitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .content__actions {
-    width: 100%;
+    flex-shrink: 0;
   }
 
   .content__actions .btn {
-    flex: 1;
+    font-size: 0;
+    gap: 0;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 8px;
+  }
+
+  .content__actions .btn .material-symbols-outlined {
+    font-size: 1.25rem;
+  }
+
+  .content__actions .actions-menu {
+    position: static;
+  }
+
+  .content__actions .actions-menu__trigger {
+    width: 40px;
+    height: 40px;
   }
 
   .board {
