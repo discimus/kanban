@@ -5,7 +5,7 @@ const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
 const VALID_PRIORITIES = ["low", "medium", "high", "critical"];
 const VALID_TASK_STATUSES = ["todo", "doing", "done"];
-const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea"];
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea", "refactor"];
 
 interface ExportResult {
   success: boolean;

@@ -19,12 +19,13 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
   { value: "critical", label: "Crítica" }
 ];
 
-export type TaskClassification = "task" | "bug" | "idea";
+export type TaskClassification = "task" | "bug" | "idea" | "refactor";
 
 export const TASK_CLASSIFICATIONS: { value: TaskClassification; label: string; icon: string }[] = [
   { value: "task", label: "Tarefa", icon: "task" },
   { value: "bug", label: "Bug", icon: "bug_report" },
-  { value: "idea", label: "Idealização", icon: "lightbulb" }
+  { value: "idea", label: "Idealização", icon: "lightbulb" },
+  { value: "refactor", label: "Refatoração", icon: "code" }
 ];
 
 export type TaskStatus = "todo" | "doing" | "done";

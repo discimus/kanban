@@ -625,6 +625,16 @@ button.chip--idea:hover {
   color: #ffd8e8;
 }
 
+.chip--refactor {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+button.chip--refactor:hover {
+  background: var(--md-on-secondary-container);
+  color: var(--md-secondary-container);
+}
+
 .card__actions {
   display: flex;
   align-items: center;

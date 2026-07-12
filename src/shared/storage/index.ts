@@ -3,7 +3,7 @@ import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
 
-const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea"];
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea", "refactor"];
 
 export function normalizeBacklogItem(item: BacklogItem): BacklogItem {
   if (!VALID_CLASSIFICATIONS.includes(item.classification)) {
