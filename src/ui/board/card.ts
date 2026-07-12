@@ -31,7 +31,27 @@ function nextFibonacci(current: number): number {
   return FIBONACCI[idx + 1];
 }
 
-const progressFormat = new Map<string, "fraction" | "percent">();
+const PROGRESS_FORMAT_KEY = "kanban-progress-format";
+
+function loadProgressFormat(): Map<string, "fraction" | "percent"> {
+  try {
+    const raw = localStorage.getItem(PROGRESS_FORMAT_KEY);
+    if (raw) {
+      return new Map(Object.entries(JSON.parse(raw))) as Map<string, "fraction" | "percent">;
+    }
+  } catch { /* ignore */ }
+  return new Map();
+}
+
+function saveProgressFormat(map: Map<string, "fraction" | "percent">): void {
+  try {
+    const obj: Record<string, "fraction" | "percent"> = {};
+    map.forEach((v, k) => { obj[k] = v; });
+    localStorage.setItem(PROGRESS_FORMAT_KEY, JSON.stringify(obj));
+  } catch { /* ignore */ }
+}
+
+const progressFormat = loadProgressFormat();
 
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true): HTMLElement {
   const taskList = el("div", { class: "card__tasks" }, []);
@@ -84,7 +104,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         const labelEl = el("span", {}, [label]);
         const bar = el("div", { class: "card__progress", title: "Clique para alternar visualização" }, [
           el("div", { class: "card__progress-bar" }, [
-            el("div", { class: "card__progress-fill", style: `width:${pct}%` })
+            el("div", { class: `card__progress-fill${pct >= 100 ? " card__progress-fill--complete" : ""}`, style: `width:${pct}%` })
           ]),
           labelEl
         ]);
@@ -93,6 +113,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           const current = progressFormat.get(item.id);
           const next: "fraction" | "percent" = current === "percent" ? "fraction" : "percent";
           progressFormat.set(item.id, next);
+          saveProgressFormat(progressFormat);
           labelEl.textContent = next === "percent" ? `${Math.round(pct)}%` : `${doneCount}/${tasks.length}`;
         });
 

@@ -44,6 +44,7 @@
   --primary-hover: #3f4bc4;
   --danger: var(--md-error);
   --danger-hover: #93000a;
+  --success: #2e7d32;
 
   /* Priority palette (semantic, kept stable across themes) */
   --low: #6b7280;
@@ -102,6 +103,7 @@
 
     --primary-hover: #d0d2ff;
     --danger-hover: #ffb4ab;
+    --success: #81c784;
 
     --low: #9ca3af;
     --medium: #38bdf8;
@@ -139,6 +141,7 @@
 
   --primary-hover: #d0d2ff;
   --danger-hover: #ffb4ab;
+  --success: #81c784;
 
   --low: #9ca3af;
   --medium: #38bdf8;
@@ -812,6 +815,10 @@ button.chip--idea:hover {
   background: var(--md-primary);
   border-radius: 3px;
   transition: width 0.3s ease;
+}
+
+.card__progress-fill--complete {
+  background: var(--success);
 }
 
 .badge {
