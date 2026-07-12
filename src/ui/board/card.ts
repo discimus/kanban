@@ -31,6 +31,8 @@ function nextFibonacci(current: number): number {
   return FIBONACCI[idx + 1];
 }
 
+const expandedCards = new Map<string, boolean>();
+
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true): HTMLElement {
   const taskList = el("div", { class: "card__tasks" }, []);
 
@@ -119,8 +121,15 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   };
   renderLinks();
 
+  let expandBtn: HTMLElement | undefined;
+
   const addLink = (): void => {
     if (linkList.querySelector(".card__subtask-add")) return;
+    if (!cardBody.classList.contains("card__body--expanded")) {
+      expandedCards.set(item.id, true);
+      cardBody.classList.add("card__body--expanded");
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", {}, ["Recolher"]));
+    }
 
     const urlInput = el("input", { class: "card__task-input", type: "text", placeholder: "URL do link…" }) as HTMLInputElement;
 
@@ -158,6 +167,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   const addSubtask = (): void => {
     if (taskList.querySelector(".card__subtask-add")) return;
+    if (!cardBody.classList.contains("card__body--expanded")) {
+      expandedCards.set(item.id, true);
+      cardBody.classList.add("card__body--expanded");
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", {}, ["Recolher"]));
+    }
 
     const input = el("input", { class: "card__task-input", type: "text", placeholder: "Nova subtarefa…" }) as HTMLInputElement;
 
@@ -275,7 +289,20 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     });
   }
 
-  const card = el("article", { class: `card${locked ? " card--locked" : ""}`, draggable: locked ? "false" : "true", "data-id": item.id }, [
+  const linkCount = linkService.byBacklogItem(item.id).length;
+  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0;
+
+  const bodyExpanded = expandedCards.get(item.id) === true;
+  const cardBody = el("div", {
+    class: `card__body${bodyExpanded ? " card__body--expanded" : ""}`
+  }, []);
+
+  if (item.description) {
+    cardBody.append(el("p", { class: "card__desc" }, [item.description]));
+  }
+  cardBody.append(taskList, linkList);
+
+  const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
       el("div", { class: "card__badges" }, [
@@ -285,11 +312,29 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       pointsBtn
     ]),
     el("h4", { class: "card__title" }, [item.title]),
-    item.description ? el("p", { class: "card__desc" }, [item.description]) : null,
     progressBar,
-    taskList,
-    linkList
-  ]);
+    cardBody
+  ];
+
+  if (hasContent) {
+    const btn = el("button", { class: "card__expand-btn", type: "button" }, [
+      icon(bodyExpanded ? "expand_less" : "expand_more"),
+      el("span", {}, [bodyExpanded ? "Recolher" : "Expandir"])
+    ]);
+    expandBtn = btn;
+    btn.addEventListener("click", () => {
+      const isExpanded = !expandedCards.get(item.id);
+      expandedCards.set(item.id, isExpanded);
+      cardBody.classList.toggle("card__body--expanded", isExpanded);
+      btn.replaceChildren(
+        icon(isExpanded ? "expand_less" : "expand_more"),
+        el("span", {}, [isExpanded ? "Recolher" : "Expandir"])
+      );
+    });
+    cardChildren.push(btn);
+  }
+
+  const card = el("article", { class: `card${locked ? " card--locked" : ""}`, draggable: locked ? "false" : "true", "data-id": item.id }, cardChildren as Node[]);
 
   if (!locked) {
     card.addEventListener("dragstart", (ev) => {

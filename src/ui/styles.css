@@ -819,6 +819,47 @@ button.chip--idea:hover {
   background: var(--success);
 }
 
+.card__body {
+  max-height: 140px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  transition: max-height 0.25s ease;
+}
+
+.card__body--expanded {
+  max-height: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.card__expand-btn {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  margin-top: 10px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.card__expand-btn:hover {
+  background: var(--md-surface-container-high);
+  color: var(--primary);
+}
+
+.card__expand-btn .material-symbols-outlined {
+  font-size: 1rem;
+}
+
 .badge {
   font-size: 0.7rem;
   font-weight: 500;
