@@ -3,6 +3,7 @@ import { Product } from "@shared/types";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { openProductForm } from "@ui/modal/product-form";
 import { productService } from "@contexts/product/application/product.service";
+import { showAlert, showConfirm } from "@ui/components/dialog";
 
 export function renderProductHeader(product: Product): HTMLElement {
   const isLocked = product.status === "completed" || product.status === "canceled";
@@ -10,7 +11,7 @@ export function renderProductHeader(product: Product): HTMLElement {
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), "Item de backlog"]);
   addItem.addEventListener("click", () => {
     if (isLocked) {
-      alert(
+      showAlert(
         'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" para adicionar novos itens.'
       );
       return;
@@ -25,9 +26,9 @@ export function renderProductHeader(product: Product): HTMLElement {
       icon: "delete",
       danger: true,
       action: () => {
-        if (confirm(`Excluir Projeto "${product.name}" e todos os seus dados?`)) {
-          productService.delete(product.id);
-        }
+        showConfirm(`Excluir Projeto "${product.name}" e todos os seus dados?`).then((ok) => {
+          if (ok) productService.delete(product.id);
+        });
       }
     }
   ]);

@@ -3,6 +3,7 @@ import { BacklogItem, PRIORITIES } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
+import { showAlert, showConfirm } from "@ui/components/dialog";
 
 function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
@@ -30,7 +31,9 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
       del.disabled = locked;
       if (!locked) {
         del.addEventListener("click", () => {
-          if (confirm(`Excluir subtarefa "${task.title}"?`)) taskService.delete(task.id);
+          showConfirm(`Excluir subtarefa "${task.title}"?`).then((ok) => {
+            if (ok) taskService.delete(task.id);
+          });
         });
       }
 
@@ -62,7 +65,7 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
   };
 
   const lockedAlert = (): void => {
-    alert(
+    showAlert(
       'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
     );
   };
@@ -81,7 +84,9 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
       action: locked
         ? lockedAlert
         : () => {
-            if (confirm(`Excluir "${item.title}"?`)) backlogService.delete(item.id);
+            showConfirm(`Excluir "${item.title}"?`).then((ok) => {
+              if (ok) backlogService.delete(item.id);
+            });
           }
     }
   ]);

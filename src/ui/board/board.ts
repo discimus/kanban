@@ -2,6 +2,7 @@ import { el } from "@ui/components/dom";
 import { KANBAN_COLUMNS, KanbanStatus, BacklogItem } from "@shared/types";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
+import { showAlert } from "@ui/components/dialog";
 import { backlogCard } from "./card";
 
 export function renderBoard(productId: string): HTMLElement {
@@ -52,7 +53,7 @@ function renderColumn(status: KanbanStatus, label: string, items: BacklogItem[],
       try {
         backlogService.move(id, status);
       } catch (e) {
-        alert((e as Error).message);
+        showAlert((e as Error).message);
       }
     });
   }
