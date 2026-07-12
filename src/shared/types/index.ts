@@ -44,6 +44,7 @@ export interface Product {
   description: string;
   createdAt: ISODate;
   status: ProductStatus;
+  showPriority: boolean;
 }
 
 export interface BacklogItem {

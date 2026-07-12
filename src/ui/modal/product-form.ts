@@ -15,10 +15,15 @@ export function openProductForm(existing?: Product): void {
   );
   const error = errorText();
 
+  const showPriority = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+  if (existing) {
+    showPriority.checked = existing.showPriority !== false;
+  }
+
   const submit = () => {
     try {
       if (existing) {
-        productService.edit(existing.id, { name: name.value, description: description.value });
+        productService.edit(existing.id, { name: name.value, description: description.value, showPriority: showPriority.checked });
         if (statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
         }
@@ -35,6 +40,7 @@ export function openProductForm(existing?: Product): void {
     field("Nome", name),
     field("Descrição", description),
     existing ? field("Status", statusSel) : null,
+    existing ? el("label", { class: "field field--checkbox" }, [showPriority, el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"])]) : null,
     error
   ]);
 

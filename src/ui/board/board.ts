@@ -18,7 +18,7 @@ export function renderBoard(productId: string): HTMLElement {
 
   for (const column of KANBAN_COLUMNS) {
     const columnItems = items.filter((i) => i.status === column.status);
-    board.append(renderColumn(column.status, column.label, columnItems, locked, productId));
+    board.append(renderColumn(column.status, column.label, columnItems, locked, productId, product?.showPriority ?? true));
   }
 
   return board;
@@ -33,14 +33,15 @@ function renderColumn(
   label: string,
   items: BacklogItem[],
   locked: boolean,
-  productId: string
+  productId: string,
+  showPriority: boolean
 ): HTMLElement {
   const body = el("div", { class: "column__body", "data-status": status }, []);
 
   if (items.length === 0) {
     body.append(el("p", { class: "column__empty" }, ["Sem itens"]));
   } else {
-    for (const item of items) body.append(backlogCard(item, locked));
+    for (const item of items) body.append(backlogCard(item, locked, showPriority));
   }
 
   if (status === "todo" && !locked) {

@@ -27,10 +27,14 @@ function reviveState(raw: unknown): AppState {
 const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 
 function normalizeProduct(product: Product): Product {
-  if (!VALID_STATUSES.includes(product.status)) {
-    return { ...product, status: product.status === "completed" ? "completed" : "backlog" };
+  const normalized: Product = {
+    ...product,
+    showPriority: product.showPriority !== false
+  };
+  if (!VALID_STATUSES.includes(normalized.status)) {
+    return { ...normalized, status: normalized.status === "completed" ? "completed" : "backlog" };
   }
-  return product;
+  return normalized;
 }
 
 /**

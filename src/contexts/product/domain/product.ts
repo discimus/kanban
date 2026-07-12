@@ -16,7 +16,8 @@ export function createProduct(props: CreateProductProps): Product {
     name,
     description: props.description?.trim() ?? "",
     createdAt: nowISO(),
-    status: "backlog"
+    status: "backlog",
+    showPriority: true
   };
 }
 

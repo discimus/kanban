@@ -1099,6 +1099,62 @@ button.chip--idea:hover {
   color: var(--text-muted);
 }
 
+.field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.field--checkbox .field__label {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.checkbox {
+  appearance: none;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--md-on-surface-variant);
+  border-radius: 2px;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.checkbox:hover {
+  border-color: var(--md-on-surface);
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
+}
+
+.checkbox:checked {
+  background: var(--md-primary);
+  border-color: var(--md-primary);
+}
+
+.checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 6px;
+  height: 10px;
+  border: solid var(--md-on-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 .input {
   background: var(--elevation-0);
   border: 1px solid var(--md-outline);

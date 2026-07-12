@@ -20,14 +20,15 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name: string; description: string }): Product {
+  edit(id: string, changes: { name: string; description: string; showPriority?: boolean }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     assertValidProductName(changes.name);
     const updated: Product = {
       ...existing,
       name: changes.name.trim(),
-      description: changes.description.trim()
+      description: changes.description.trim(),
+      showPriority: changes.showPriority ?? existing.showPriority
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);

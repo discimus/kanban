@@ -30,7 +30,7 @@ function nextFibonacci(current: number): number {
   return FIBONACCI[idx + 1];
 }
 
-export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
+export function backlogCard(item: BacklogItem, locked = false, showPriority = true): HTMLElement {
   const taskList = el("div", { class: "card__tasks" }, []);
 
   const renderTasks = (): void => {
@@ -192,7 +192,7 @@ export function backlogCard(item: BacklogItem, locked = false): HTMLElement {
     el("div", { class: "card__top" }, [
       el("div", { class: "card__badges" }, [
         classifyChip,
-        el("span", { class: `badge badge--${item.priority}` }, [priorityLabel(item.priority)])
+        showPriority ? el("span", { class: `badge badge--${item.priority}` }, [priorityLabel(item.priority)]) : null
       ]),
       pointsBtn
     ]),
