@@ -153,10 +153,26 @@ export function validateAndImport(jsonString: string): ExportResult {
 }
 
 function doImport(data: AppState): void {
-  store.replaceState({
-    products: data.products ?? [],
-    backlogItems: data.backlogItems ?? [],
-    tasks: data.tasks ?? [],
-    estimations: data.estimations ?? []
+  store.update((state) => {
+    for (const product of data.products) {
+      if (!state.products.some((p) => p.id === product.id)) {
+        state.products.push(product);
+      }
+    }
+    for (const bi of data.backlogItems) {
+      if (!state.backlogItems.some((b) => b.id === bi.id)) {
+        state.backlogItems.push(bi);
+      }
+    }
+    for (const task of data.tasks) {
+      if (!state.tasks.some((t) => t.id === task.id)) {
+        state.tasks.push(task);
+      }
+    }
+    for (const est of data.estimations) {
+      if (!state.estimations.some((e) => e.id === est.id)) {
+        state.estimations.push(est);
+      }
+    }
   });
 }
