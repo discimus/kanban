@@ -43,6 +43,7 @@ export const CATEGORY_CLASSIFICATIONS: Record<ProductCategory, { value: TaskClas
     { value: "meeting", label: "Reunião", icon: "groups" }
   ],
   study: [
+    { value: "task", label: "Tarefa", icon: "task" },
     { value: "content", label: "Conteúdo", icon: "menu_book" },
     { value: "project", label: "Projeto", icon: "build" },
     { value: "note", label: "Anotação", icon: "sticky_note_2" },
