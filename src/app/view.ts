@@ -8,15 +8,38 @@ import { renderThemeMenu } from "@ui/components/theme-menu";
 let selectedProductId: string | null = null;
 let drawerOpen = false;
 
+const LAST_PROJECT_KEY = "kanban-last-project";
+
+function persistSelection(id: string | null): void {
+  try { localStorage.setItem(LAST_PROJECT_KEY, id ?? ""); } catch { /* ignore */ }
+  const url = id ? `?project=${id}` : window.location.pathname;
+  history.replaceState(null, "", url);
+}
+
 function ensureSelection(): void {
   const products = productService.list();
   if (products.length === 0) {
     selectedProductId = null;
+    persistSelection(null);
     return;
   }
-  if (!selectedProductId || !products.some((p) => p.id === selectedProductId)) {
-    selectedProductId = products[0].id;
+
+  const urlParam = new URLSearchParams(window.location.search).get("project");
+  if (urlParam && products.some((p) => p.id === urlParam)) {
+    selectedProductId = urlParam;
+    persistSelection(urlParam);
+    return;
   }
+
+  const saved = localStorage.getItem(LAST_PROJECT_KEY);
+  if (saved && products.some((p) => p.id === saved)) {
+    selectedProductId = saved;
+    persistSelection(saved);
+    return;
+  }
+
+  selectedProductId = products[0].id;
+  persistSelection(selectedProductId);
 }
 
 export function renderApp(root: HTMLElement): void {
@@ -33,6 +56,7 @@ export function renderApp(root: HTMLElement): void {
   const products = productService.list();
   const sidebar = renderSidebar(products, selectedProductId, (id) => {
     selectedProductId = id;
+    persistSelection(id);
     setDrawer(false);
     renderApp(root);
   });
