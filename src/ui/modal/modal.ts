@@ -26,6 +26,9 @@ export function openModal(options: ModalOptions): void {
   document.body.append(overlay);
   document.addEventListener("keydown", onEsc);
   pendingOnClose = options.onClose ?? null;
+
+  const firstField = dialog.querySelector<HTMLElement>(".modal__body input, .modal__body textarea");
+  firstField?.focus();
 }
 
 function onEsc(ev: KeyboardEvent): void {
