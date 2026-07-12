@@ -990,6 +990,12 @@ button.chip--exercise:hover {
   margin-top: 0;
 }
 
+.stats__desc {
+  margin: -4px 0 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .stats__title:not(:first-child) {
   margin-top: 8px;
 }

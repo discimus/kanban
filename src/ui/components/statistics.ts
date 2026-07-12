@@ -22,8 +22,26 @@ export function renderStatistics(productId: string): HTMLElement {
 
   const section = el("div", { class: "stats" }, []);
 
-  // Waterfall — colunas kanban
-  section.append(el("h3", { class: "stats__title" }, ["Distribuição por coluna"]));
+  // Visão Geral — KPIs
+  section.append(el("h3", { class: "stats__title" }, ["Visão Geral"]));
+  section.append(el("p", { class: "stats__desc" }, ["Métricas principais do projeto"]));
+  section.append(
+    el("div", { class: "stats__badges" }, [
+      el("span", { class: "stats__badge" }, [`${total} cards`]),
+      el("span", { class: "stats__badge" }, [`${totalPoints} pts`]),
+      el("span", { class: "stats__badge" }, [`${allTasks.length} tasks`])
+    ])
+  );
+
+  // Progresso — completion rates
+  section.append(el("h3", { class: "stats__title" }, ["Progresso"]));
+  section.append(el("p", { class: "stats__desc" }, ["Cards e tarefas concluídos"]));
+  section.append(renderProgress("Cards concluídos", doneCards, total, cardsPct));
+  section.append(renderProgress("Subtarefas concluídas", doneTasks, allTasks.length, tasksPct));
+
+  // Fluxo de Trabalho — colunas kanban
+  section.append(el("h3", { class: "stats__title" }, ["Fluxo de Trabalho"]));
+  section.append(el("p", { class: "stats__desc" }, ["Cards em cada etapa do pipeline"]));
 
   for (const column of KANBAN_COLUMNS) {
     const colItems = items.filter((i) => i.status === column.status);
@@ -52,28 +70,15 @@ export function renderStatistics(productId: string): HTMLElement {
     );
   }
 
-  // Total badge
-  section.append(
-    el("div", { class: "stats__badges" }, [
-      el("span", { class: "stats__badge" }, [`${total} cards`]),
-      el("span", { class: "stats__badge" }, [`${totalPoints} pts`]),
-      el("span", { class: "stats__badge" }, [`${allTasks.length} tasks`])
-    ])
-  );
-
-  // Completion rates
-  section.append(el("h3", { class: "stats__title" }, ["Progresso"]));
-
-  section.append(renderProgress("Cards concluídos", doneCards, total, cardsPct));
-  section.append(renderProgress("Subtarefas concluídas", doneTasks, allTasks.length, tasksPct));
-
-  // Priority distribution
-  section.append(el("h3", { class: "stats__title" }, ["Prioridades"]));
-  section.append(renderChips(PRIORITIES, items, "priority"));
-
-  // Classification breakdown
+  // Classificações — tipos de trabalho
   section.append(el("h3", { class: "stats__title" }, ["Classificações"]));
+  section.append(el("p", { class: "stats__desc" }, ["Por tipo de trabalho"]));
   section.append(renderChips(clist, items, "classification"));
+
+  // Prioridades — níveis de urgência
+  section.append(el("h3", { class: "stats__title" }, ["Prioridades"]));
+  section.append(el("p", { class: "stats__desc" }, ["Por nível de urgência"]));
+  section.append(renderChips(PRIORITIES, items, "priority"));
 
   return section;
 }
