@@ -2,11 +2,16 @@ import { el } from "@ui/components/dom";
 import { field, textInput, textArea, numberInput, select, formActions, errorText } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { backlogService } from "@contexts/product/application/backlog.service";
+import { productService } from "@contexts/product/application/product.service";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
-import { BacklogItem, Priority, PRIORITIES, TASK_CLASSIFICATIONS, TaskClassification } from "@shared/types";
+import { BacklogItem, Priority, PRIORITIES, CATEGORY_CLASSIFICATIONS, TaskClassification } from "@shared/types";
 
 export function openBacklogForm(productId: string, existing?: BacklogItem): void {
+  const product = productService.get(productId);
+  const category = product?.category ?? "development";
+  const clist = CATEGORY_CLASSIFICATIONS[category];
+
   const title = textInput(existing?.title ?? "", "Título do item");
   const description = textArea(existing?.description ?? "", "Descrição");
   const priority = select(
@@ -15,8 +20,8 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   );
   const points = numberInput(existing?.storyPoints ?? 0, 0);
   const classification = select(
-    TASK_CLASSIFICATIONS.map((c) => ({ value: c.value, label: c.label })),
-    existing?.classification ?? "task"
+    clist.map((c) => ({ value: c.value, label: c.label })),
+    existing?.classification ?? clist[0].value
   );
   const error = errorText();
 

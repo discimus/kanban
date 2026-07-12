@@ -1,5 +1,5 @@
 import { el, icon } from "@ui/components/dom";
-import { Product, ProductStatus, PRODUCT_STATUSES } from "@shared/types";
+import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { openProductForm } from "@ui/modal/product-form";
 
 const STATUS_ICONS: Record<ProductStatus, string> = {
@@ -11,6 +11,14 @@ const STATUS_ICONS: Record<ProductStatus, string> = {
 
 function statusLabel(status: ProductStatus): string {
   return PRODUCT_STATUSES.find((s) => s.value === status)?.label ?? status;
+}
+
+function categoryLabel(cat: ProductCategory): string {
+  return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.label ?? cat;
+}
+
+function categoryIcon(cat: ProductCategory): string {
+  return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.icon ?? "help";
 }
 
 export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void): HTMLElement {
@@ -25,13 +33,18 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     const status = product.status ?? "backlog";
     const item = el("button", { class: `product-item ${isActive ? "product-item--active" : ""}` }, [
       el("span", { class: "product-item__name" }, [
+        el("span", { class: `product-item__category product-item__category--${product.category}`, title: categoryLabel(product.category) }, [
+          icon(categoryIcon(product.category))
+        ]),
         el("span", { class: "product-item__name-text" }, [product.name]),
         el("span", { class: `product-item__status product-item__status--${status}` }, [
           icon(STATUS_ICONS[status]),
           statusLabel(status)
         ])
       ]),
-      el("span", { class: "product-item__desc" }, [product.description || "Sem descrição"])
+      el("span", { class: "product-item__desc" }, [
+        product.description || "Sem descrição"
+      ])
     ]);
     item.addEventListener("click", () => onSelect(product.id));
     list.append(item);

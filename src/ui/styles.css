@@ -240,7 +240,7 @@ body {
   font-family: inherit;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -258,14 +258,16 @@ body {
   font-weight: 500;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  /* justify-content: space-between; */
+  gap: 0;
 }
 
 .product-item__name-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex-grow: 1;
+  padding-left: 2px;
 }
 
 .product-item__status {
@@ -280,6 +282,20 @@ body {
 }
 
 .product-item__status .material-symbols-outlined {
+  font-size: 0.85rem;
+}
+
+.product-item__category {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.product-item__category .material-symbols-outlined {
   font-size: 0.85rem;
 }
 
@@ -303,12 +319,26 @@ body {
   color: var(--md-on-error-container);
 }
 
+.product-item__category--development {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.product-item__category--business {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+.product-item__category--study {
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+}
+
 .product-item__desc {
   font-size: 0.78rem;
   color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .product-item--active .product-item__desc {
@@ -633,6 +663,76 @@ button.chip--idea:hover {
 button.chip--refactor:hover {
   background: var(--md-on-secondary-container);
   color: var(--md-secondary-container);
+}
+
+.chip--pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+button.chip--pending:hover {
+  background: #856404;
+  color: #fff3cd;
+}
+
+.chip--improvement {
+  background: var(--success);
+  color: #fff;
+}
+
+button.chip--improvement:hover {
+  background: #1b5e20;
+  color: #c8e6c9;
+}
+
+.chip--meeting {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+button.chip--meeting:hover {
+  background: #1565c0;
+  color: #e3f2fd;
+}
+
+.chip--content {
+  background: #f3e5f5;
+  color: #6a1b9a;
+}
+
+button.chip--content:hover {
+  background: #6a1b9a;
+  color: #f3e5f5;
+}
+
+.chip--project {
+  background: #e8eaf6;
+  color: #283593;
+}
+
+button.chip--project:hover {
+  background: #283593;
+  color: #e8eaf6;
+}
+
+.chip--note {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+button.chip--note:hover {
+  background: #f57f17;
+  color: #fff8e1;
+}
+
+.chip--exercise {
+  background: #e0f2f1;
+  color: #00695c;
+}
+
+button.chip--exercise:hover {
+  background: #00695c;
+  color: #e0f2f1;
 }
 
 .card__actions {

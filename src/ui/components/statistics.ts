@@ -1,9 +1,14 @@
 import { el, icon } from "@ui/components/dom";
-import { KANBAN_COLUMNS, TASK_CLASSIFICATIONS, PRIORITIES } from "@shared/types";
+import { KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, PRIORITIES } from "@shared/types";
 import { backlogService } from "@contexts/product/application/backlog.service";
+import { productService } from "@contexts/product/application/product.service";
 import { taskService } from "@contexts/task/application/task.service";
 
 export function renderStatistics(productId: string): HTMLElement {
+  const product = productService.get(productId);
+  const category = product?.category ?? "development";
+  const clist = CATEGORY_CLASSIFICATIONS[category];
+
   const items = backlogService.byProduct(productId);
   const total = items.length;
   const totalPoints = items.reduce((sum, i) => sum + i.storyPoints, 0);
@@ -26,7 +31,7 @@ export function renderStatistics(productId: string): HTMLElement {
     const points = colItems.reduce((s, i) => s + i.storyPoints, 0);
     const barPct = total > 0 ? Math.max(2, (count / total) * 100) : 0;
 
-    const classSegments = TASK_CLASSIFICATIONS.map((tc) => {
+    const classSegments = clist.map((tc) => {
       const n = colItems.filter((i) => i.classification === tc.value).length;
       if (n === 0) return null;
       return el("div", { class: `stats__bar-seg stats__bar-seg--${tc.value}`, style: `flex:${n}` });
@@ -68,7 +73,7 @@ export function renderStatistics(productId: string): HTMLElement {
 
   // Classification breakdown
   section.append(el("h3", { class: "stats__title" }, ["Classificações"]));
-  section.append(renderChips(TASK_CLASSIFICATIONS, items, "classification"));
+  section.append(renderChips(clist, items, "classification"));
 
   return section;
 }

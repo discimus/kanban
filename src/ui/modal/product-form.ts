@@ -2,7 +2,7 @@ import { el, icon } from "@ui/components/dom";
 import { field, textInput, textArea, select, formActions, errorText } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
-import { Product, ProductStatus, PRODUCT_STATUSES } from "@shared/types";
+import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { openImportPicker, validateAndImport } from "@contexts/product/application/export.service";
 import { showAlert } from "@ui/components/dialog";
 
@@ -15,6 +15,11 @@ export function openProductForm(existing?: Product): void {
   );
   const error = errorText();
 
+  const catSel = select(
+    PRODUCT_CATEGORIES.map((c) => ({ value: c.value, label: `${c.label}` })),
+    existing?.category ?? "development"
+  );
+
   const showPriority = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   if (existing) {
     showPriority.checked = existing.showPriority !== false;
@@ -23,12 +28,12 @@ export function openProductForm(existing?: Product): void {
   const submit = () => {
     try {
       if (existing) {
-        productService.edit(existing.id, { name: name.value, description: description.value, showPriority: showPriority.checked });
+        productService.edit(existing.id, { name: name.value, description: description.value, showPriority: showPriority.checked, category: catSel.value as ProductCategory });
         if (statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
         }
       } else {
-        productService.create(name.value, description.value);
+        productService.create(name.value, description.value, catSel.value as ProductCategory);
       }
       closeModal();
     } catch (e) {
@@ -39,6 +44,7 @@ export function openProductForm(existing?: Product): void {
   const body = el("div", { class: "form" }, [
     field("Nome", name),
     field("Descrição", description),
+    field("Categoria", catSel),
     existing ? field("Status", statusSel) : null,
     existing ? el("label", { class: "field field--checkbox" }, [showPriority, el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"])]) : null,
     error

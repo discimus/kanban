@@ -34,6 +34,7 @@ function makeProduct(overrides: Partial<ReturnType<typeof productService.create>
     createdAt: "2025-01-01T00:00:00.000Z",
     status: "backlog" as const,
     showPriority: true,
+    category: "development" as const,
     ...overrides
   };
 }
@@ -96,6 +97,16 @@ describe("productService", () => {
       const result = productService.create("Name Only");
       expect(result.description).toBe("");
     });
+
+    it("defaults category to 'development'", () => {
+      const result = productService.create("P");
+      expect(result.category).toBe("development");
+    });
+
+    it("preserves custom category 'study'", () => {
+      const result = productService.create("P", "", "study");
+      expect(result.category).toBe("study");
+    });
   });
 
   describe("edit", () => {
@@ -111,6 +122,12 @@ describe("productService", () => {
       expect(() => productService.edit("ghost", { name: "X", description: "Y" })).toThrow(
         "Projeto não encontrado."
       );
+    });
+
+    it("changes category to 'business'", () => {
+      state.products = [makeProduct()];
+      const result = productService.edit("p1", { name: "P", description: "", category: "business" });
+      expect(result.category).toBe("business");
     });
   });
 

@@ -107,7 +107,8 @@ export function createExampleData(): AppState {
         description: "Plataforma completa de vendas online com carrinho, pagamento e gestão de produtos",
         createdAt: now,
         status: "in_progress",
-        showPriority: true
+        showPriority: true,
+        category: "development"
       }
     ],
     backlogItems: items,

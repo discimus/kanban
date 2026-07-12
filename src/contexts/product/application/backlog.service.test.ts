@@ -32,7 +32,8 @@ vi.mock("@contexts/product/application/product.service", () => ({
       description: "",
       createdAt: "",
       status: "backlog",
-      showPriority: true
+      showPriority: true,
+      category: "development"
     })),
     recomputeStatus: vi.fn()
   }
@@ -69,7 +70,8 @@ beforeEach(() => {
     description: "",
     createdAt: "",
     status: "backlog",
-    showPriority: true
+    showPriority: true,
+    category: "development"
   });
   vi.mocked(productService.recomputeStatus).mockClear();
 });
@@ -115,7 +117,8 @@ describe("backlogService", () => {
         description: "",
         createdAt: "",
         status: "completed",
-        showPriority: true
+        showPriority: true,
+      category: "development"
       });
       expect(() => backlogService.create({ productId: "p1", title: "Item" })).toThrow(
         /concluído ou cancelado/

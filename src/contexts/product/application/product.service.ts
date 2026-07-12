@@ -1,4 +1,4 @@
-import { Product, ProductStatus } from "@shared/types";
+import { Product, ProductStatus, ProductCategory } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { createProduct, assertValidProductName } from "../domain/product";
 import { productRepository } from "../infrastructure/product.repository";
@@ -13,14 +13,14 @@ export const productService = {
     return productRepository.findById(id);
   },
 
-  create(name: string, description = ""): Product {
-    const product = createProduct({ name, description });
+  create(name: string, description = "", category: ProductCategory = "development"): Product {
+    const product = createProduct({ name, description, category });
     productRepository.add(product);
     eventBus.emit("product:created", product);
     return product;
   },
 
-  edit(id: string, changes: { name: string; description: string; showPriority?: boolean }): Product {
+  edit(id: string, changes: { name: string; description: string; showPriority?: boolean; category?: ProductCategory }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     assertValidProductName(changes.name);
@@ -28,7 +28,8 @@ export const productService = {
       ...existing,
       name: changes.name.trim(),
       description: changes.description.trim(),
-      showPriority: changes.showPriority ?? existing.showPriority
+      showPriority: changes.showPriority ?? existing.showPriority,
+      category: changes.category ?? existing.category
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);

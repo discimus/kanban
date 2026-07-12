@@ -19,13 +19,49 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
   { value: "critical", label: "Crítica" }
 ];
 
-export type TaskClassification = "task" | "bug" | "idea" | "refactor";
+export type TaskClassification = "task" | "bug" | "refactor" | "idea" | "pending" | "improvement" | "meeting" | "content" | "project" | "note" | "exercise";
+
+export type ProductCategory = "development" | "business" | "study";
+
+export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string; icon: string }[] = [
+  { value: "development", label: "Desenvolvimento", icon: "code" },
+  { value: "business", label: "Negócios", icon: "business_center" },
+  { value: "study", label: "Estudo", icon: "school" }
+];
+
+export const CATEGORY_CLASSIFICATIONS: Record<ProductCategory, { value: TaskClassification; label: string; icon: string }[]> = {
+  development: [
+    { value: "task", label: "Tarefa", icon: "task" },
+    { value: "bug", label: "Bug", icon: "bug_report" },
+    { value: "refactor", label: "Refatoração", icon: "code" },
+    { value: "idea", label: "Idealização", icon: "lightbulb" }
+  ],
+  business: [
+    { value: "task", label: "Tarefa", icon: "task" },
+    { value: "pending", label: "Pendência", icon: "pending" },
+    { value: "improvement", label: "Melhoria", icon: "trending_up" },
+    { value: "meeting", label: "Reunião", icon: "groups" }
+  ],
+  study: [
+    { value: "content", label: "Conteúdo", icon: "menu_book" },
+    { value: "project", label: "Projeto", icon: "build" },
+    { value: "note", label: "Anotação", icon: "sticky_note_2" },
+    { value: "exercise", label: "Exercício", icon: "fitness_center" }
+  ]
+};
 
 export const TASK_CLASSIFICATIONS: { value: TaskClassification; label: string; icon: string }[] = [
   { value: "task", label: "Tarefa", icon: "task" },
   { value: "bug", label: "Bug", icon: "bug_report" },
+  { value: "refactor", label: "Refatoração", icon: "code" },
   { value: "idea", label: "Idealização", icon: "lightbulb" },
-  { value: "refactor", label: "Refatoração", icon: "code" }
+  { value: "pending", label: "Pendência", icon: "pending" },
+  { value: "improvement", label: "Melhoria", icon: "trending_up" },
+  { value: "meeting", label: "Reunião", icon: "groups" },
+  { value: "content", label: "Conteúdo", icon: "menu_book" },
+  { value: "project", label: "Projeto", icon: "build" },
+  { value: "note", label: "Anotação", icon: "sticky_note_2" },
+  { value: "exercise", label: "Exercício", icon: "fitness_center" }
 ];
 
 export type TaskStatus = "todo" | "doing" | "done";
@@ -46,6 +82,7 @@ export interface Product {
   createdAt: ISODate;
   status: ProductStatus;
   showPriority: boolean;
+  category: ProductCategory;
 }
 
 export interface BacklogItem {

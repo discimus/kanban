@@ -1,9 +1,10 @@
-import { Product } from "@shared/types";
+import { Product, ProductCategory } from "@shared/types";
 import { uuid, nowISO } from "@shared/utils";
 
 export interface CreateProductProps {
   name: string;
   description?: string;
+  category?: ProductCategory;
 }
 
 export function createProduct(props: CreateProductProps): Product {
@@ -17,7 +18,8 @@ export function createProduct(props: CreateProductProps): Product {
     description: props.description?.trim() ?? "",
     createdAt: nowISO(),
     status: "backlog",
-    showPriority: true
+    showPriority: true,
+    category: props.category ?? "development"
   };
 }
 

@@ -48,8 +48,9 @@ function validProduct(overrides: Record<string, unknown> = {}) {
     createdAt: "2025-01-01T00:00:00.000Z",
     status: "backlog" as string,
     showPriority: true,
+    category: "development" as string,
     ...overrides
-  } as { id: string; name: string; description: string; createdAt: string; status: string; showPriority: boolean };
+  } as { id: string; name: string; description: string; createdAt: string; status: string; showPriority: boolean; category: string };
 }
 
 describe("validateAndImport", () => {
@@ -99,6 +100,15 @@ describe("validateAndImport", () => {
     const result = validateAndImport(json);
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/Status inválido/);
+  });
+
+  it("product with invalid category → error", () => {
+    const json = JSON.stringify({
+      products: [validProduct({ category: "invalid_cat" })]
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Categoria inválida/);
   });
 
   it("backlogItem with invalid priority → error", () => {

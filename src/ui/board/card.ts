@@ -1,5 +1,5 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
-import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, TASK_CLASSIFICATIONS, TaskClassification } from "@shared/types";
+import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
@@ -10,17 +10,18 @@ function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
 }
 
-function classificationLabel(c: TaskClassification): string {
-  return TASK_CLASSIFICATIONS.find((x) => x.value === c)?.label ?? c;
+function classificationLabel(c: TaskClassification, category: ProductCategory): string {
+  return CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c)?.label ?? c;
 }
 
-function classificationIcon(c: TaskClassification): string {
-  return TASK_CLASSIFICATIONS.find((x) => x.value === c)?.icon ?? "help";
+function classificationIcon(c: TaskClassification, category: ProductCategory): string {
+  return CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c)?.icon ?? "help";
 }
 
-function nextClassification(current: TaskClassification): TaskClassification {
-  const idx = TASK_CLASSIFICATIONS.findIndex((c) => c.value === current);
-  return TASK_CLASSIFICATIONS[(idx + 1) % TASK_CLASSIFICATIONS.length].value;
+function nextClassification(current: TaskClassification, category: ProductCategory): TaskClassification {
+  const list = CATEGORY_CLASSIFICATIONS[category];
+  const idx = list.findIndex((c) => c.value === current);
+  return list[(idx + 1) % list.length].value;
 }
 
 const FIBONACCI = [1, 2, 3, 5, 8];
@@ -33,7 +34,7 @@ function nextFibonacci(current: number): number {
 
 const expandedCards = new Map<string, boolean>();
 
-export function backlogCard(item: BacklogItem, locked = false, showPriority = true): HTMLElement {
+export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development"): HTMLElement {
   const taskList = el("div", { class: "card__tasks" }, []);
 
   const renderTasks = (): void => {
@@ -267,14 +268,14 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const classifyChip = el("button", {
     class: `chip chip--${item.classification}`,
     type: "button",
-    "aria-label": `Classificação: ${classificationLabel(item.classification)}`
+    "aria-label": `Classificação: ${classificationLabel(item.classification, category)}`
   }, [
-    icon(classificationIcon(item.classification)),
-    el("span", {}, [classificationLabel(item.classification)])
+    icon(classificationIcon(item.classification, category)),
+    el("span", {}, [classificationLabel(item.classification, category)])
   ]);
   if (!locked) {
     classifyChip.addEventListener("click", () => {
-      backlogService.classify(item.id, nextClassification(item.classification));
+      backlogService.classify(item.id, nextClassification(item.classification, category));
     });
   }
 

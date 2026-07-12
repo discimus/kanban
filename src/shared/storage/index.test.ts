@@ -10,6 +10,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     createdAt: "2024-01-01T00:00:00.000Z",
     status: "backlog",
     showPriority: true,
+    category: "development",
     ...overrides,
   };
 }
@@ -146,6 +147,31 @@ describe("normalizeProduct", () => {
     const result = normalizeProduct(legacy);
     expect(result.status).toBe("completed");
     expect(result.showPriority).toBe(true);
+  });
+
+  it("defaults category to 'development' when missing", () => {
+    const legacy = {
+      id: "p1",
+      name: "P",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.category).toBe("development");
+  });
+
+  it("preserves valid category 'business'", () => {
+    const product = makeProduct({ category: "business" });
+    const result = normalizeProduct(product);
+    expect(result.category).toBe("business");
+  });
+
+  it("fixes invalid category to 'development'", () => {
+    const product = makeProduct({ category: "invalid" as never });
+    const result = normalizeProduct(product);
+    expect(result.category).toBe("development");
   });
 });
 

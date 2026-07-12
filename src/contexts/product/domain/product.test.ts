@@ -49,6 +49,21 @@ describe("createProduct", () => {
   it("throws Error when name is only whitespace", () => {
     expect(() => createProduct({ name: "   " })).toThrow("O nome do Projeto é obrigatório.");
   });
+
+  it("returns category 'development' by default", () => {
+    const product = createProduct({ name: "P" });
+    expect(product.category).toBe("development");
+  });
+
+  it("preserves category 'business'", () => {
+    const product = createProduct({ name: "P", category: "business" });
+    expect(product.category).toBe("business");
+  });
+
+  it("preserves category 'study'", () => {
+    const product = createProduct({ name: "P", category: "study" });
+    expect(product.category).toBe("study");
+  });
 });
 
 describe("assertValidProductName", () => {

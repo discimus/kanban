@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, TaskClassification, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, TaskClassification, ProductCategory, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
@@ -26,11 +26,13 @@ export function reviveState(raw: unknown): AppState {
 }
 
 const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
+const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study"];
 
 export function normalizeProduct(product: Product): Product {
   const normalized: Product = {
     ...product,
-    showPriority: product.showPriority !== false
+    showPriority: product.showPriority !== false,
+    category: VALID_CATEGORIES.includes(product.category) ? product.category : "development"
   };
   if (!VALID_STATUSES.includes(normalized.status)) {
     return { ...normalized, status: normalized.status === "completed" ? "completed" : "backlog" };

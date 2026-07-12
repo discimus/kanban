@@ -1,5 +1,6 @@
 import { el, icon } from "@ui/components/dom";
-import { KANBAN_COLUMNS, KanbanStatus, BacklogItem } from "@shared/types";
+import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory } from "@shared/types";
+
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert } from "@ui/components/dialog";
@@ -18,7 +19,7 @@ export function renderBoard(productId: string): HTMLElement {
 
   for (const column of KANBAN_COLUMNS) {
     const columnItems = items.filter((i) => i.status === column.status);
-    board.append(renderColumn(column.status, column.label, columnItems, locked, productId, product?.showPriority ?? true));
+    board.append(renderColumn(column.status, column.label, columnItems, locked, productId, product?.showPriority ?? true, product?.category ?? "development"));
   }
 
   return board;
@@ -34,14 +35,15 @@ function renderColumn(
   items: BacklogItem[],
   locked: boolean,
   productId: string,
-  showPriority: boolean
+  showPriority: boolean,
+  category: ProductCategory
 ): HTMLElement {
   const body = el("div", { class: "column__body", "data-status": status }, []);
 
   if (items.length === 0) {
     body.append(el("p", { class: "column__empty" }, ["Sem itens"]));
   } else {
-    for (const item of items) body.append(backlogCard(item, locked, showPriority));
+    for (const item of items) body.append(backlogCard(item, locked, showPriority, category));
   }
 
   if (status === "todo" && !locked) {

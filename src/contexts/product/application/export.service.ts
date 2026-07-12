@@ -1,11 +1,12 @@
 import { store } from "@shared/storage";
-import { AppState, Product, BacklogItem, Task, Link, EstimationLog, TaskClassification } from "@shared/types";
+import { AppState, Product, BacklogItem, Task, Link, EstimationLog, TaskClassification, ProductCategory } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
 const VALID_PRIORITIES = ["low", "medium", "high", "critical"];
 const VALID_TASK_STATUSES = ["todo", "doing", "done"];
-const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea", "refactor"];
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "refactor", "idea", "pending", "improvement", "meeting", "content", "project", "note", "exercise"];
+const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study"];
 
 interface ExportResult {
   success: boolean;
@@ -112,6 +113,9 @@ export function validateAndImport(jsonString: string): ExportResult {
     if (!p.createdAt || typeof p.createdAt !== "string") return { success: false, error: "Cada produto precisa de createdAt (string ISO)." };
     if (!VALID_PRODUCT_STATUSES.includes(p.status)) {
       return { success: false, error: `Status inválido no produto "${p.name}": ${p.status}. Valores válidos: ${VALID_PRODUCT_STATUSES.join(", ")}` };
+    }
+    if (p.category && !VALID_CATEGORIES.includes(p.category as ProductCategory)) {
+      return { success: false, error: `Categoria inválida no produto "${p.name}": ${p.category}. Valores válidos: ${VALID_CATEGORIES.join(", ")}` };
     }
   }
 
