@@ -2,6 +2,7 @@ export type DomainEvent =
   | "state:changed"
   | "product:created"
   | "product:updated"
+  | "product:pending-completion"
   | "product:deleted"
   | "backlog:created"
   | "backlog:updated"

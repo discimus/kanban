@@ -160,14 +160,28 @@ describe("productService", () => {
       expect(result?.status).toBe("backlog");
     });
 
-    it('with all "done" items → "completed"', () => {
+    it('with all "done" items → no automatic completion', () => {
       state.products = [makeProduct({ status: "backlog" })];
       state.backlogItems = [
         makeBacklogItem({ productId: "p1", status: "done" }),
         makeBacklogItem({ id: "b2", productId: "p1", status: "done" })
       ];
       const result = productService.recomputeStatus("p1");
-      expect(result?.status).toBe("completed");
+      expect(result?.status).toBe("backlog");
+    });
+
+    it("allItemsDone returns true when all items are done", () => {
+      state.products = [makeProduct({ status: "backlog" })];
+      state.backlogItems = [
+        makeBacklogItem({ productId: "p1", status: "done" }),
+        makeBacklogItem({ id: "b2", productId: "p1", status: "done" })
+      ];
+      expect(productService.allItemsDone("p1")).toBe(true);
+    });
+
+    it("allItemsDone returns false when no items", () => {
+      state.products = [makeProduct({ status: "backlog" })];
+      expect(productService.allItemsDone("p1")).toBe(false);
     });
 
     it("with mixed items → in_progress", () => {

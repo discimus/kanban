@@ -35,7 +35,8 @@ vi.mock("@contexts/product/application/product.service", () => ({
       showPriority: true,
       category: "development"
     })),
-    recomputeStatus: vi.fn()
+    recomputeStatus: vi.fn(),
+    allItemsDone: vi.fn(() => false)
   }
 }));
 

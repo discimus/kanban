@@ -55,7 +55,7 @@ export const productService = {
     if (items.length === 0 || items.every((i) => i.status === "todo")) {
       next = "backlog";
     } else if (items.every((i) => i.status === "done")) {
-      next = "completed";
+      return existing;
     } else {
       next = "in_progress";
     }
@@ -64,6 +64,11 @@ export const productService = {
       return this.setStatus(productId, next);
     }
     return existing;
+  },
+
+  allItemsDone(productId: string): boolean {
+    const items = backlogRepository.byProduct(productId);
+    return items.length > 0 && items.every((i) => i.status === "done");
   },
 
   delete(id: string): void {

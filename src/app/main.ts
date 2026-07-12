@@ -2,7 +2,8 @@ import { eventBus } from "@shared/events";
 import { renderApp } from "./view";
 import { applyTheme, getTheme } from "@ui/theme";
 import { store } from "@shared/storage";
-import { showOnboarding } from "@ui/components/dialog";
+import { showConfirm, showOnboarding } from "@ui/components/dialog";
+import { productService } from "@contexts/product/application/product.service";
 import { createExampleData } from "@contexts/product/domain/example-data";
 
 const root = document.getElementById("app");
@@ -16,6 +17,20 @@ renderApp(root);
 
 eventBus.on("state:changed", () => {
   renderApp(root);
+});
+
+eventBus.on("product:pending-completion", (productId) => {
+  const product = productService.get(productId as string);
+  if (!product) return;
+  setTimeout(async () => {
+    const ok = await showConfirm(
+      'Todos os cards estão em "Done". Deseja concluir o projeto "{{text}}"?\n\nProjetos concluídos ficam em modo somente leitura.',
+      product.name
+    );
+    if (ok) {
+      productService.setStatus(productId as string, "completed");
+    }
+  }, 0);
 });
 
 const state = store.getState();

@@ -95,6 +95,14 @@ export const backlogService = {
     backlogRepository.save(updated);
     eventBus.emit("backlog:moved", updated);
     productService.recomputeStatus(updated.productId);
+
+    if (productService.allItemsDone(updated.productId)) {
+      const product = productService.get(updated.productId);
+      if (product && product.status !== "completed") {
+        eventBus.emit("product:pending-completion", updated.productId);
+      }
+    }
+
     return updated;
   },
 
