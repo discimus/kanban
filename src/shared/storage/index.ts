@@ -72,6 +72,12 @@ class Store {
     this.persist();
     eventBus.emit("state:changed");
   }
+
+  replaceState(newState: AppState): void {
+    this.state = reviveState(newState);
+    this.persist();
+    eventBus.emit("state:changed");
+  }
 }
 
 export const store = new Store();

@@ -4,6 +4,7 @@ import { openBacklogForm } from "@ui/modal/backlog-form";
 import { openProductForm } from "@ui/modal/product-form";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
+import { downloadExportProduct } from "@contexts/product/application/export.service";
 
 export function renderProductHeader(product: Product): HTMLElement {
   const isLocked = product.status === "completed" || product.status === "canceled";
@@ -21,6 +22,7 @@ export function renderProductHeader(product: Product): HTMLElement {
 
   const menu = actionsMenu([
     { label: "Editar", icon: "edit", action: () => openProductForm(product) },
+    { label: "Exportar", icon: "download", action: () => downloadExportProduct(product.name, product.id) },
     {
       label: "Excluir",
       icon: "delete",
