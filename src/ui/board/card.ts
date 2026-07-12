@@ -31,6 +31,8 @@ function nextFibonacci(current: number): number {
   return FIBONACCI[idx + 1];
 }
 
+const progressFormat = new Map<string, "fraction" | "percent">();
+
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true): HTMLElement {
   const taskList = el("div", { class: "card__tasks" }, []);
 
@@ -69,6 +71,34 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
   };
   renderTasks();
+
+  const tasks = taskService.byBacklogItem(item.id);
+  const doneCount = tasks.filter((t) => t.status === "done").length;
+
+  const progressBar = tasks.length > 0
+    ? (() => {
+        const pct = (doneCount / tasks.length) * 100;
+        const format = progressFormat.get(item.id) === "percent" ? "percent" : "fraction";
+        const label = format === "percent" ? `${Math.round(pct)}%` : `${doneCount}/${tasks.length}`;
+
+        const labelEl = el("span", {}, [label]);
+        const bar = el("div", { class: "card__progress", title: "Clique para alternar visualização" }, [
+          el("div", { class: "card__progress-bar" }, [
+            el("div", { class: "card__progress-fill", style: `width:${pct}%` })
+          ]),
+          labelEl
+        ]);
+
+        bar.addEventListener("click", () => {
+          const current = progressFormat.get(item.id);
+          const next: "fraction" | "percent" = current === "percent" ? "fraction" : "percent";
+          progressFormat.set(item.id, next);
+          labelEl.textContent = next === "percent" ? `${Math.round(pct)}%` : `${doneCount}/${tasks.length}`;
+        });
+
+        return bar;
+      })()
+    : null;
 
   const linkList = el("div", { class: "card__links" }, []);
 
@@ -274,6 +304,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     ]),
     el("h4", { class: "card__title" }, [item.title]),
     item.description ? el("p", { class: "card__desc" }, [item.description]) : null,
+    progressBar,
     taskList,
     linkList
   ]);

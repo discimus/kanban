@@ -788,6 +788,32 @@ button.chip--idea:hover {
   font-size: 0.85rem;
 }
 
+.card__progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.card__progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--md-surface-container-highest);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.card__progress-fill {
+  height: 100%;
+  background: var(--md-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
 .badge {
   font-size: 0.7rem;
   font-weight: 500;
