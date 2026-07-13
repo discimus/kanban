@@ -1877,9 +1877,7 @@ h4 {
   }
 
   .content__subtitle {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none;
   }
 
   .stats {
@@ -1959,7 +1957,7 @@ h4 {
   }
 
   .content {
-    padding: 12px;
+    padding: 68px 12px 12px;
   }
 
   .card {
