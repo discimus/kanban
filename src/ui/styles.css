@@ -1926,6 +1926,36 @@ h4 {
   }
 }
 
+/* ── Confetti ── */
+.confetti {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.confetti__piece {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: confetti-burst var(--duration, 1s) ease-out var(--delay, 0s) forwards;
+  opacity: 0;
+}
+
+.confetti__piece svg {
+  display: block;
+}
+
+@keyframes confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0px), var(--dy, -80px)) rotate(var(--dr, 0deg)) scale(0.3);
+    opacity: 0;
+  }
+}
+
 /* Prevent hover-lift on touch devices (avoids sticky hover states) */
 @media (hover: none) {
   .card:hover {

@@ -4,6 +4,7 @@ import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory } from "@sha
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert } from "@ui/components/dialog";
+import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 
 export function renderBoard(productId: string): HTMLElement {
@@ -65,6 +66,13 @@ function renderColumn(
       if (!id) return;
       try {
         backlogService.move(id, status);
+        if (status === "done") {
+          const card = document.querySelector(`[data-id="${id}"]`);
+          if (card) {
+            const rect = card.getBoundingClientRect();
+            showConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+          }
+        }
       } catch (e) {
         showAlert((e as Error).message);
       }
