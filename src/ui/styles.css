@@ -550,6 +550,11 @@ body {
   opacity: 0.5;
 }
 
+.card--archived .card__action-btn {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 .card--archived .card__task-check,
 .card--archived .card__task-delete {
   opacity: 0.35;
@@ -995,10 +1000,54 @@ button.chip--exercise:hover {
   -webkit-mask-image: none;
 }
 
+.card__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.card__footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.card__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.card__action-btn:hover {
+  background: var(--md-surface-container-high);
+  color: var(--primary);
+}
+
+.card__action-btn .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.card__footer-actions .card__action-btn:hover {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
 .card__expand-btn {
   display: flex;
   justify-content: center;
-  width: 100%;
+  flex: 1;
   align-items: center;
   gap: 4px;
   border: 1px solid transparent;
@@ -1009,7 +1058,6 @@ button.chip--exercise:hover {
   font-size: 0.78rem;
   cursor: pointer;
   padding: 6px 12px;
-  margin-top: 10px;
   transition: color 0.15s, background 0.15s;
 }
 

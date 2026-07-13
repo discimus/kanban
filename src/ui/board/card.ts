@@ -34,6 +34,20 @@ function nextFibonacci(current: number): number {
   return FIBONACCI[idx + 1];
 }
 
+function cardActionBtn(iconName: string, label: string, action: () => void): HTMLElement {
+  const btn = el("button", {
+    class: "card__action-btn",
+    type: "button",
+    "aria-label": label,
+    title: label
+  }, [icon(iconName)]);
+  btn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    action();
+  });
+  return btn;
+}
+
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const seg = Math.floor(diff / 1000);
@@ -430,6 +444,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   ];
 
   if (hasContent && !isArchived) {
+    const footer = el("div", { class: "card__footer" }, []);
+
     const btn = el("button", { class: "card__expand-btn", type: "button" }, [
       icon(bodyExpanded ? "expand_less" : "expand_more"),
       el("span", {}, [bodyExpanded ? "Recolher" : "Expandir"])
@@ -444,7 +460,18 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         el("span", {}, [isExpanded ? "Recolher" : "Expandir"])
       );
     });
-    cardChildren.push(btn);
+    footer.append(btn);
+
+    if (!readOnly) {
+      const actionsFooter = el("div", { class: "card__footer-actions" }, [
+        cardActionBtn("playlist_add", "Adicionar subtarefa", locked ? lockedAlert : addSubtask),
+        cardActionBtn("chat", "Adicionar comentário", locked ? lockedAlert : addComment),
+        cardActionBtn("link", "Adicionar link", locked ? lockedAlert : addLink)
+      ]);
+      footer.append(actionsFooter);
+    }
+
+    cardChildren.push(footer);
   }
 
   const card = el("article", {
