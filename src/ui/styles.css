@@ -1393,6 +1393,12 @@ button.chip--exercise:hover {
   color: var(--danger);
 }
 
+.actions-menu__item:disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;

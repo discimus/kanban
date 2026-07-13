@@ -53,10 +53,13 @@ export function on<K extends keyof HTMLElementEventMap>(
 
 export interface MenuItem {
   label: string;
-  icon: string;
+  icon?: string;
   danger?: boolean;
   action?: () => void;
   submenu?: MenuItem[];
+  className?: string;
+  checked?: boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -96,8 +99,10 @@ export function actionsMenu(items: MenuItem[]): HTMLElement {
 
     for (const item of levelItems) {
       const hasSub = !!item.submenu && item.submenu.length > 0;
-      const btn = el("button", { class: `actions-menu__item${item.danger ? " actions-menu__item--danger" : ""}` }, [
-        icon(item.icon),
+      const btnClass = `actions-menu__item${item.danger ? " actions-menu__item--danger" : ""}${item.className ? ` ${item.className}` : ""}`;
+      const iconEl = item.checked ? icon("check") : (item.icon ? icon(item.icon) : null);
+      const btn = el("button", { class: btnClass, disabled: item.disabled || undefined }, [
+        iconEl,
         el("span", { class: "actions-menu__label" }, [item.label]),
         hasSub ? icon("chevron_right", "actions-menu__chevron") : null
       ]);

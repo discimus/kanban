@@ -224,10 +224,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     );
   };
 
-  const currentIndex = KANBAN_COLUMNS.findIndex((c) => c.status === item.status);
-  const prevColumn = currentIndex > 0 ? KANBAN_COLUMNS[currentIndex - 1] : null;
-  const nextColumn = currentIndex < KANBAN_COLUMNS.length - 1 ? KANBAN_COLUMNS[currentIndex + 1] : null;
-
   const moveTo = (status: (typeof KANBAN_COLUMNS)[number]["status"]): void => {
     try {
       backlogService.move(item.id, status);
@@ -236,26 +232,17 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
   };
 
-  const moveItems: MenuItem[] = [];
-  if (nextColumn) {
-    moveItems.push({
-      label: `Avançar para "${nextColumn.label}"`,
-      icon: "arrow_forward",
-      action: locked ? lockedAlert : () => moveTo(nextColumn.status)
-    });
-  }
-  if (prevColumn) {
-    moveItems.push({
-      label: `Voltar para "${prevColumn.label}"`,
-      icon: "arrow_back",
-      action: locked ? lockedAlert : () => moveTo(prevColumn.status)
-    });
-  }
+  const columnSubmenu: MenuItem[] = KANBAN_COLUMNS.map((col) => ({
+    label: col.label,
+    checked: col.status === item.status,
+    disabled: col.status === item.status,
+    action: locked ? lockedAlert : () => moveTo(col.status)
+  }));
 
   const menu = actionsMenu([
     { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
     { label: "Adicionar link", icon: "link", action: locked ? lockedAlert : addLink },
-    ...moveItems,
+    { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
     {
       label: "Editar",
       icon: "edit",
