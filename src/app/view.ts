@@ -9,6 +9,7 @@ import { renderThemeMenu } from "@ui/components/theme-menu";
 let selectedProductId: string | null = null;
 let drawerOpen = false;
 let showStats = false;
+let showArchived = false;
 
 const LAST_PROJECT_KEY = "kanban-last-project";
 
@@ -85,8 +86,11 @@ export function renderApp(root: HTMLElement): void {
         renderProductHeader(product, showStats, () => {
           showStats = !showStats;
           renderApp(root);
-        }, hamburger),
-        showStats ? renderStatistics(product.id) : renderBoard(product.id)
+        }, hamburger, showArchived, () => {
+          showArchived = !showArchived;
+          renderApp(root);
+        }),
+        showStats ? renderStatistics(product.id) : renderBoard(product.id, showArchived)
       );
     }
   }

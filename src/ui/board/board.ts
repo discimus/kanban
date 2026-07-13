@@ -7,12 +7,13 @@ import { showAlert } from "@ui/components/dialog";
 import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 
-export function renderBoard(productId: string): HTMLElement {
+export function renderBoard(productId: string, showArchived = false): HTMLElement {
   const product = productService.get(productId);
   const locked = product?.status === "completed" || product?.status === "canceled";
 
   const items = backlogService
     .byProduct(productId)
+    .filter((i) => showArchived || !i.archivedAt)
     .slice()
     .sort((a, b) => priorityRank(b) - priorityRank(a));
 

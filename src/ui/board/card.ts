@@ -36,6 +36,8 @@ function nextFibonacci(current: number): number {
 const expandedCards = new Map<string, boolean>();
 
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development"): HTMLElement {
+  const isArchived = !!item.archivedAt;
+  const readOnly = locked || isArchived;
   const taskList = el("div", { class: "card__tasks" }, []);
 
   const renderTasks = (): void => {
@@ -46,16 +48,16 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
       const checkbox = el("input", { class: "card__task-check", type: "checkbox" }) as HTMLInputElement;
       checkbox.checked = done;
-      checkbox.disabled = locked;
-      if (!locked) {
+      checkbox.disabled = readOnly;
+      if (!readOnly) {
         checkbox.addEventListener("change", () => {
           taskService.changeStatus(task.id, checkbox.checked ? "done" : "todo");
         });
       }
 
       const del = el("button", { class: "card__task-delete", "aria-label": "Excluir subtarefa" }, [icon("close")]);
-      del.disabled = locked;
-      if (!locked) {
+      del.disabled = readOnly;
+      if (!readOnly) {
         del.addEventListener("click", () => {
           showConfirm('Excluir subtarefa "{{text}}"?', task.title).then((ok) => {
             if (ok) taskService.delete(task.id);
@@ -112,8 +114,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       });
 
       const del = el("button", { class: "card__task-delete", "aria-label": "Excluir link" }, [icon("close")]);
-      del.disabled = locked;
-      if (!locked) {
+      del.disabled = readOnly;
+      if (!readOnly) {
         del.addEventListener("click", () => {
           showConfirm('Excluir link "{{text}}"?', displayUrl).then((ok) => {
             if (ok) linkService.delete(link.id);
@@ -239,28 +241,49 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     action: locked ? lockedAlert : () => moveTo(col.status)
   }));
 
-  const menu = actionsMenu([
-    { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
-    { label: "Adicionar link", icon: "link", action: locked ? lockedAlert : addLink },
-    { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
-    {
-      label: "Editar",
-      icon: "edit",
-      action: locked ? lockedAlert : () => openBacklogForm(item.productId, item)
-    },
-    {
-      label: "Excluir",
-      icon: "delete",
-      danger: true,
-      action: locked
-        ? lockedAlert
-        : () => {
-            showConfirm('Excluir "{{text}}"?', item.title).then((ok) => {
-              if (ok) backlogService.delete(item.id);
-            });
+  const menu = actionsMenu(
+    isArchived
+      ? [
+          {
+            label: "Restaurar",
+            icon: "restore",
+            action: () => backlogService.restore(item.id)
+          },
+          {
+            label: "Excluir",
+            icon: "delete",
+            danger: true,
+            action: () => {
+              showConfirm('Excluir "{{text}}"?', item.title).then((ok) => {
+                if (ok) backlogService.delete(item.id);
+              });
+            }
           }
-    }
-  ]);
+        ]
+      : [
+          { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+          { label: "Adicionar link", icon: "link", action: locked ? lockedAlert : addLink },
+          { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
+          { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
+          {
+            label: "Editar",
+            icon: "edit",
+            action: locked ? lockedAlert : () => openBacklogForm(item.productId, item)
+          },
+          {
+            label: "Excluir",
+            icon: "delete",
+            danger: true,
+            action: locked
+              ? lockedAlert
+              : () => {
+                  showConfirm('Excluir "{{text}}"?', item.title).then((ok) => {
+                    if (ok) backlogService.delete(item.id);
+                  });
+                }
+          }
+        ]
+  );
 
   const classifyChip = el("button", {
     class: `chip chip--${item.classification}`,
@@ -270,7 +293,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     icon(classificationIcon(item.classification, category)),
     el("span", {}, [classificationLabel(item.classification, category)])
   ]);
-  if (!locked) {
+  if (!readOnly) {
     classifyChip.addEventListener("click", () => {
       backlogService.classify(item.id, nextClassification(item.classification, category));
     });
@@ -281,7 +304,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     type: "button",
     "aria-label": `${item.storyPoints} story points`
   }, [`${item.storyPoints} pts`]);
-  if (!locked) {
+  if (!readOnly) {
     pointsBtn.addEventListener("click", () => {
       backlogService.setStoryPoints(item.id, nextFibonacci(item.storyPoints));
     });
@@ -314,7 +337,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     cardBody
   ];
 
-  if (hasContent) {
+  if (hasContent && !isArchived) {
     const btn = el("button", { class: "card__expand-btn", type: "button" }, [
       icon(bodyExpanded ? "expand_less" : "expand_more"),
       el("span", {}, [bodyExpanded ? "Recolher" : "Expandir"])
@@ -332,9 +355,13 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     cardChildren.push(btn);
   }
 
-  const card = el("article", { class: `card${locked ? " card--locked" : ""}`, draggable: locked ? "false" : "true", "data-id": item.id }, cardChildren as Node[]);
+  const card = el("article", {
+    class: `card${locked ? " card--locked" : ""}${isArchived ? " card--archived" : ""}`,
+    draggable: readOnly ? "false" : "true",
+    "data-id": item.id
+  }, cardChildren as Node[]);
 
-  if (!locked) {
+  if (!readOnly) {
     card.addEventListener("dragstart", (ev) => {
       ev.dataTransfer?.setData("text/plain", item.id);
       card.classList.add("card--dragging");

@@ -525,6 +525,34 @@ body {
   cursor: default;
   opacity: 0.55;
   filter: grayscale(0.5);
+  z-index: 1;
+}
+
+.card--archived {
+  cursor: default;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.card--archived .card__title::after {
+  content: "archive";
+  font-family: "Material Symbols Outlined";
+  font-size: 0.75rem;
+  margin-left: 6px;
+  color: var(--md-primary);
+  vertical-align: middle;
+}
+
+.card--archived .card__points,
+.card--archived .chip,
+.card--archived .card__expand-btn {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.card--archived .card__task-check,
+.card--archived .card__task-delete {
+  opacity: 0.35;
 }
 
 .card__top {
@@ -1852,6 +1880,10 @@ h4 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .stats {
+    margin-top: 16px;
   }
 
   .content__actions {

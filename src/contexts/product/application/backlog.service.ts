@@ -1,6 +1,7 @@
 import { BacklogItem, KanbanStatus, Priority, TaskClassification } from "@shared/types";
 import { eventBus } from "@shared/events";
-import { createBacklogItem, CreateBacklogItemProps } from "../domain/backlog-item";
+import { nowISO } from "@shared/utils";
+import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem } from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
 import { productService } from "./product.service";
 
@@ -111,5 +112,23 @@ export const backlogService = {
     if (existing) assertProductEditable(existing.productId);
     backlogRepository.remove(id);
     eventBus.emit("backlog:deleted", id);
+  },
+
+  archive(id: string): BacklogItem {
+    const existing = backlogRepository.findById(id);
+    if (!existing) throw new Error("Item de backlog não encontrado.");
+    const updated = archiveItem(existing, nowISO());
+    backlogRepository.save(updated);
+    eventBus.emit("backlog:archived", updated);
+    return updated;
+  },
+
+  restore(id: string): BacklogItem {
+    const existing = backlogRepository.findById(id);
+    if (!existing) throw new Error("Item de backlog não encontrado.");
+    const updated = restoreItem(existing);
+    backlogRepository.save(updated);
+    eventBus.emit("backlog:restored", updated);
+    return updated;
   }
 };

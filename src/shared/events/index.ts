@@ -8,6 +8,8 @@ export type DomainEvent =
   | "backlog:updated"
   | "backlog:moved"
   | "backlog:deleted"
+  | "backlog:archived"
+  | "backlog:restored"
   | "task:created"
   | "task:updated"
   | "link:created"

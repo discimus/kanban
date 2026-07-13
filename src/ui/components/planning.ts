@@ -6,7 +6,14 @@ import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { downloadExportProduct } from "@contexts/product/application/export.service";
 
-export function renderProductHeader(product: Product, showStats = false, onToggleView?: () => void, hamburger?: HTMLElement): HTMLElement {
+export function renderProductHeader(
+  product: Product,
+  showStats = false,
+  onToggleStats?: () => void,
+  hamburger?: HTMLElement,
+  showArchived = false,
+  onToggleArchived?: () => void
+): HTMLElement {
   const isLocked = product.status === "completed" || product.status === "canceled";
 
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), "Adicionar tarefa"]);
@@ -20,14 +27,24 @@ export function renderProductHeader(product: Product, showStats = false, onToggl
     openBacklogForm(product.id);
   });
 
-  const statBtn = onToggleView
+  const statBtn = onToggleStats
     ? el("button", { class: `btn btn--sm${showStats ? " btn--primary" : ""}` }, [
         icon("bar_chart"),
         "Estatísticas"
       ])
     : null;
   if (statBtn) {
-    statBtn.addEventListener("click", onToggleView!);
+    statBtn.addEventListener("click", onToggleStats!);
+  }
+
+  const archBtn = onToggleArchived
+    ? el("button", { class: `btn btn--sm${showArchived ? " btn--primary" : ""}` }, [
+        icon("archive"),
+        "Arquivadas"
+      ])
+    : null;
+  if (archBtn) {
+    archBtn.addEventListener("click", onToggleArchived!);
   }
 
   const menu = actionsMenu([
@@ -48,7 +65,7 @@ export function renderProductHeader(product: Product, showStats = false, onToggl
   const topBar = el("div", { class: "content__topbar" }, [
     hamburger,
     el("h2", { class: "content__title" }, [product.name]),
-    el("div", { class: "content__actions" }, [addItem, statBtn, menu].filter(Boolean) as HTMLElement[])
+    el("div", { class: "content__actions" }, [addItem, statBtn, archBtn, menu].filter(Boolean) as HTMLElement[])
   ].filter(Boolean) as HTMLElement[]);
 
   return el("header", { class: "content__header" }, [

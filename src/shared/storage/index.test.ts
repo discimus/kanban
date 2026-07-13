@@ -25,6 +25,7 @@ function makeBacklogItem(overrides: Partial<BacklogItem> = {}): BacklogItem {
     status: "todo",
     storyPoints: 1,
     classification: "task",
+    archivedAt: null,
     ...overrides,
   };
 }

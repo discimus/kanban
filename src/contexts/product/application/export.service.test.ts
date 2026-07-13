@@ -185,8 +185,8 @@ describe("exportProductState", () => {
   it("returns product + related backlogItems, tasks, links, estimations for valid id", () => {
     state.products = [validProduct({ id: "p1" }) as Product];
     state.backlogItems = [
-      { id: "b1", productId: "p1", title: "B1", description: "", priority: "medium" as const, status: "todo" as const, storyPoints: 1, classification: "task" as const },
-      { id: "b2", productId: "p1", title: "B2", description: "", priority: "low" as const, status: "doing" as const, storyPoints: 2, classification: "bug" as const }
+      { id: "b1", productId: "p1", title: "B1", description: "", priority: "medium" as const, status: "todo" as const, storyPoints: 1, classification: "task" as const, archivedAt: null },
+      { id: "b2", productId: "p1", title: "B2", description: "", priority: "low" as const, status: "doing" as const, storyPoints: 2, classification: "bug" as const, archivedAt: null }
     ];
     state.tasks = [
       { id: "t1", backlogItemId: "b1", title: "T1", status: "todo" as const, assignedTo: "" }

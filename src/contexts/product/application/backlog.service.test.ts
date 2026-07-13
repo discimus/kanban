@@ -53,6 +53,7 @@ function makeBacklogItem(overrides: Record<string, unknown> = {}) {
     status: "todo" as const,
     storyPoints: 3,
     classification: "task" as const,
+    archivedAt: null,
     ...overrides
   };
 }

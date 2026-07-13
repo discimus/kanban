@@ -7,9 +7,9 @@ const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea", "ref
 
 export function normalizeBacklogItem(item: BacklogItem): BacklogItem {
   if (!VALID_CLASSIFICATIONS.includes(item.classification)) {
-    return { ...item, classification: "task" };
+    return { ...item, classification: "task", archivedAt: (item as any).archivedAt ?? null };
   }
-  return item;
+  return { ...item, archivedAt: (item as any).archivedAt ?? null };
 }
 
 export function reviveState(raw: unknown): AppState {

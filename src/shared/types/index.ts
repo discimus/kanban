@@ -95,6 +95,7 @@ export interface BacklogItem {
   status: KanbanStatus;
   storyPoints: number;
   classification: TaskClassification;
+  archivedAt: ISODate | null;
 }
 
 export interface Task {

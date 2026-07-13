@@ -22,11 +22,20 @@ export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
     priority: props.priority ?? "medium",
     status: "todo",
     storyPoints: Math.max(0, props.storyPoints ?? 0),
-    classification: props.classification ?? "task"
+    classification: props.classification ?? "task",
+    archivedAt: null
   };
 }
 
 export function isValidTransition(from: KanbanStatus, to: KanbanStatus): boolean {
   const order: KanbanStatus[] = ["todo", "doing", "review", "done"];
   return order.includes(from) && order.includes(to);
+}
+
+export function archive(item: BacklogItem, now: string): BacklogItem {
+  return { ...item, archivedAt: now };
+}
+
+export function restore(item: BacklogItem): BacklogItem {
+  return { ...item, archivedAt: null };
 }
