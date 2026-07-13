@@ -46,11 +46,11 @@
   --danger-hover: #93000a;
   --success: #2e7d32;
 
-  /* Priority palette (semantic, kept stable across themes) */
-  --low: #6b7280;
-  --medium: #0284c7;
-  --high: #d97706;
-  --critical: #dc2626;
+  /* Priority palette — MD3 tonal tokens */
+  --low: var(--md-surface-container-highest);
+  --medium: var(--md-primary-container);
+  --high: var(--md-tertiary-container);
+  --critical: var(--md-error-container);
 
   /* MD3 shape scale */
   --radius: 12px;
@@ -104,11 +104,6 @@
     --primary-hover: #d0d2ff;
     --danger-hover: #ffb4ab;
     --success: #81c784;
-
-    --low: #9ca3af;
-    --medium: #38bdf8;
-    --high: #fbbf24;
-    --critical: #f87171;
   }
 }
 
@@ -142,11 +137,6 @@
   --primary-hover: #d0d2ff;
   --danger-hover: #ffb4ab;
   --success: #81c784;
-
-  --low: #9ca3af;
-  --medium: #38bdf8;
-  --high: #fbbf24;
-  --critical: #f87171;
 
   color-scheme: dark;
 }
@@ -1159,20 +1149,23 @@ button.chip--exercise:hover {
   letter-spacing: 0.04em;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
-  color: #fff;
 }
 
 .badge--low {
   background: var(--low);
+  color: var(--md-on-surface-variant);
 }
 .badge--medium {
   background: var(--medium);
+  color: var(--md-on-primary-container);
 }
 .badge--high {
   background: var(--high);
+  color: var(--md-on-tertiary-container);
 }
 .badge--critical {
   background: var(--critical);
+  color: var(--md-on-error-container);
 }
 
 /* Buttons — MD3 (filled / text / outlined) */
