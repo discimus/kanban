@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, TaskClassification, ProductCategory, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, TaskClassification, ProductCategory, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
@@ -20,13 +20,17 @@ export function reviveState(raw: unknown): AppState {
     products: Array.isArray(data.products) ? data.products.map(normalizeProduct) : base.products,
     backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems.map(normalizeBacklogItem) : base.backlogItems,
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
-    links: Array.isArray(data.links) ? data.links : base.links,
+    links: Array.isArray(data.links) ? data.links.map(normalizeLink) : base.links,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };
 }
 
 const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study"];
+
+export function normalizeLink(link: Link): Link {
+  return { ...link, visitedAt: (link as any).visitedAt ?? null };
+}
 
 export function normalizeProduct(product: Product): Product {
   const normalized: Product = {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createLink, changeUrl } from "@contexts/link/domain/link";
+import { createLink, changeUrl, markAsVisited } from "@contexts/link/domain/link";
 
 describe("createLink", () => {
   it("returns a Link with generated id", () => {
@@ -28,6 +28,35 @@ describe("createLink", () => {
 
   it("throws Error when URL is only whitespace", () => {
     expect(() => createLink({ backlogItemId: "bi-1", url: "   " })).toThrow(Error);
+  });
+});
+
+describe("markAsVisited", () => {
+  it("returns new object with different reference", () => {
+    const link = createLink({ backlogItemId: "bi-1", url: "https://example.com" });
+    const visited = markAsVisited(link, "2026-07-12T14:30:00.000Z");
+    expect(visited).not.toBe(link);
+  });
+
+  it("sets visitedAt to the provided timestamp", () => {
+    const link = createLink({ backlogItemId: "bi-1", url: "https://example.com" });
+    const visited = markAsVisited(link, "2026-07-12T14:30:00.000Z");
+    expect(visited.visitedAt).toBe("2026-07-12T14:30:00.000Z");
+  });
+
+  it("preserves other properties", () => {
+    const link = createLink({ backlogItemId: "bi-1", url: "https://example.com" });
+    const visited = markAsVisited(link, "2026-07-12T14:30:00.000Z");
+    expect(visited.id).toBe(link.id);
+    expect(visited.backlogItemId).toBe(link.backlogItemId);
+    expect(visited.url).toBe(link.url);
+  });
+
+  it("can be called multiple times, updating visitedAt", () => {
+    const link = createLink({ backlogItemId: "bi-1", url: "https://example.com" });
+    const t1 = markAsVisited(link, "2026-07-12T10:00:00.000Z");
+    const t2 = markAsVisited(t1, "2026-07-12T15:00:00.000Z");
+    expect(t2.visitedAt).toBe("2026-07-12T15:00:00.000Z");
   });
 });
 
@@ -60,5 +89,6 @@ describe("changeUrl", () => {
     const updated = changeUrl(link, "https://new.example.com");
     expect(updated.id).toBe(link.id);
     expect(updated.backlogItemId).toBe(link.backlogItemId);
+    expect(updated.visitedAt).toBe(link.visitedAt);
   });
 });

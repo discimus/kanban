@@ -1,4 +1,4 @@
-import { store } from "@shared/storage";
+import { store, normalizeLink } from "@shared/storage";
 import { AppState, Product, BacklogItem, Task, Link, EstimationLog, TaskClassification, ProductCategory } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
@@ -190,7 +190,7 @@ function doImport(data: AppState): void {
     }
     for (const link of data.links) {
       if (!state.links.some((l) => l.id === link.id)) {
-        state.links.push(link);
+        state.links.push(normalizeLink(link));
       }
     }
     for (const est of data.estimations) {

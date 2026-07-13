@@ -109,6 +109,7 @@ export interface Link {
   id: ID;
   backlogItemId: ID;
   url: string;
+  visitedAt: ISODate | null;
 }
 
 export interface EstimationLog {

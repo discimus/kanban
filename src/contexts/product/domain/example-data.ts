@@ -1,4 +1,4 @@
-import { AppState } from "@shared/types";
+import { AppState, Link } from "@shared/types";
 
 export function createExampleData(): AppState {
   const prodId = "example-prod-1";
@@ -91,12 +91,12 @@ export function createExampleData(): AppState {
     { id: "ex-t-11", backlogItemId: "ex-bi-6", title: "Migrar páginas para novo serviço", status: "todo" as const, assignedTo: "" }
   ];
 
-  const links = [
-    { id: "ex-l-1", backlogItemId: "ex-bi-1", url: "https://www.figma.com/file/carrinho-prototype" },
-    { id: "ex-l-2", backlogItemId: "ex-bi-2", url: "https://docs.stripe.com/api" },
-    { id: "ex-l-3", backlogItemId: "ex-bi-3", url: "https://www.figma.com/file/product-grid" },
-    { id: "ex-l-4", backlogItemId: "ex-bi-6", url: "https://github.com/org/repo/auth-service" },
-    { id: "ex-l-5", backlogItemId: "ex-bi-7", url: "https://www.figma.com/file/checkout-redesign" }
+  const links: Link[] = [
+    { id: "ex-l-1", backlogItemId: "ex-bi-1", url: "https://www.figma.com/file/carrinho-prototype", visitedAt: null },
+    { id: "ex-l-2", backlogItemId: "ex-bi-2", url: "https://docs.stripe.com/api", visitedAt: null },
+    { id: "ex-l-3", backlogItemId: "ex-bi-3", url: "https://www.figma.com/file/product-grid", visitedAt: null },
+    { id: "ex-l-4", backlogItemId: "ex-bi-6", url: "https://github.com/org/repo/auth-service", visitedAt: null },
+    { id: "ex-l-5", backlogItemId: "ex-bi-7", url: "https://www.figma.com/file/checkout-redesign", visitedAt: null }
   ];
 
   return {

@@ -884,6 +884,16 @@ button.chip--exercise:hover {
   background: var(--md-primary-container);
 }
 
+.card__link-btn--visited {
+  color: var(--md-on-surface-variant);
+  opacity: 0.6;
+}
+
+.card__link-btn--visited:hover {
+  background: transparent;
+  opacity: 0.8;
+}
+
 .card__link-btn--empty {
   color: var(--text-muted);
   cursor: default;

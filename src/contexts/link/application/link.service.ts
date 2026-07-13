@@ -1,6 +1,7 @@
 import { Link } from "@shared/types";
 import { eventBus } from "@shared/events";
-import { createLink, changeUrl as changeUrlFn, CreateLinkProps } from "../domain/link";
+import { nowISO } from "@shared/utils";
+import { createLink, changeUrl as changeUrlFn, markAsVisited as markAsVisitedFn, CreateLinkProps } from "../domain/link";
 import { linkRepository } from "../infrastructure/link.repository";
 
 export const linkService = {
@@ -29,6 +30,15 @@ export const linkService = {
     const updated = changeUrlFn(existing, url);
     linkRepository.save(updated);
     eventBus.emit("link:updated", updated);
+    return updated;
+  },
+
+  markAsVisited(id: string): Link {
+    const existing = linkRepository.findById(id);
+    if (!existing) throw new Error("Link não encontrado.");
+    const updated = markAsVisitedFn(existing, nowISO());
+    linkRepository.save(updated);
+    eventBus.emit("link:visited", updated);
     return updated;
   },
 

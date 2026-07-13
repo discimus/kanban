@@ -31,6 +31,7 @@ function makeLink(overrides: Record<string, unknown> = {}) {
     id: "l1",
     backlogItemId: "b1",
     url: "https://example.com",
+    visitedAt: null,
     ...overrides
   };
 }
@@ -90,6 +91,20 @@ describe("linkService", () => {
 
     it("throws when link not found", () => {
       expect(() => linkService.changeUrl("ghost", "https://x.com")).toThrow("Link não encontrado.");
+    });
+  });
+
+  describe("markAsVisited", () => {
+    it("updates visitedAt and emits link:visited", () => {
+      state.links = [makeLink()];
+      const result = linkService.markAsVisited("l1");
+      expect(result.visitedAt).toBeTypeOf("string");
+      expect(result.id).toBe("l1");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("link:visited", result);
+    });
+
+    it("throws when link not found", () => {
+      expect(() => linkService.markAsVisited("ghost")).toThrow("Link não encontrado.");
     });
   });
 

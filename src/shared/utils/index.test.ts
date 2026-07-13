@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { uuid, nowISO, formatDate, toDateInputValue, fromDateInputValue } from "@shared/utils";
+import { uuid, nowISO, formatDate, toDateInputValue, fromDateInputValue, timeAgo } from "@shared/utils";
 
 describe("uuid", () => {
   it("returns a non-empty string", () => {
@@ -44,6 +44,62 @@ describe("formatDate", () => {
 
   it("returns '—' for an invalid date", () => {
     expect(formatDate("invalid")).toBe("—");
+  });
+});
+
+describe("timeAgo", () => {
+  it("returns empty string for null", () => {
+    expect(timeAgo(null)).toBe("");
+  });
+
+  it('returns "Visitado agora" for a recent date', () => {
+    const recent = new Date(Date.now() - 1000).toISOString();
+    expect(timeAgo(recent)).toBe("Visitado agora");
+  });
+
+  it('returns "Visitado agora" for a future date', () => {
+    const future = new Date(Date.now() + 10000).toISOString();
+    expect(timeAgo(future)).toBe("Visitado agora");
+  });
+
+  it("returns minutes for a few minutes ago", () => {
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    expect(timeAgo(fiveMinAgo)).toBe("Visitado há 5 minutos");
+  });
+
+  it("returns singular minute", () => {
+    const oneMinAgo = new Date(Date.now() - 60 * 1000).toISOString();
+    expect(timeAgo(oneMinAgo)).toBe("Visitado há 1 minuto");
+  });
+
+  it("returns hours for a few hours ago", () => {
+    const threeHrAgo = new Date(Date.now() - 3 * 3600 * 1000).toISOString();
+    expect(timeAgo(threeHrAgo)).toBe("Visitado há 3 horas");
+  });
+
+  it("returns singular hour", () => {
+    const oneHrAgo = new Date(Date.now() - 3600 * 1000).toISOString();
+    expect(timeAgo(oneHrAgo)).toBe("Visitado há 1 hora");
+  });
+
+  it("returns days for more than 24h", () => {
+    const twoDaysAgo = new Date(Date.now() - 2 * 86400 * 1000).toISOString();
+    expect(timeAgo(twoDaysAgo)).toBe("Visitado há 2 dias");
+  });
+
+  it("returns singular day", () => {
+    const oneDayAgo = new Date(Date.now() - 86400 * 1000).toISOString();
+    expect(timeAgo(oneDayAgo)).toBe("Visitado há 1 dia");
+  });
+
+  it("returns months for > 30 days", () => {
+    const twoMonthsAgo = new Date(Date.now() - 61 * 86400 * 1000).toISOString();
+    expect(timeAgo(twoMonthsAgo)).toBe("Visitado há 2 meses");
+  });
+
+  it("returns anos for > 12 months", () => {
+    const twoYearsAgo = new Date(Date.now() - 730 * 86400 * 1000).toISOString();
+    expect(timeAgo(twoYearsAgo)).toBe("Visitado há 2 anos");
   });
 });
 

@@ -5,6 +5,7 @@ import { linkService } from "@contexts/link/application/link.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
+import { timeAgo } from "@shared/utils";
 
 function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
@@ -100,6 +101,15 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         rel: "noopener",
         "aria-label": `Abrir ${link.url}`
       }, [icon("link")]);
+
+      if (link.visitedAt) {
+        linkBtn.classList.add("card__link-btn--visited");
+        linkBtn.title = timeAgo(link.visitedAt);
+      }
+
+      linkBtn.addEventListener("click", () => {
+        linkService.markAsVisited(link.id);
+      });
 
       const del = el("button", { class: "card__task-delete", "aria-label": "Excluir link" }, [icon("close")]);
       del.disabled = locked;

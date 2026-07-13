@@ -20,7 +20,8 @@ vi.mock("@shared/storage", () => ({
   store: mockStore,
   reviveState: (r: unknown) => r,
   normalizeProduct: (p: unknown) => p,
-  normalizeBacklogItem: (b: unknown) => b
+  normalizeBacklogItem: (b: unknown) => b,
+  normalizeLink: (l: unknown) => l
 }));
 vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
 
@@ -191,7 +192,7 @@ describe("exportProductState", () => {
       { id: "t1", backlogItemId: "b1", title: "T1", status: "todo" as const, assignedTo: "" }
     ];
     state.links = [
-      { id: "l1", backlogItemId: "b1", url: "https://x.com" }
+      { id: "l1", backlogItemId: "b1", url: "https://x.com", visitedAt: null }
     ];
     state.estimations = [
       { id: "e1", taskId: "t1", estimate: 8, createdAt: "2025-01-01T00:00:00.000Z", comment: "" }

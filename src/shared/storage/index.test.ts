@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { reviveState, normalizeProduct, normalizeBacklogItem } from "@shared/storage";
-import { emptyState, type Product, type BacklogItem } from "@shared/types";
+import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink } from "@shared/storage";
+import { emptyState, type Link, type Product, type BacklogItem } from "@shared/types";
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
@@ -172,6 +172,29 @@ describe("normalizeProduct", () => {
     const product = makeProduct({ category: "invalid" as never });
     const result = normalizeProduct(product);
     expect(result.category).toBe("development");
+  });
+});
+
+describe("normalizeLink", () => {
+  it("sets visitedAt to null for legacy link without it", () => {
+    const legacy = {
+      id: "l1",
+      backlogItemId: "b1",
+      url: "https://example.com",
+    } as unknown as Link;
+    const result = normalizeLink(legacy);
+    expect(result.visitedAt).toBeNull();
+  });
+
+  it("preserves existing visitedAt", () => {
+    const link = {
+      id: "l1",
+      backlogItemId: "b1",
+      url: "https://example.com",
+      visitedAt: "2026-07-12T14:30:00.000Z",
+    } as Link;
+    const result = normalizeLink(link);
+    expect(result.visitedAt).toBe("2026-07-12T14:30:00.000Z");
   });
 });
 

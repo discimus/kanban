@@ -13,7 +13,8 @@ export function createLink(props: CreateLinkProps): Link {
   return {
     id: uuid(),
     backlogItemId: props.backlogItemId,
-    url
+    url,
+    visitedAt: null
   };
 }
 
@@ -21,4 +22,8 @@ export function changeUrl(link: Link, url: string): Link {
   const trimmed = url.trim();
   if (!trimmed) throw new Error("A URL do link é obrigatória.");
   return { ...link, url: trimmed };
+}
+
+export function markAsVisited(link: Link, now: string): Link {
+  return { ...link, visitedAt: now };
 }
