@@ -1956,6 +1956,17 @@ h4 {
   }
 }
 
+/* Card move highlight */
+.card--just-moved {
+  animation: card-highlight 0.4s ease-out;
+}
+
+@keyframes card-highlight {
+  0%   { background-color: var(--md-primary-container); }
+  25%  { background-color: var(--md-primary-container); }
+  100% { background-color: var(--elevation-3); }
+}
+
 /* Prevent hover-lift on touch devices (avoids sticky hover states) */
 @media (hover: none) {
   .card:hover {

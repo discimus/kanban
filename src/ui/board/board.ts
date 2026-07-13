@@ -66,12 +66,14 @@ function renderColumn(
       if (!id) return;
       try {
         backlogService.move(id, status);
-        if (status === "done") {
-          const card = document.querySelector(`[data-id="${id}"]`);
-          if (card) {
-            const rect = card.getBoundingClientRect();
-            showConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
-          }
+        const card = document.querySelector(`[data-id="${id}"]`);
+        if (status === "done" && card) {
+          const rect = card.getBoundingClientRect();
+          showConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+        if (card) {
+          card.classList.add("card--just-moved");
+          setTimeout(() => card.classList.remove("card--just-moved"), 500);
         }
       } catch (e) {
         showAlert((e as Error).message);
