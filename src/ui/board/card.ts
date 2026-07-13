@@ -2,10 +2,11 @@ import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
 import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
+import { commentService } from "@contexts/comment/application/comment.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
-import { timeAgo } from "@shared/utils";
+import { timeAgo, formatDate } from "@shared/utils";
 
 function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
@@ -31,6 +32,24 @@ function nextFibonacci(current: number): number {
   const idx = FIBONACCI.indexOf(current);
   if (idx === -1 || idx === FIBONACCI.length - 1) return FIBONACCI[0];
   return FIBONACCI[idx + 1];
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const seg = Math.floor(diff / 1000);
+  if (seg < 60) return "agora";
+  const min = Math.floor(seg / 60);
+  if (min < 60) return `há ${min}min`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `há ${hr}h`;
+  const dias = Math.floor(hr / 24);
+  if (dias < 30) return `há ${dias}d`;
+  return formatDate(iso);
+}
+
+function fullDateTime(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
 const expandedCards = new Map<string, boolean>();
@@ -220,6 +239,77 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     input.focus();
   };
 
+  const commentList = el("div", { class: "card__links" }, []);
+
+  const renderComments = (): void => {
+    clear(commentList);
+    const comments = commentService.byBacklogItem(item.id);
+    for (const c of comments) {
+      const delBtn = el("button", { class: "card__task-delete", "aria-label": "Excluir comentário" }, [icon("close")]);
+      delBtn.disabled = readOnly;
+      if (!readOnly) {
+        delBtn.addEventListener("click", () => {
+          showConfirm('Excluir comentário "{{text}}"?', c.text).then((ok) => {
+            if (ok) commentService.delete(c.id);
+          });
+        });
+      }
+
+      const timeSpan = el("span", { class: "card__comment-time", title: fullDateTime(c.createdAt) }, [relativeTime(c.createdAt)]);
+
+      commentList.append(
+        el("div", { class: "card__task" }, [
+          el("span", { class: "card__comment-icon" }, [icon("chat")]),
+          el("span", { class: "card__task-text" }, [c.text]),
+          timeSpan,
+          delBtn
+        ])
+      );
+    }
+  };
+  renderComments();
+
+  const addComment = (): void => {
+    if (commentList.querySelector(".card__subtask-add")) return;
+    if (!cardBody.classList.contains("card__body--expanded")) {
+      expandedCards.set(item.id, true);
+      cardBody.classList.add("card__body--expanded");
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", {}, ["Recolher"]));
+    }
+
+    const input = el("input", { class: "card__task-input", type: "text", placeholder: "Adicionar comentário…" }) as HTMLInputElement;
+    const save = el("button", { class: "card__subtask-save", "aria-label": "Salvar comentário", type: "button" }, [
+      icon("check")
+    ]);
+
+    const row = el("div", { class: "card__subtask-add" }, [input, save]);
+
+    let done = false;
+    const commit = (): void => {
+      if (done) return;
+      const text = input.value.trim();
+      if (text) {
+        done = true;
+        commentService.create({ backlogItemId: item.id, text });
+      }
+    };
+    const cancel = (): void => {
+      done = true;
+      row.remove();
+    };
+
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") commit();
+      else if (ev.key === "Escape") cancel();
+    });
+    input.addEventListener("blur", () => setTimeout(() => !done && row.remove(), 150));
+    save.addEventListener("mousedown", (ev) => ev.preventDefault());
+    save.addEventListener("click", commit);
+
+    commentList.append(row);
+    input.focus();
+  };
+
   const lockedAlert = (): void => {
     showAlert(
       'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
@@ -262,6 +352,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         ]
       : [
           { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+          { label: "Adicionar comentário", icon: "chat", action: locked ? lockedAlert : addComment },
           { label: "Adicionar link", icon: "link", action: locked ? lockedAlert : addLink },
           { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
           { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
@@ -311,7 +402,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   }
 
   const linkCount = linkService.byBacklogItem(item.id).length;
-  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0;
+  const commentCount = commentService.byBacklogItem(item.id).length;
+  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0;
 
   const bodyExpanded = expandedCards.get(item.id) === true;
   const cardBody = el("div", {
@@ -321,7 +413,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   if (item.description) {
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
-  cardBody.append(taskList, linkList);
+  cardBody.append(taskList, linkList, commentList);
 
   const cardChildren: (Node | null)[] = [
     menu,

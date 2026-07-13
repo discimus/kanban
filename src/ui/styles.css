@@ -932,6 +932,27 @@ button.chip--exercise:hover {
   font-size: 0.85rem;
 }
 
+.card__comment-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+.card__comment-icon .material-symbols-outlined {
+  font-size: 0.85rem;
+}
+
+.card__comment-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .card__progress {
   display: flex;
   align-items: center;

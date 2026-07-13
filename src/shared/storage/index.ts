@@ -21,6 +21,7 @@ export function reviveState(raw: unknown): AppState {
     backlogItems: Array.isArray(data.backlogItems) ? data.backlogItems.map(normalizeBacklogItem) : base.backlogItems,
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
     links: Array.isArray(data.links) ? data.links.map(normalizeLink) : base.links,
+    comments: Array.isArray(data.comments) ? data.comments : base.comments,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };
 }

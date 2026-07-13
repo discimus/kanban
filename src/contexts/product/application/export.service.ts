@@ -1,5 +1,5 @@
 import { store, normalizeLink, normalizeBacklogItem } from "@shared/storage";
-import { AppState, Product, BacklogItem, Task, Link, EstimationLog, TaskClassification, ProductCategory } from "@shared/types";
+import { AppState, Product, BacklogItem, Task, Link, Comment, EstimationLog, TaskClassification, ProductCategory } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
@@ -35,6 +35,7 @@ export function exportProductState(productId: string): AppState | null {
   const tasks = state.tasks.filter((t) => backlogItemIds.has(t.backlogItemId));
   const links = state.links.filter((l) => backlogItemIds.has(l.backlogItemId));
   const taskIds = new Set(tasks.map((t) => t.id));
+  const comments = state.comments.filter((c) => backlogItemIds.has(c.backlogItemId));
   const estimations = state.estimations.filter((e) => taskIds.has(e.taskId));
 
   return {
@@ -42,6 +43,7 @@ export function exportProductState(productId: string): AppState | null {
     backlogItems,
     tasks,
     links,
+    comments,
     estimations
   };
 }
@@ -158,6 +160,15 @@ export function validateAndImport(jsonString: string): ExportResult {
     }
   }
 
+  if (obj.comments !== undefined && !Array.isArray(obj.comments)) {
+    return { success: false, error: '"comments" deve ser um array.' };
+  }
+  if (Array.isArray(obj.comments)) {
+    for (const c of obj.comments as Comment[]) {
+      if (!c.id || !c.backlogItemId || !c.text) return { success: false, error: "Cada comment precisa de id, backlogItemId e text." };
+    }
+  }
+
   if (obj.estimations !== undefined && !Array.isArray(obj.estimations)) {
     return { success: false, error: '"estimations" deve ser um array.' };
   }
@@ -191,6 +202,13 @@ function doImport(data: AppState): void {
     for (const link of data.links) {
       if (!state.links.some((l) => l.id === link.id)) {
         state.links.push(normalizeLink(link));
+      }
+    }
+    if (Array.isArray(data.comments)) {
+      for (const comment of data.comments) {
+        if (!state.comments.some((c) => c.id === comment.id)) {
+          state.comments.push(comment);
+        }
       }
     }
     for (const est of data.estimations) {

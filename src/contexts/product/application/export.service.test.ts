@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AppState, Product } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
-  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], estimations: [] };
+  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], estimations: [] };
   return {
     state,
     mockStore: {
@@ -36,6 +36,7 @@ beforeEach(() => {
   state.backlogItems.length = 0;
   state.tasks.length = 0;
   state.links.length = 0;
+  state.comments.length = 0;
   state.estimations.length = 0;
   mockStore.update.mockClear();
   mockEventBus.emit.mockClear();

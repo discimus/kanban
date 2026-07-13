@@ -16,7 +16,9 @@ export type DomainEvent =
   | "link:updated"
   | "link:deleted"
   | "link:visited"
-  | "estimation:logged";
+  | "estimation:logged"
+  | "comment:created"
+  | "comment:deleted";
 
 type Handler = (payload?: unknown) => void;
 

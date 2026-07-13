@@ -113,6 +113,13 @@ export interface Link {
   visitedAt: ISODate | null;
 }
 
+export interface Comment {
+  id: ID;
+  backlogItemId: ID;
+  text: string;
+  createdAt: ISODate;
+}
+
 export interface EstimationLog {
   id: ID;
   taskId: ID;
@@ -126,6 +133,7 @@ export interface AppState {
   backlogItems: BacklogItem[];
   tasks: Task[];
   links: Link[];
+  comments: Comment[];
   estimations: EstimationLog[];
 }
 
@@ -135,6 +143,7 @@ export function emptyState(): AppState {
     backlogItems: [],
     tasks: [],
     links: [],
+    comments: [],
     estimations: []
   };
 }

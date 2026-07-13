@@ -121,6 +121,7 @@ export function createExampleData(): AppState {
     backlogItems: items,
     tasks,
     links,
+    comments: [],
     estimations: []
   };
 }
