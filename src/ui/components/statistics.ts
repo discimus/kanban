@@ -44,6 +44,7 @@ export function renderStatistics(productId: string): HTMLElement {
   section.append(el("p", { class: "stats__desc" }, ["Cards em cada etapa do pipeline"]));
 
   for (const column of KANBAN_COLUMNS) {
+    if (column.status === "review" && product?.showReview === false) continue;
     const colItems = items.filter((i) => i.status === column.status);
     const count = colItems.length;
     const points = colItems.reduce((s, i) => s + i.storyPoints, 0);

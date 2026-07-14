@@ -348,7 +348,10 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
   };
 
-  const columnSubmenu: MenuItem[] = KANBAN_COLUMNS.map((col) => ({
+  const showReview = productService.get(item.productId)?.showReview !== false;
+  const columnSubmenu: MenuItem[] = KANBAN_COLUMNS
+    .filter((col) => col.status !== "review" || showReview)
+    .map((col) => ({
     label: col.label,
     icon: col.icon,
     checked: col.status === item.status,

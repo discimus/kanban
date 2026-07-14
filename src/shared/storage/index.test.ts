@@ -13,6 +13,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     category: "development",
     autoArchiveDays: null,
     autoPasteLinks: true,
+    showReview: true,
     ...overrides,
   };
 }
@@ -211,6 +212,28 @@ describe("normalizeProduct", () => {
     const product = makeProduct({ autoPasteLinks: false });
     const result = normalizeProduct(product);
     expect(result.autoPasteLinks).toBe(false);
+  });
+
+  it("sets showReview to true for legacy product without it", () => {
+    const legacy = {
+      id: "p1",
+      name: "Old",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+      category: "development",
+      autoArchiveDays: null,
+      autoPasteLinks: true,
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.showReview).toBe(true);
+  });
+
+  it("preserves showReview: false", () => {
+    const product = makeProduct({ showReview: false });
+    const result = normalizeProduct(product);
+    expect(result.showReview).toBe(false);
   });
 });
 

@@ -20,10 +20,16 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean }): Product {
+  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; showReview?: boolean }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     if (changes.name !== undefined) assertValidProductName(changes.name);
+    if (changes.showReview === false) {
+      const itemsInReview = backlogRepository.byProduct(id).filter((i) => i.status === "review");
+      if (itemsInReview.length > 0) {
+        throw new Error("Não é possível ocultar a coluna Review pois existem cards nela.");
+      }
+    }
     const updated: Product = {
       ...existing,
       name: changes.name?.trim() ?? existing.name,
@@ -31,7 +37,8 @@ export const productService = {
       showPriority: changes.showPriority ?? existing.showPriority,
       category: changes.category ?? existing.category,
       autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays,
-      autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks
+      autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks,
+      showReview: changes.showReview ?? existing.showReview
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);

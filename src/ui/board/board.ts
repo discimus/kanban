@@ -20,6 +20,7 @@ export function renderBoard(productId: string, showArchived = false): HTMLElemen
   const board = el("div", { class: "board" }, []);
 
   for (const column of KANBAN_COLUMNS) {
+    if (column.status === "review" && product?.showReview === false) continue;
     const columnItems = items.filter((i) => i.status === column.status);
     board.append(renderColumn(column.status, column.label, column.icon, columnItems, locked, productId, product?.showPriority ?? true, product?.category ?? "development"));
   }

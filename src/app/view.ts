@@ -49,6 +49,12 @@ function ensureSelection(): void {
   persistSelection(selectedProductId);
 }
 
+export function forceSelectProduct(id: string, root: HTMLElement): void {
+  selectedProductId = id;
+  persistSelection(id);
+  renderApp(root);
+}
+
 export function renderApp(root: HTMLElement): void {
   const projectChanged = selectedProductId !== lastRenderedProductId;
 

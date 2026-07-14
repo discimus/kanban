@@ -30,6 +30,11 @@ export function openProductForm(existing?: Product): void {
     autoPasteCb.checked = existing.autoPasteLinks !== false;
   }
 
+  const showReviewCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+  if (existing) {
+    showReviewCb.checked = existing.showReview !== false;
+  }
+
   const AUTO_ARCHIVE_OPTIONS = [
     { value: "", label: "Nunca" },
     { value: "1", label: "1 dia" },
@@ -53,15 +58,20 @@ export function openProductForm(existing?: Product): void {
           showPriority: showPriority.checked,
           category: catSel.value as ProductCategory,
           autoArchiveDays: autoArchiveSel.value ? Number(autoArchiveSel.value) : null,
-          autoPasteLinks: autoPasteCb.checked
+          autoPasteLinks: autoPasteCb.checked,
+          showReview: showReviewCb.checked
         });
         if (statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
         }
+        closeModal();
       } else {
-        productService.create(name.value, description.value, catSel.value as ProductCategory);
+        const created = productService.create(name.value, description.value, catSel.value as ProductCategory);
+        closeModal();
+        import("../../app/view").then(({ forceSelectProduct }) => {
+          forceSelectProduct(created.id, document.getElementById("app")!);
+        });
       }
-      closeModal();
     } catch (e) {
       error.textContent = (e as Error).message;
     }
@@ -85,6 +95,13 @@ export function openProductForm(existing?: Product): void {
       el("span", { class: "field__text-wrapper" }, [
         el("span", { class: "field__label" }, ["Colar link automaticamente"]),
         el("span", { class: "field__description" }, ["Ao adicionar um link, preenche automaticamente com o conteúdo da área de transferência."])
+      ])
+    ]) : null,
+    existing ? el("label", { class: "field field--checkbox" }, [
+      showReviewCb,
+      el("span", { class: "field__text-wrapper" }, [
+        el("span", { class: "field__label" }, ["Exibir coluna Review"]),
+        el("span", { class: "field__description" }, ["Mostra a coluna Review no quadro Kanban."])
       ])
     ]) : null,
     error

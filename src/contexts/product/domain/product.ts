@@ -21,7 +21,8 @@ export function createProduct(props: CreateProductProps): Product {
     showPriority: true,
     category: props.category ?? "development",
     autoArchiveDays: null,
-    autoPasteLinks: true
+    autoPasteLinks: true,
+    showReview: (props.category ?? "development") === "development"
   };
 }
 

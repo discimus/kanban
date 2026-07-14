@@ -37,6 +37,7 @@ function makeProduct(overrides: Partial<ReturnType<typeof productService.create>
     category: "development" as const,
     autoArchiveDays: null,
     autoPasteLinks: true,
+    showReview: true,
     ...overrides
   };
 }
@@ -112,6 +113,7 @@ describe("productService", () => {
       const result = productService.create("P", "", "study");
       expect(result.category).toBe("study");
     });
+
   });
 
   describe("edit", () => {
@@ -197,6 +199,27 @@ describe("productService", () => {
       ];
       const result = productService.recomputeStatus("p1");
       expect(result?.status).toBe("in_progress");
+    });
+  });
+
+  describe("edit", () => {
+    it("throws when showReview: false and cards are in review", () => {
+      state.products = [makeProduct()];
+      state.backlogItems = [
+        makeBacklogItem({ productId: "p1", status: "review" })
+      ];
+      expect(() => productService.edit("p1", { showReview: false })).toThrow(
+        /ocultar a coluna Review/
+      );
+    });
+
+    it("allows showReview: false when no cards in review", () => {
+      state.products = [makeProduct()];
+      state.backlogItems = [
+        makeBacklogItem({ productId: "p1", status: "todo" })
+      ];
+      expect(() => productService.edit("p1", { showReview: false })).not.toThrow();
+      expect(productService.get("p1")?.showReview).toBe(false);
     });
   });
 });

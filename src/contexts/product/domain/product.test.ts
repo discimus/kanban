@@ -36,6 +36,21 @@ describe("createProduct", () => {
     expect(product.autoPasteLinks).toBe(true);
   });
 
+  it("returns showReview as true for development", () => {
+    const product = createProduct({ name: "My Project" });
+    expect(product.showReview).toBe(true);
+  });
+
+  it("returns showReview as false for study", () => {
+    const product = createProduct({ name: "My Project", category: "study" });
+    expect(product.showReview).toBe(false);
+  });
+
+  it("returns showReview as false for business", () => {
+    const product = createProduct({ name: "My Project", category: "business" });
+    expect(product.showReview).toBe(false);
+  });
+
   it("trims whitespace from name", () => {
     const product = createProduct({ name: "  Hello World  " });
     expect(product.name).toBe("Hello World");
