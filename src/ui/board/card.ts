@@ -284,7 +284,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         title: c.updatedAt
           ? `Criado ${fullDateTime(c.createdAt)} · Editado ${fullDateTime(c.updatedAt)}`
           : fullDateTime(c.createdAt)
-      }, [c.updatedAt ? "editado" : relativeTime(c.createdAt)]);
+      }, [relativeTime(c.updatedAt ?? c.createdAt)]);
 
       commentList.append(
         el("div", { class: "card__task" }, [
