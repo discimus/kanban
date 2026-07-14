@@ -17,3 +17,9 @@ export function createComment(props: CreateCommentProps): Comment {
     createdAt: nowISO()
   };
 }
+
+export function editComment(comment: Comment, text: string): Comment {
+  const trimmed = text.trim();
+  if (!trimmed) throw new Error("O texto do comentário é obrigatório.");
+  return { ...comment, text: trimmed, updatedAt: nowISO() };
+}

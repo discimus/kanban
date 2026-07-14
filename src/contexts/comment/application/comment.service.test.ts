@@ -66,6 +66,20 @@ describe("commentService", () => {
     });
   });
 
+  describe("edit", () => {
+    it("updates comment text and emits comment:updated", () => {
+      state.comments = [makeComment()];
+      const updated = commentService.edit("c1", "Texto editado");
+      expect(updated.text).toBe("Texto editado");
+      expect(updated.updatedAt).toBeTypeOf("string");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("comment:updated", updated);
+    });
+
+    it("throws when comment does not exist", () => {
+      expect(() => commentService.edit("inexistente", "novo")).toThrow(Error);
+    });
+  });
+
   describe("delete", () => {
     it("removes comment and emits comment:deleted", () => {
       state.comments = [makeComment()];

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createComment } from "@contexts/comment/domain/comment";
+import { createComment, editComment } from "@contexts/comment/domain/comment";
 
 describe("createComment", () => {
   it("returns a Comment with generated id", () => {
@@ -39,5 +39,37 @@ describe("createComment", () => {
 
   it("throws Error when text is only whitespace", () => {
     expect(() => createComment({ backlogItemId: "b-1", text: "   " })).toThrow(Error);
+  });
+});
+
+describe("editComment", () => {
+  it("updates text", () => {
+    const comment = createComment({ backlogItemId: "b-1", text: "Original" });
+    const updated = editComment(comment, "Editado");
+    expect(updated.text).toBe("Editado");
+  });
+
+  it("sets updatedAt", () => {
+    const comment = createComment({ backlogItemId: "b-1", text: "Original" });
+    const updated = editComment(comment, "Editado");
+    expect(updated.updatedAt).toBeTypeOf("string");
+    expect(() => new Date(updated.updatedAt!)).not.toThrow();
+  });
+
+  it("throws Error when text is empty", () => {
+    const comment = createComment({ backlogItemId: "b-1", text: "Original" });
+    expect(() => editComment(comment, "")).toThrow(Error);
+  });
+
+  it("throws Error when text is only whitespace", () => {
+    const comment = createComment({ backlogItemId: "b-1", text: "Original" });
+    expect(() => editComment(comment, "   ")).toThrow(Error);
+  });
+
+  it("preserves id and backlogItemId", () => {
+    const comment = createComment({ backlogItemId: "b-42", text: "Original" });
+    const updated = editComment(comment, "Editado");
+    expect(updated.id).toBe(comment.id);
+    expect(updated.backlogItemId).toBe("b-42");
   });
 });

@@ -279,7 +279,12 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         });
       }
 
-      const timeSpan = el("span", { class: "card__comment-time", title: fullDateTime(c.createdAt) }, [relativeTime(c.createdAt)]);
+      const timeSpan = el("span", {
+        class: "card__comment-time",
+        title: c.updatedAt
+          ? `Criado ${fullDateTime(c.createdAt)} · Editado ${fullDateTime(c.updatedAt)}`
+          : fullDateTime(c.createdAt)
+      }, [c.updatedAt ? "editado" : relativeTime(c.createdAt)]);
 
       commentList.append(
         el("div", { class: "card__task" }, [

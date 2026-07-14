@@ -20,6 +20,13 @@ export const commentRepository = {
     });
   },
 
+  save(comment: Comment): void {
+    store.update((s) => {
+      const idx = s.comments.findIndex((c) => c.id === comment.id);
+      if (idx >= 0) s.comments[idx] = comment;
+    });
+  },
+
   remove(id: string): void {
     store.update((s) => {
       s.comments = s.comments.filter((c) => c.id !== id);

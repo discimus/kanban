@@ -5,6 +5,7 @@ import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
+import { commentService } from "@contexts/comment/application/comment.service";
 import { BacklogItem, Priority, PRIORITIES, CATEGORY_CLASSIFICATIONS, TaskClassification } from "@shared/types";
 
 export function openBacklogForm(productId: string, existing?: BacklogItem): void {
@@ -31,6 +32,9 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   const linkInputs: { linkId: string; urlInput: HTMLInputElement }[] = [];
   const linksSection = existing ? buildLinksSection(existing.id, linkInputs) : null;
 
+  const commentInputs: { commentId: string; original: string; input: HTMLInputElement }[] = [];
+  const commentsSection = existing ? buildCommentsSection(existing.id, commentInputs) : null;
+
   const submit = () => {
     try {
       if (existing) {
@@ -41,6 +45,10 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
         for (const { linkId, urlInput } of linkInputs) {
           const urlVal = urlInput.value.trim();
           if (urlVal) linkService.changeUrl(linkId, urlVal);
+        }
+        for (const { commentId, original, input } of commentInputs) {
+          const value = input.value.trim();
+          if (value && value !== original) commentService.edit(commentId, value);
         }
         backlogService.edit(existing.id, {
           title: title.value,
@@ -72,6 +80,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     field("Classificação", classification),
     subtasksSection,
     linksSection,
+    commentsSection,
     error,
     formActions(existing ? "Salvar" : "Criar item", submit)
   ]);
@@ -114,6 +123,26 @@ function buildLinksSection(
 
   return el("div", { class: "field" }, [
     el("span", { class: "field__label" }, ["Links"]),
+    ...rows
+  ]);
+}
+
+function buildCommentsSection(
+  backlogItemId: string,
+  commentInputs: { commentId: string; original: string; input: HTMLInputElement }[]
+): HTMLElement | null {
+  const comments = commentService.byBacklogItem(backlogItemId);
+  if (comments.length === 0) return null;
+
+  const rows: HTMLElement[] = [];
+  for (const c of comments) {
+    const input = textInput(c.text, "Editar comentário");
+    commentInputs.push({ commentId: c.id, original: c.text, input });
+    rows.push(input);
+  }
+
+  return el("div", { class: "field" }, [
+    el("span", { class: "field__label" }, ["Comentários"]),
     ...rows
   ]);
 }

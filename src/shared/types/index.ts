@@ -122,6 +122,7 @@ export interface Comment {
   backlogItemId: ID;
   text: string;
   createdAt: ISODate;
+  updatedAt?: ISODate;
 }
 
 export interface EstimationLog {

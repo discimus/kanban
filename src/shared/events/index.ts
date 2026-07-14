@@ -18,6 +18,7 @@ export type DomainEvent =
   | "link:visited"
   | "estimation:logged"
   | "comment:created"
+  | "comment:updated"
   | "comment:deleted"
   | "backlog:auto-archived";
 
