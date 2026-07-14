@@ -98,6 +98,12 @@ export function renderApp(root: HTMLElement): void {
 
   if (!selectedProductId) {
     content.append(
+      el("header", { class: "content__header" }, [
+        el("div", { class: "content__topbar" }, [
+          el("div", { class: "content__topbar-start" }, [hamburger]),
+          el("div", { class: "content__topbar-end" }, [])
+        ])
+      ]),
       el("div", { class: "empty-state" }, [
         el("h2", {}, ["Bem-vindo ao Kanban"]),
         el("p", { class: "muted" }, ["Crie um Projeto na barra lateral para começar."])
