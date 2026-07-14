@@ -520,7 +520,7 @@ body {
 .content__topbar {
   display: flex;
   align-items: center;
-  gap: 16px;
+  /* gap: 16px; */
 }
 
 .content__topbar-start {
