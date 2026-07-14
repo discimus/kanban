@@ -1243,7 +1243,10 @@ button.chip--exercise:hover {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 8px 0 16px;
+  padding: 8px 1.2rem 16px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .stats__title {
@@ -1390,32 +1393,6 @@ button.chip--exercise:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-}
-
-.stats__chip-pct {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-right: 4px;
-}
-
-.stats__progress-text {
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  min-width: 80px;
-  text-align: right;
-}
-
-.stats__chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-
-.stats__chip-pct {
-  font-size: 0.72rem;
-  color: var(--text-muted);
 }
 
 .badge {
