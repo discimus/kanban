@@ -25,6 +25,11 @@ export function openProductForm(existing?: Product): void {
     showPriority.checked = existing.showPriority !== false;
   }
 
+  const autoPasteCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+  if (existing) {
+    autoPasteCb.checked = existing.autoPasteLinks !== false;
+  }
+
   const AUTO_ARCHIVE_OPTIONS = [
     { value: "", label: "Nunca" },
     { value: "1", label: "1 dia" },
@@ -47,7 +52,8 @@ export function openProductForm(existing?: Product): void {
           description: description.value,
           showPriority: showPriority.checked,
           category: catSel.value as ProductCategory,
-          autoArchiveDays: autoArchiveSel.value ? Number(autoArchiveSel.value) : null
+          autoArchiveDays: autoArchiveSel.value ? Number(autoArchiveSel.value) : null,
+          autoPasteLinks: autoPasteCb.checked
         });
         if (statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
@@ -67,7 +73,20 @@ export function openProductForm(existing?: Product): void {
     field("Categoria", catSel),
     existing ? field("Status", statusSel) : null,
     existing ? field("Arquivar automático", autoArchiveSel) : null,
-    existing ? el("label", { class: "field field--checkbox" }, [showPriority, el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"])]) : null,
+    existing ? el("label", { class: "field field--checkbox" }, [
+      showPriority,
+      el("span", { class: "field__text-wrapper" }, [
+        el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"]),
+        el("span", { class: "field__description" }, ["Mostra indicadores de prioridade (baixa, média, alta, crítica) nos cards do quadro."])
+      ])
+    ]) : null,
+    existing ? el("label", { class: "field field--checkbox" }, [
+      autoPasteCb,
+      el("span", { class: "field__text-wrapper" }, [
+        el("span", { class: "field__label" }, ["Colar link automaticamente"]),
+        el("span", { class: "field__description" }, ["Ao adicionar um link, preenche automaticamente com o conteúdo da área de transferência."])
+      ])
+    ]) : null,
     error
   ]);
 

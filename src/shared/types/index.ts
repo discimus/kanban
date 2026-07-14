@@ -85,6 +85,7 @@ export interface Product {
   showPriority: boolean;
   category: ProductCategory;
   autoArchiveDays: number | null;
+  autoPasteLinks: boolean;
 }
 
 export interface BacklogItem {

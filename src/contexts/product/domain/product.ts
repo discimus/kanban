@@ -20,7 +20,8 @@ export function createProduct(props: CreateProductProps): Product {
     status: "backlog",
     showPriority: true,
     category: props.category ?? "development",
-    autoArchiveDays: null
+    autoArchiveDays: null,
+    autoPasteLinks: true
   };
 }
 

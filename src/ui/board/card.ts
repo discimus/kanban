@@ -4,6 +4,7 @@ import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
+import { productService } from "@contexts/product/application/product.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { timeAgo, formatDate } from "@shared/utils";
@@ -209,12 +210,15 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
     linkList.append(row);
     urlInput.focus();
-    navigator.clipboard.readText().then((text) => {
-      if (text) {
-        urlInput.value = text;
-        urlInput.setSelectionRange(text.length, text.length);
-      }
-    }).catch(() => {});
+    if (productService.get(item.productId)?.autoPasteLinks !== false) {
+      navigator.clipboard.readText().then((text) => {
+        if (text) {
+          urlInput.value = text;
+          urlInput.setSelectionRange(text.length, text.length);
+          commit();
+        }
+      }).catch(() => {});
+    }
   };
 
   const addSubtask = (): void => {

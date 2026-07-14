@@ -40,7 +40,8 @@ vi.mock("@contexts/product/application/product.service", () => ({
       status: "backlog",
       showPriority: true,
       category: "development",
-      autoArchiveDays: null
+      autoArchiveDays: null,
+      autoPasteLinks: true
     })),
     recomputeStatus: vi.fn(),
     allItemsDone: vi.fn(() => false)
@@ -83,7 +84,8 @@ beforeEach(() => {
     status: "backlog",
     showPriority: true,
     category: "development",
-    autoArchiveDays: null
+    autoArchiveDays: null,
+    autoPasteLinks: true
   });
   vi.mocked(productService.recomputeStatus).mockClear();
 });
@@ -131,7 +133,8 @@ describe("backlogService", () => {
         status: "completed",
         showPriority: true,
       category: "development",
-      autoArchiveDays: null
+      autoArchiveDays: null,
+      autoPasteLinks: true
       });
       expect(() => backlogService.create({ productId: "p1", title: "Item" })).toThrow(
         /concluído ou cancelado/

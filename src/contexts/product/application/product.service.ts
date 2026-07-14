@@ -20,17 +20,18 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name: string; description: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null }): Product {
+  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
-    assertValidProductName(changes.name);
+    if (changes.name !== undefined) assertValidProductName(changes.name);
     const updated: Product = {
       ...existing,
-      name: changes.name.trim(),
-      description: changes.description.trim(),
+      name: changes.name?.trim() ?? existing.name,
+      description: changes.description?.trim() ?? existing.description,
       showPriority: changes.showPriority ?? existing.showPriority,
       category: changes.category ?? existing.category,
-      autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays
+      autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays,
+      autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);

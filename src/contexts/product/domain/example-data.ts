@@ -123,7 +123,8 @@ export function createExampleData(): AppState {
         status: "in_progress",
         showPriority: true,
         category: "development",
-        autoArchiveDays: null
+        autoArchiveDays: null,
+        autoPasteLinks: true
       }
     ],
     backlogItems: items,

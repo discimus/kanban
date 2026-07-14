@@ -36,6 +36,7 @@ function makeProduct(overrides: Partial<ReturnType<typeof productService.create>
     showPriority: true,
     category: "development" as const,
     autoArchiveDays: null,
+    autoPasteLinks: true,
     ...overrides
   };
 }

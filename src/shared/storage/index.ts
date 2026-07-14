@@ -39,7 +39,8 @@ export function normalizeProduct(product: Product): Product {
     ...product,
     showPriority: product.showPriority !== false,
     category: VALID_CATEGORIES.includes(product.category) ? product.category : "development",
-    autoArchiveDays: (product as any).autoArchiveDays ?? null
+    autoArchiveDays: (product as any).autoArchiveDays ?? null,
+    autoPasteLinks: (product as any).autoPasteLinks !== false
   };
   if (!VALID_STATUSES.includes(normalized.status)) {
     return { ...normalized, status: normalized.status === "completed" ? "completed" : "backlog" };

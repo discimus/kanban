@@ -31,6 +31,11 @@ describe("createProduct", () => {
     expect(product.autoArchiveDays).toBeNull();
   });
 
+  it("returns autoPasteLinks as true", () => {
+    const product = createProduct({ name: "My Project" });
+    expect(product.autoPasteLinks).toBe(true);
+  });
+
   it("trims whitespace from name", () => {
     const product = createProduct({ name: "  Hello World  " });
     expect(product.name).toBe("Hello World");

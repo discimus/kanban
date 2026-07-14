@@ -52,8 +52,9 @@ function validProduct(overrides: Record<string, unknown> = {}) {
     showPriority: true,
     category: "development" as string,
     autoArchiveDays: null,
+    autoPasteLinks: true,
     ...overrides
-  } as { id: string; name: string; description: string; createdAt: string; status: string; showPriority: boolean; category: string; autoArchiveDays: number | null };
+  } as { id: string; name: string; description: string; createdAt: string; status: string; showPriority: boolean; category: string; autoArchiveDays: number | null; autoPasteLinks: boolean };
 }
 
 describe("validateAndImport", () => {
