@@ -667,6 +667,9 @@ body {
   .card__expand-btn-text {
     display: none;
   }
+  .chip > :last-child {
+    display: none;
+  }
 }
 
 .card:hover {
