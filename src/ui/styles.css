@@ -1655,9 +1655,15 @@ button.chip--exercise:hover {
 }
 
 .actions-menu__item--back {
+  background: var(--md-surface-container);
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
   border-radius: 8px 8px 0 0;
+  margin-bottom: 4px;
+}
+
+.actions-menu__item--back:hover {
+  background: var(--md-surface-container-highest);
 }
 
 .actions-menu__item--danger {
