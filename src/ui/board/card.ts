@@ -209,6 +209,12 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
     linkList.append(row);
     urlInput.focus();
+    navigator.clipboard.readText().then((text) => {
+      if (text) {
+        urlInput.value = text;
+        urlInput.setSelectionRange(text.length, text.length);
+      }
+    }).catch(() => {});
   };
 
   const addSubtask = (): void => {
