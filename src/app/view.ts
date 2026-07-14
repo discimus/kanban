@@ -1,6 +1,6 @@
 import { el, clear, icon } from "@ui/components/dom";
 import { productService } from "@contexts/product/application/product.service";
-import { renderSidebar } from "@ui/components/sidebar";
+import { renderSidebar, setupScrollFade } from "@ui/components/sidebar";
 import { renderProductHeader } from "@ui/components/planning";
 import { renderBoard } from "@ui/board/board";
 import { renderStatistics } from "@ui/components/statistics";
@@ -118,7 +118,10 @@ export function renderApp(root: HTMLElement): void {
 
   requestAnimationFrame(() => {
     const list = root.querySelector(".product-list");
-    if (list) list.scrollTop = savedSidebarScrollTop;
+    if (list) {
+      list.scrollTop = savedSidebarScrollTop;
+      setupScrollFade(list as HTMLElement);
+    }
 
     if (!projectChanged) {
       const board = root.querySelector(".board");

@@ -21,6 +21,32 @@ function categoryIcon(cat: ProductCategory): string {
   return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.icon ?? "help";
 }
 
+const FADE_SIZE = 36;
+
+function updateScrollFade(el: HTMLElement): void {
+  const { scrollTop, scrollHeight, clientHeight } = el;
+
+  if (scrollHeight <= clientHeight) {
+    el.style.removeProperty("mask-image");
+    el.style.removeProperty("-webkit-mask-image");
+    return;
+  }
+
+  const topFade = scrollTop > 0 ? Math.min(scrollTop, FADE_SIZE) : 0;
+  const bottomRemaining = scrollHeight - scrollTop - clientHeight;
+  const bottomFade = bottomRemaining > 0 ? Math.min(bottomRemaining, FADE_SIZE) : 0;
+
+  const mask = `linear-gradient(to bottom, transparent 0%, black ${topFade}px, black calc(100% - ${bottomFade}px), transparent 100%)`;
+  el.style.maskImage = mask;
+  el.style.webkitMaskImage = mask;
+}
+
+export function setupScrollFade(el: HTMLElement): void {
+  const handler = (): void => updateScrollFade(el);
+  el.addEventListener("scroll", handler, { passive: true });
+  requestAnimationFrame(() => handler());
+}
+
 export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void): HTMLElement {
   const list = el("div", { class: "product-list" }, []);
 
