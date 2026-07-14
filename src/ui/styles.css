@@ -1413,12 +1413,17 @@ button.chip--exercise:hover {
 }
 
 .badge {
-  font-size: 0.7rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.badge .material-symbols-outlined {
+  font-size: 1rem;
 }
 
 .badge--low {

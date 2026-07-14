@@ -446,7 +446,12 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     el("div", { class: "card__top" }, [
       el("div", { class: "card__badges" }, [
         classifyChip,
-        showPriority ? el("span", { class: `badge badge--${item.priority}` }, [priorityLabel(item.priority)]) : null
+        showPriority ? el("span", { class: `badge badge--${item.priority}`, title: `Prioridade: ${priorityLabel(item.priority)}` }, [icon({
+          low: "arrow_downward",
+          medium: "remove",
+          high: "arrow_upward",
+          critical: "priority_high"
+        }[item.priority])]) : null
       ]),
       pointsBtn
     ]),
