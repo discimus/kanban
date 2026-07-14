@@ -139,6 +139,7 @@ export const backlogService = {
 export function runAutoArchive(): void {
   const items = backlogRepository.all();
   const products = new Map<string, Product>(productRepository.all().map((p) => [p.id, p]));
+  let count = 0;
   for (const item of items) {
     if (item.status !== "done" || item.archivedAt) continue;
     const product = products.get(item.productId);
@@ -147,7 +148,8 @@ export function runAutoArchive(): void {
     if (elapsed >= product.autoArchiveDays * 86400000) {
       const updated = archiveItem(item, nowISO());
       backlogRepository.save(updated);
-      eventBus.emit("backlog:archived", updated);
+      count++;
     }
   }
+  if (count > 0) eventBus.emit("backlog:auto-archived", count);
 }

@@ -18,7 +18,8 @@ export type DomainEvent =
   | "link:visited"
   | "estimation:logged"
   | "comment:created"
-  | "comment:deleted";
+  | "comment:deleted"
+  | "backlog:auto-archived";
 
 type Handler = (payload?: unknown) => void;
 

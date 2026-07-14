@@ -4,6 +4,8 @@ import { applyTheme, getTheme } from "@ui/theme";
 import { store } from "@shared/storage";
 import { showConfirm, showOnboarding } from "@ui/components/dialog";
 import { productService } from "@contexts/product/application/product.service";
+import { runAutoArchive } from "@contexts/product/application/backlog.service";
+import { showToast } from "@ui/components/notification";
 import { createExampleData } from "@contexts/product/domain/example-data";
 
 const root = document.getElementById("app");
@@ -13,12 +15,19 @@ if (!root) {
 }
 
 applyTheme(getTheme());
-import { runAutoArchive } from "@contexts/product/application/backlog.service";
 runAutoArchive();
 renderApp(root);
 
 eventBus.on("state:changed", () => {
   renderApp(root);
+});
+
+eventBus.on("backlog:archived", () => {
+  showToast("Card arquivado", "archive");
+});
+
+eventBus.on("backlog:auto-archived", (count) => {
+  showToast(`${count} ${Number(count) === 1 ? "card arquivado" : "cards arquivados"} automaticamente`, "archive");
 });
 
 eventBus.on("product:pending-completion", (productId) => {
