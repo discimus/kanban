@@ -451,26 +451,31 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     cardBody
   ];
 
-  if (hasContent && !isArchived) {
+  const showExpand = hasContent && !isArchived;
+  const showActions = !readOnly;
+
+  if (showExpand || showActions) {
     const footer = el("div", { class: "card__footer" }, []);
 
-    const btn = el("button", { class: "card__expand-btn", type: "button" }, [
-      icon(bodyExpanded ? "expand_less" : "expand_more"),
-      el("span", { class: "card__expand-btn-text" }, [bodyExpanded ? "Recolher" : "Expandir"])
-    ]);
-    expandBtn = btn;
-    btn.addEventListener("click", () => {
-      const isExpanded = !expandedCards.get(item.id);
-      expandedCards.set(item.id, isExpanded);
-      cardBody.classList.toggle("card__body--expanded", isExpanded);
-      btn.replaceChildren(
-        icon(isExpanded ? "expand_less" : "expand_more"),
-        el("span", { class: "card__expand-btn-text" }, [isExpanded ? "Recolher" : "Expandir"])
-      );
-    });
-    footer.append(btn);
+    if (showExpand) {
+      const btn = el("button", { class: "card__expand-btn", type: "button" }, [
+        icon(bodyExpanded ? "expand_less" : "expand_more"),
+        el("span", { class: "card__expand-btn-text" }, [bodyExpanded ? "Recolher" : "Expandir"])
+      ]);
+      expandBtn = btn;
+      btn.addEventListener("click", () => {
+        const isExpanded = !expandedCards.get(item.id);
+        expandedCards.set(item.id, isExpanded);
+        cardBody.classList.toggle("card__body--expanded", isExpanded);
+        btn.replaceChildren(
+          icon(isExpanded ? "expand_less" : "expand_more"),
+          el("span", { class: "card__expand-btn-text" }, [isExpanded ? "Recolher" : "Expandir"])
+        );
+      });
+      footer.append(btn);
+    }
 
-    if (!readOnly) {
+    if (showActions) {
       const actionsFooter = el("div", { class: "card__footer-actions" }, [
         cardActionBtn("playlist_add", "Adicionar subtarefa", locked ? lockedAlert : addSubtask),
         cardActionBtn("chat", "Adicionar comentário", locked ? lockedAlert : addComment),
