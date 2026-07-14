@@ -174,7 +174,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     if (!cardBody.classList.contains("card__body--expanded")) {
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", {}, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
     }
 
     const urlInput = el("input", { class: "card__task-input", type: "text", placeholder: "URL do link…" }) as HTMLInputElement;
@@ -216,7 +216,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     if (!cardBody.classList.contains("card__body--expanded")) {
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", {}, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
     }
 
     const input = el("input", { class: "card__task-input", type: "text", placeholder: "Nova subtarefa…" }) as HTMLInputElement;
@@ -288,7 +288,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     if (!cardBody.classList.contains("card__body--expanded")) {
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", {}, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
     }
 
     const input = el("input", { class: "card__task-input", type: "text", placeholder: "Adicionar comentário…" }) as HTMLInputElement;
@@ -365,9 +365,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           }
         ]
       : [
-          { label: "Adicionar subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
-          { label: "Adicionar comentário", icon: "chat", action: locked ? lockedAlert : addComment },
-          { label: "Adicionar link", icon: "link", action: locked ? lockedAlert : addLink },
+          { label: "Adicionar...", icon: "add", submenu: [
+            { label: "Subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+            { label: "Comentário", icon: "chat", action: locked ? lockedAlert : addComment },
+            { label: "Link", icon: "link", action: locked ? lockedAlert : addLink }
+          ]},
           { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
           { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
           {
@@ -448,7 +450,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
     const btn = el("button", { class: "card__expand-btn", type: "button" }, [
       icon(bodyExpanded ? "expand_less" : "expand_more"),
-      el("span", {}, [bodyExpanded ? "Recolher" : "Expandir"])
+      el("span", { class: "card__expand-btn-text" }, [bodyExpanded ? "Recolher" : "Expandir"])
     ]);
     expandBtn = btn;
     btn.addEventListener("click", () => {
@@ -457,7 +459,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       cardBody.classList.toggle("card__body--expanded", isExpanded);
       btn.replaceChildren(
         icon(isExpanded ? "expand_less" : "expand_more"),
-        el("span", {}, [isExpanded ? "Recolher" : "Expandir"])
+        el("span", { class: "card__expand-btn-text" }, [isExpanded ? "Recolher" : "Expandir"])
       );
     });
     footer.append(btn);

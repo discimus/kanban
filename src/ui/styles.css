@@ -660,6 +660,13 @@ body {
   padding: 14px;
   cursor: grab;
   transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  container-type: inline-size;
+}
+
+@container (max-width: 200px) {
+  .card__expand-btn-text {
+    display: none;
+  }
 }
 
 .card:hover {
