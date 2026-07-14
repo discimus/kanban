@@ -350,6 +350,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   const columnSubmenu: MenuItem[] = KANBAN_COLUMNS.map((col) => ({
     label: col.label,
+    icon: col.icon,
     checked: col.status === item.status,
     disabled: col.status === item.status,
     action: locked ? lockedAlert : () => moveTo(col.status)

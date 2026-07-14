@@ -3,11 +3,11 @@ export type ISODate = string;
 
 export type KanbanStatus = "todo" | "doing" | "review" | "done";
 
-export const KANBAN_COLUMNS: { status: KanbanStatus; label: string }[] = [
-  { status: "todo", label: "Todo" },
-  { status: "doing", label: "Doing" },
-  { status: "review", label: "Review" },
-  { status: "done", label: "Done" }
+export const KANBAN_COLUMNS: { status: KanbanStatus; label: string; icon: string }[] = [
+  { status: "todo", label: "Todo", icon: "radio_button_unchecked" },
+  { status: "doing", label: "Doing", icon: "progress_activity" },
+  { status: "review", label: "Review", icon: "rate_review" },
+  { status: "done", label: "Done", icon: "check_circle" }
 ];
 
 export type Priority = "low" | "medium" | "high" | "critical";

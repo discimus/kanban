@@ -21,7 +21,7 @@ export function renderBoard(productId: string, showArchived = false): HTMLElemen
 
   for (const column of KANBAN_COLUMNS) {
     const columnItems = items.filter((i) => i.status === column.status);
-    board.append(renderColumn(column.status, column.label, columnItems, locked, productId, product?.showPriority ?? true, product?.category ?? "development"));
+    board.append(renderColumn(column.status, column.label, column.icon, columnItems, locked, productId, product?.showPriority ?? true, product?.category ?? "development"));
   }
 
   return board;
@@ -34,6 +34,7 @@ function priorityRank(item: BacklogItem): number {
 function renderColumn(
   status: KanbanStatus,
   label: string,
+  labelIcon: string,
   items: BacklogItem[],
   locked: boolean,
   productId: string,
@@ -84,7 +85,7 @@ function renderColumn(
 
   return el("section", { class: "column" }, [
     el("header", { class: "column__header" }, [
-      el("span", { class: "column__title" }, [label]),
+      el("span", { class: "column__title" }, [icon(labelIcon), label]),
       el("span", { class: "column__count" }, [String(items.length)])
     ]),
     body
