@@ -10,6 +10,10 @@ let selectedProductId: string | null = null;
 let drawerOpen = false;
 let showStats = false;
 let showArchived = false;
+let savedBoardScrollLeft = 0;
+let savedBoardScrollTop = 0;
+let savedSidebarScrollTop = 0;
+let lastRenderedProductId: string | null = null;
 
 const LAST_PROJECT_KEY = "kanban-last-project";
 
@@ -46,7 +50,21 @@ function ensureSelection(): void {
 }
 
 export function renderApp(root: HTMLElement): void {
+  const projectChanged = selectedProductId !== lastRenderedProductId;
+
+  if (!projectChanged) {
+    const prevBoard = root.querySelector(".board");
+    if (prevBoard) {
+      savedBoardScrollLeft = prevBoard.scrollLeft;
+      savedBoardScrollTop = prevBoard.scrollTop;
+    }
+  }
+
+  const prevList = root.querySelector(".product-list");
+  if (prevList) savedSidebarScrollTop = prevList.scrollTop;
+
   ensureSelection();
+  lastRenderedProductId = selectedProductId;
   clear(root);
 
   const layout = el("div", { class: `layout${drawerOpen ? " layout--drawer-open" : ""}` }, []);
@@ -62,7 +80,7 @@ export function renderApp(root: HTMLElement): void {
     persistSelection(id);
     setDrawer(false);
     renderApp(root);
-  });
+  }, () => setDrawer(false));
 
   const scrim = el("div", { class: "drawer-scrim", "aria-hidden": "true" }, []);
   scrim.addEventListener("click", () => setDrawer(false));
@@ -97,4 +115,17 @@ export function renderApp(root: HTMLElement): void {
 
   layout.append(sidebar, scrim, content);
   root.append(layout, renderThemeMenu());
+
+  requestAnimationFrame(() => {
+    const list = root.querySelector(".product-list");
+    if (list) list.scrollTop = savedSidebarScrollTop;
+
+    if (!projectChanged) {
+      const board = root.querySelector(".board");
+      if (board) {
+        board.scrollLeft = savedBoardScrollLeft;
+        board.scrollTop = savedBoardScrollTop;
+      }
+    }
+  });
 }

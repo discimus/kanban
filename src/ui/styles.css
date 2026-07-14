@@ -169,7 +169,8 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Sidebar */
@@ -180,6 +181,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-y: auto;
 }
 
 .sidebar__brand {
@@ -217,6 +219,8 @@ body {
   flex-direction: column;
   gap: 8px;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .product-item {
@@ -348,7 +352,9 @@ body {
 /* Content */
 .content {
   padding: 24px;
-  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Hamburger + drawer scrim are desktop-hidden by default */
@@ -381,14 +387,30 @@ body {
 }
 
 .content__header {
+  flex-shrink: 0;
+  background: var(--bg);
   margin-bottom: 16px;
 }
 
 .content__topbar {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
+}
+
+.content__topbar-start {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.content__topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .content__title {
@@ -396,6 +418,11 @@ body {
   font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .content__subtitle {
@@ -415,6 +442,9 @@ body {
   grid-template-columns: repeat(4, minmax(240px, 1fr));
   gap: 16px;
   align-items: start;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .column {
@@ -1868,7 +1898,6 @@ h4 {
 @media (max-width: 720px) {
   .layout {
     grid-template-columns: 1fr;
-    min-height: auto;
   }
 
   .hamburger {
@@ -1919,7 +1948,7 @@ h4 {
   .content {
     padding: 16px;
     padding-top: 68px;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .content__topbar {
@@ -1936,13 +1965,7 @@ h4 {
   }
 
   .content__topbar .content__title {
-    flex: 1;
     font-size: 1.15rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
   }
 
   .content__subtitle {
@@ -1970,11 +1993,7 @@ h4 {
     font-size: 1.25rem;
   }
 
-  .content__actions .actions-menu {
-    position: static;
-  }
-
-  .content__actions .actions-menu__trigger {
+  .content__topbar .actions-menu__trigger {
     width: 40px;
     height: 40px;
   }
@@ -2187,4 +2206,33 @@ h4 {
   .quick-add__save {
     display: inline-flex;
   }
+}
+
+/* ── Custom scrollbars (MD3) ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 999px;
+  opacity: 0.35;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.7;
+}
+
+::-webkit-scrollbar-thumb:active {
+  opacity: 0.85;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted) transparent;
 }

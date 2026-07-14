@@ -63,10 +63,13 @@ export function renderProductHeader(
   ]);
 
   const topBar = el("div", { class: "content__topbar" }, [
-    hamburger,
+    el("div", { class: "content__topbar-start" }, [hamburger]),
     el("h2", { class: "content__title" }, [product.name]),
-    el("div", { class: "content__actions" }, [addItem, statBtn, archBtn, menu].filter(Boolean) as HTMLElement[])
-  ].filter(Boolean) as HTMLElement[]);
+    el("div", { class: "content__topbar-end" }, [
+      el("div", { class: "content__actions" }, [addItem, statBtn, archBtn].filter(Boolean) as HTMLElement[]),
+      menu
+    ])
+  ]);
 
   return el("header", { class: "content__header" }, [
     topBar,

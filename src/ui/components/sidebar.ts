@@ -21,7 +21,7 @@ function categoryIcon(cat: ProductCategory): string {
   return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.icon ?? "help";
 }
 
-export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void): HTMLElement {
+export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void): HTMLElement {
   const list = el("div", { class: "product-list" }, []);
 
   if (products.length === 0) {
@@ -51,7 +51,10 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   }
 
   const addBtn = el("button", { class: "btn btn--primary btn--block" }, [icon("add"), "Novo Projeto"]);
-  addBtn.addEventListener("click", () => openProductForm());
+  addBtn.addEventListener("click", () => {
+    onNewProject?.();
+    openProductForm();
+  });
 
   return el("aside", { class: "sidebar" }, [
     el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban"]),
