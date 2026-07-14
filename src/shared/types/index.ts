@@ -84,6 +84,7 @@ export interface Product {
   status: ProductStatus;
   showPriority: boolean;
   category: ProductCategory;
+  autoArchiveDays: number | null;
 }
 
 export interface BacklogItem {
@@ -96,6 +97,7 @@ export interface BacklogItem {
   storyPoints: number;
   classification: TaskClassification;
   archivedAt: ISODate | null;
+  completedAt: ISODate | null;
 }
 
 export interface Task {

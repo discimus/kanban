@@ -26,6 +26,11 @@ describe("createProduct", () => {
     expect(product.showPriority).toBe(true);
   });
 
+  it("returns autoArchiveDays as null", () => {
+    const product = createProduct({ name: "My Project" });
+    expect(product.autoArchiveDays).toBeNull();
+  });
+
   it("trims whitespace from name", () => {
     const product = createProduct({ name: "  Hello World  " });
     expect(product.name).toBe("Hello World");

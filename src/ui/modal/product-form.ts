@@ -25,10 +25,30 @@ export function openProductForm(existing?: Product): void {
     showPriority.checked = existing.showPriority !== false;
   }
 
+  const AUTO_ARCHIVE_OPTIONS = [
+    { value: "", label: "Nunca" },
+    { value: "1", label: "1 dia" },
+    { value: "3", label: "3 dias" },
+    { value: "7", label: "7 dias" },
+    { value: "14", label: "14 dias" },
+    { value: "30", label: "30 dias" },
+  ];
+
+  const autoArchiveSel = select(
+    AUTO_ARCHIVE_OPTIONS,
+    existing?.autoArchiveDays ? String(existing.autoArchiveDays) : ""
+  );
+
   const submit = () => {
     try {
       if (existing) {
-        productService.edit(existing.id, { name: name.value, description: description.value, showPriority: showPriority.checked, category: catSel.value as ProductCategory });
+        productService.edit(existing.id, {
+          name: name.value,
+          description: description.value,
+          showPriority: showPriority.checked,
+          category: catSel.value as ProductCategory,
+          autoArchiveDays: autoArchiveSel.value ? Number(autoArchiveSel.value) : null
+        });
         if (statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
         }
@@ -46,6 +66,7 @@ export function openProductForm(existing?: Product): void {
     field("Descrição", description),
     field("Categoria", catSel),
     existing ? field("Status", statusSel) : null,
+    existing ? field("Arquivar automático", autoArchiveSel) : null,
     existing ? el("label", { class: "field field--checkbox" }, [showPriority, el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"])]) : null,
     error
   ]);

@@ -1,8 +1,9 @@
-import { BacklogItem, KanbanStatus, Priority, TaskClassification } from "@shared/types";
+import { BacklogItem, KanbanStatus, Priority, TaskClassification, Product } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
 import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem } from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
+import { productRepository } from "../infrastructure/product.repository";
 import { productService } from "./product.service";
 
 function assertProductEditable(productId: string): void {
@@ -92,10 +93,12 @@ export const backlogService = {
       throw new Error("O projeto está concluído ou cancelado. Não é possível mover os itens.");
     }
     if (existing.status === status) return existing;
-    const updated: BacklogItem = { ...existing, status };
+    const completedAt = status === "done" ? (existing.completedAt ?? nowISO()) : null;
+    const updated: BacklogItem = { ...existing, status, completedAt };
     backlogRepository.save(updated);
     eventBus.emit("backlog:moved", updated);
     productService.recomputeStatus(updated.productId);
+    runAutoArchive();
 
     if (productService.allItemsDone(updated.productId)) {
       const product = productService.get(updated.productId);
@@ -132,3 +135,19 @@ export const backlogService = {
     return updated;
   }
 };
+
+export function runAutoArchive(): void {
+  const items = backlogRepository.all();
+  const products = new Map<string, Product>(productRepository.all().map((p) => [p.id, p]));
+  for (const item of items) {
+    if (item.status !== "done" || item.archivedAt) continue;
+    const product = products.get(item.productId);
+    if (!product?.autoArchiveDays || !item.completedAt) continue;
+    const elapsed = Date.now() - new Date(item.completedAt).getTime();
+    if (elapsed >= product.autoArchiveDays * 86400000) {
+      const updated = archiveItem(item, nowISO());
+      backlogRepository.save(updated);
+      eventBus.emit("backlog:archived", updated);
+    }
+  }
+}

@@ -23,7 +23,8 @@ export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
     status: "todo",
     storyPoints: Math.max(0, props.storyPoints ?? 0),
     classification: props.classification ?? "task",
-    archivedAt: null
+    archivedAt: null,
+    completedAt: null
   };
 }
 

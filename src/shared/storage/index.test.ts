@@ -11,6 +11,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     status: "backlog",
     showPriority: true,
     category: "development",
+    autoArchiveDays: null,
     ...overrides,
   };
 }
@@ -26,6 +27,7 @@ function makeBacklogItem(overrides: Partial<BacklogItem> = {}): BacklogItem {
     storyPoints: 1,
     classification: "task",
     archivedAt: null,
+    completedAt: null,
     ...overrides,
   };
 }
@@ -174,6 +176,20 @@ describe("normalizeProduct", () => {
     const result = normalizeProduct(product);
     expect(result.category).toBe("development");
   });
+
+  it("sets autoArchiveDays to null for legacy product without it", () => {
+    const legacy = {
+      id: "p1",
+      name: "Old",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+      category: "development",
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.autoArchiveDays).toBeNull();
+  });
 });
 
 describe("normalizeLink", () => {
@@ -224,5 +240,21 @@ describe("normalizeBacklogItem", () => {
     const item = makeBacklogItem({ classification: "invalid" as never });
     const result = normalizeBacklogItem(item);
     expect(result.classification).toBe("task");
+  });
+
+  it("sets completedAt to null for legacy backlogItem without it", () => {
+    const legacy = {
+      id: "b1",
+      productId: "p1",
+      title: "Old Item",
+      description: "",
+      priority: "low",
+      status: "todo",
+      storyPoints: 1,
+      classification: "task",
+      archivedAt: null,
+    } as unknown as BacklogItem;
+    const result = normalizeBacklogItem(legacy);
+    expect(result.completedAt).toBeNull();
   });
 });

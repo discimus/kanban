@@ -13,6 +13,8 @@ if (!root) {
 }
 
 applyTheme(getTheme());
+import { runAutoArchive } from "@contexts/product/application/backlog.service";
+runAutoArchive();
 renderApp(root);
 
 eventBus.on("state:changed", () => {

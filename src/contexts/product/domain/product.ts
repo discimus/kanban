@@ -19,7 +19,8 @@ export function createProduct(props: CreateProductProps): Product {
     createdAt: nowISO(),
     status: "backlog",
     showPriority: true,
-    category: props.category ?? "development"
+    category: props.category ?? "development",
+    autoArchiveDays: null
   };
 }
 

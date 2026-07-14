@@ -35,6 +35,7 @@ function makeProduct(overrides: Partial<ReturnType<typeof productService.create>
     status: "backlog" as const,
     showPriority: true,
     category: "development" as const,
+    autoArchiveDays: null,
     ...overrides
   };
 }
@@ -50,6 +51,7 @@ function makeBacklogItem(overrides: Record<string, unknown> = {}) {
     storyPoints: 1,
     classification: "task" as const,
     archivedAt: null,
+    completedAt: null,
     ...overrides
   };
 }

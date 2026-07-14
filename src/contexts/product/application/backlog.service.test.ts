@@ -24,6 +24,12 @@ vi.mock("@shared/storage", () => ({
 }));
 vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
 
+vi.mock("@contexts/product/infrastructure/product.repository", () => ({
+  productRepository: {
+    all: vi.fn(() => [])
+  }
+}));
+
 vi.mock("@contexts/product/application/product.service", () => ({
   productService: {
     get: vi.fn(() => ({
@@ -33,7 +39,8 @@ vi.mock("@contexts/product/application/product.service", () => ({
       createdAt: "",
       status: "backlog",
       showPriority: true,
-      category: "development"
+      category: "development",
+      autoArchiveDays: null
     })),
     recomputeStatus: vi.fn(),
     allItemsDone: vi.fn(() => false)
@@ -54,6 +61,7 @@ function makeBacklogItem(overrides: Record<string, unknown> = {}) {
     storyPoints: 3,
     classification: "task" as const,
     archivedAt: null,
+    completedAt: null,
     ...overrides
   };
 }
@@ -74,7 +82,8 @@ beforeEach(() => {
     createdAt: "",
     status: "backlog",
     showPriority: true,
-    category: "development"
+    category: "development",
+    autoArchiveDays: null
   });
   vi.mocked(productService.recomputeStatus).mockClear();
 });
@@ -121,7 +130,8 @@ describe("backlogService", () => {
         createdAt: "",
         status: "completed",
         showPriority: true,
-      category: "development"
+      category: "development",
+      autoArchiveDays: null
       });
       expect(() => backlogService.create({ productId: "p1", title: "Item" })).toThrow(
         /concluído ou cancelado/

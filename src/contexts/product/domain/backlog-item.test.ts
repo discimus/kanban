@@ -32,6 +32,11 @@ describe("createBacklogItem", () => {
     expect(item.storyPoints).toBe(0);
   });
 
+  it("completedAt defaults to null", () => {
+    const item = createBacklogItem(validProps);
+    expect(item.completedAt).toBeNull();
+  });
+
   it("trims title whitespace", () => {
     const item = createBacklogItem({ productId: "p1", title: "  Hello  " });
     expect(item.title).toBe("Hello");

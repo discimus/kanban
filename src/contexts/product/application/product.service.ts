@@ -20,7 +20,7 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name: string; description: string; showPriority?: boolean; category?: ProductCategory }): Product {
+  edit(id: string, changes: { name: string; description: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     assertValidProductName(changes.name);
@@ -29,7 +29,8 @@ export const productService = {
       name: changes.name.trim(),
       description: changes.description.trim(),
       showPriority: changes.showPriority ?? existing.showPriority,
-      category: changes.category ?? existing.category
+      category: changes.category ?? existing.category,
+      autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);

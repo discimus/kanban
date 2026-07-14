@@ -14,7 +14,8 @@ export function createExampleData(): AppState {
       status: "todo" as const,
       storyPoints: 5,
       classification: "task" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     },
     {
       id: "ex-bi-2",
@@ -25,7 +26,8 @@ export function createExampleData(): AppState {
       status: "doing" as const,
       storyPoints: 8,
       classification: "task" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     },
     {
       id: "ex-bi-3",
@@ -36,7 +38,8 @@ export function createExampleData(): AppState {
       status: "doing" as const,
       storyPoints: 3,
       classification: "task" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     },
     {
       id: "ex-bi-4",
@@ -47,7 +50,8 @@ export function createExampleData(): AppState {
       status: "review" as const,
       storyPoints: 2,
       classification: "bug" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     },
     {
       id: "ex-bi-5",
@@ -58,7 +62,8 @@ export function createExampleData(): AppState {
       status: "done" as const,
       storyPoints: 1,
       classification: "task" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     },
     {
       id: "ex-bi-6",
@@ -69,7 +74,8 @@ export function createExampleData(): AppState {
       status: "todo" as const,
       storyPoints: 5,
       classification: "refactor" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     },
     {
       id: "ex-bi-7",
@@ -80,7 +86,8 @@ export function createExampleData(): AppState {
       status: "done" as const,
       storyPoints: 3,
       classification: "idea" as const,
-      archivedAt: null
+      archivedAt: null,
+      completedAt: null
     }
   ];
 
@@ -115,7 +122,8 @@ export function createExampleData(): AppState {
         createdAt: now,
         status: "in_progress",
         showPriority: true,
-        category: "development"
+        category: "development",
+        autoArchiveDays: null
       }
     ],
     backlogItems: items,
