@@ -514,7 +514,6 @@ body {
 .content__header {
   flex-shrink: 0;
   background: var(--bg);
-  margin-bottom: 16px;
 }
 
 .content__topbar {
@@ -551,7 +550,7 @@ body {
 }
 
 .content__subtitle {
-  margin: 4px 0 0;
+  margin: 4px 0 16px;
   color: var(--text-muted);
 }
 
