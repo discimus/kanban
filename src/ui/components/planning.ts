@@ -2,6 +2,7 @@ import { el, icon, actionsMenu } from "@ui/components/dom";
 import { Product } from "@shared/types";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { openProductForm } from "@ui/modal/product-form";
+import { openProductSettings } from "@ui/modal/settings-modal";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { downloadExportProduct } from "@contexts/product/application/export.service";
@@ -47,6 +48,9 @@ export function renderProductHeader(
     archBtn.addEventListener("click", onToggleArchived!);
   }
 
+  const settingsBtn = el("button", { class: "btn btn--sm btn--icon", "aria-label": "Configurações" }, [icon("settings")]);
+  settingsBtn.addEventListener("click", () => openProductSettings(product));
+
   const menu = actionsMenu([
     { label: "Editar", icon: "edit", action: () => openProductForm(product) },
     { label: "Exportar", icon: "download", action: () => downloadExportProduct(product.name, product.id) },
@@ -66,7 +70,7 @@ export function renderProductHeader(
     el("div", { class: "content__topbar-start" }, [hamburger]),
     el("h2", { class: "content__title" }, [product.name]),
     el("div", { class: "content__topbar-end" }, [
-      el("div", { class: "content__actions" }, [addItem, statBtn, archBtn].filter(Boolean) as HTMLElement[]),
+      el("div", { class: "content__actions" }, [addItem, statBtn, archBtn, settingsBtn].filter(Boolean) as HTMLElement[]),
       menu
     ])
   ]);

@@ -1572,6 +1572,13 @@ button.chip--exercise:hover {
   width: 100%;
 }
 
+.btn--icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+}
+
 /* Actions overflow menu */
 .actions-menu {
   position: relative;
