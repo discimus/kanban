@@ -9,8 +9,12 @@
   --md-on-primary: #ffffff;
   --md-primary-container: #e0e0ff;
   --md-on-primary-container: #0a0b6b;
+  --md-secondary: #5c5b9a;
+  --md-on-secondary: #ffffff;
   --md-secondary-container: #e2e0f9;
   --md-on-secondary-container: #1a1a2c;
+  --md-tertiary: #8b4a63;
+  --md-on-tertiary: #ffffff;
   --md-tertiary-container: #ffd8e8;
   --md-on-tertiary-container: #37071f;
   --md-error: #ba1a1a;
@@ -52,6 +56,42 @@
   --high: var(--md-tertiary-container);
   --critical: var(--md-error-container);
 
+  /* Classification chip colors — light scheme */
+  --chip-pending-container: #fff8e1;
+  --chip-on-pending-container: #7c5800;
+  --chip-pending: #f9a825;
+  --chip-on-pending: #ffffff;
+
+  --chip-improvement-container: #e8f5e9;
+  --chip-on-improvement-container: #1b5e20;
+  --chip-improvement: #43a047;
+  --chip-on-improvement: #ffffff;
+
+  --chip-meeting-container: #e3f2fd;
+  --chip-on-meeting-container: #0d47a1;
+  --chip-meeting: #1e88e5;
+  --chip-on-meeting: #ffffff;
+
+  --chip-content-container: #f3e5f5;
+  --chip-on-content-container: #6a1b9a;
+  --chip-content: #8e24aa;
+  --chip-on-content: #ffffff;
+
+  --chip-project-container: #e8eaf6;
+  --chip-on-project-container: #283593;
+  --chip-project: #3949ab;
+  --chip-on-project: #ffffff;
+
+  --chip-note-container: #fff3e0;
+  --chip-on-note-container: #e65100;
+  --chip-note: #fb8c00;
+  --chip-on-note: #ffffff;
+
+  --chip-exercise-container: #e0f2f1;
+  --chip-on-exercise-container: #004d40;
+  --chip-exercise: #00897b;
+  --chip-on-exercise: #ffffff;
+
   /* MD3 shape scale */
   --radius: 12px;
   --radius-lg: 16px;
@@ -79,8 +119,12 @@
     --md-on-primary: #1a1c8f;
     --md-primary-container: #363cae;
     --md-on-primary-container: #e0e0ff;
+    --md-secondary: #c6c4e9;
+    --md-on-secondary: #2d2b4e;
     --md-secondary-container: #3c3c5b;
     --md-on-secondary-container: #e2e0f9;
+    --md-tertiary: #ffb1c8;
+    --md-on-tertiary: #3f001e;
     --md-tertiary-container: #5b3049;
     --md-on-tertiary-container: #ffd8e8;
     --md-error: #ffb4ab;
@@ -101,6 +145,42 @@
     --md-inverse-surface: #e4e1e9;
     --md-inverse-on-surface: #303036;
 
+    /* Classification chip colors — dark scheme */
+    --chip-pending-container: #3e2d00;
+    --chip-on-pending-container: #ffdf9a;
+    --chip-pending: #ffc107;
+    --chip-on-pending: #1a1300;
+
+    --chip-improvement-container: #0d3b1e;
+    --chip-on-improvement-container: #a5d6a7;
+    --chip-improvement: #66bb6a;
+    --chip-on-improvement: #002b0d;
+
+    --chip-meeting-container: #0d3b66;
+    --chip-on-meeting-container: #90caf9;
+    --chip-meeting: #42a5f5;
+    --chip-on-meeting: #002133;
+
+    --chip-content-container: #3a1a4a;
+    --chip-on-content-container: #ce93d8;
+    --chip-content: #ab47bc;
+    --chip-on-content: #1a0028;
+
+    --chip-project-container: #1a237e;
+    --chip-on-project-container: #9fa8da;
+    --chip-project: #5c6bc0;
+    --chip-on-project: #0d1433;
+
+    --chip-note-container: #3a1a00;
+    --chip-on-note-container: #ffcc80;
+    --chip-note: #ffa726;
+    --chip-on-note: #1a0a00;
+
+    --chip-exercise-container: #00332d;
+    --chip-on-exercise-container: #80cbc4;
+    --chip-exercise: #26a69a;
+    --chip-on-exercise: #001a16;
+
     --primary-hover: #d0d2ff;
     --danger-hover: #ffb4ab;
     --success: #81c784;
@@ -112,8 +192,12 @@
   --md-on-primary: #1a1c8f;
   --md-primary-container: #363cae;
   --md-on-primary-container: #e0e0ff;
+  --md-secondary: #c6c4e9;
+  --md-on-secondary: #2d2b4e;
   --md-secondary-container: #3c3c5b;
   --md-on-secondary-container: #e2e0f9;
+  --md-tertiary: #ffb1c8;
+  --md-on-tertiary: #3f001e;
   --md-tertiary-container: #5b3049;
   --md-on-tertiary-container: #ffd8e8;
   --md-error: #ffb4ab;
@@ -133,6 +217,42 @@
   --md-outline-variant: #46464f;
   --md-inverse-surface: #e4e1e9;
   --md-inverse-on-surface: #303036;
+
+  /* Classification chip colors — dark scheme */
+  --chip-pending-container: #3e2d00;
+  --chip-on-pending-container: #ffdf9a;
+  --chip-pending: #ffc107;
+  --chip-on-pending: #1a1300;
+
+  --chip-improvement-container: #0d3b1e;
+  --chip-on-improvement-container: #a5d6a7;
+  --chip-improvement: #66bb6a;
+  --chip-on-improvement: #002b0d;
+
+  --chip-meeting-container: #0d3b66;
+  --chip-on-meeting-container: #90caf9;
+  --chip-meeting: #42a5f5;
+  --chip-on-meeting: #002133;
+
+  --chip-content-container: #3a1a4a;
+  --chip-on-content-container: #ce93d8;
+  --chip-content: #ab47bc;
+  --chip-on-content: #1a0028;
+
+  --chip-project-container: #1a237e;
+  --chip-on-project-container: #9fa8da;
+  --chip-project: #5c6bc0;
+  --chip-on-project: #0d1433;
+
+  --chip-note-container: #3a1a00;
+  --chip-on-note-container: #ffcc80;
+  --chip-note: #ffa726;
+  --chip-on-note: #1a0a00;
+
+  --chip-exercise-container: #00332d;
+  --chip-on-exercise-container: #80cbc4;
+  --chip-exercise: #26a69a;
+  --chip-on-exercise: #001a16;
 
   --primary-hover: #d0d2ff;
   --danger-hover: #ffb4ab;
@@ -707,8 +827,8 @@ button.chip--bug:hover {
 }
 
 button.chip--idea:hover {
-  background: #5b3049;
-  color: #ffd8e8;
+  background: var(--md-tertiary);
+  color: var(--md-on-tertiary);
 }
 
 .chip--refactor {
@@ -717,78 +837,78 @@ button.chip--idea:hover {
 }
 
 button.chip--refactor:hover {
-  background: var(--md-on-secondary-container);
-  color: var(--md-secondary-container);
+  background: var(--md-secondary);
+  color: var(--md-on-secondary);
 }
 
 .chip--pending {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--chip-pending-container);
+  color: var(--chip-on-pending-container);
 }
 
 button.chip--pending:hover {
-  background: #856404;
-  color: #fff3cd;
+  background: var(--chip-pending);
+  color: var(--chip-on-pending);
 }
 
 .chip--improvement {
-  background: var(--success);
-  color: #fff;
+  background: var(--chip-improvement-container);
+  color: var(--chip-on-improvement-container);
 }
 
 button.chip--improvement:hover {
-  background: #1b5e20;
-  color: #c8e6c9;
+  background: var(--chip-improvement);
+  color: var(--chip-on-improvement);
 }
 
 .chip--meeting {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--chip-meeting-container);
+  color: var(--chip-on-meeting-container);
 }
 
 button.chip--meeting:hover {
-  background: #1565c0;
-  color: #e3f2fd;
+  background: var(--chip-meeting);
+  color: var(--chip-on-meeting);
 }
 
 .chip--content {
-  background: #f3e5f5;
-  color: #6a1b9a;
+  background: var(--chip-content-container);
+  color: var(--chip-on-content-container);
 }
 
 button.chip--content:hover {
-  background: #6a1b9a;
-  color: #f3e5f5;
+  background: var(--chip-content);
+  color: var(--chip-on-content);
 }
 
 .chip--project {
-  background: #e8eaf6;
-  color: #283593;
+  background: var(--chip-project-container);
+  color: var(--chip-on-project-container);
 }
 
 button.chip--project:hover {
-  background: #283593;
-  color: #e8eaf6;
+  background: var(--chip-project);
+  color: var(--chip-on-project);
 }
 
 .chip--note {
-  background: #fff8e1;
-  color: #f57f17;
+  background: var(--chip-note-container);
+  color: var(--chip-on-note-container);
 }
 
 button.chip--note:hover {
-  background: #f57f17;
-  color: #fff8e1;
+  background: var(--chip-note);
+  color: var(--chip-on-note);
 }
 
 .chip--exercise {
-  background: #e0f2f1;
-  color: #00695c;
+  background: var(--chip-exercise-container);
+  color: var(--chip-on-exercise-container);
 }
 
 button.chip--exercise:hover {
-  background: #00695c;
-  color: #e0f2f1;
+  background: var(--chip-exercise);
+  color: var(--chip-on-exercise);
 }
 
 .card__actions {
