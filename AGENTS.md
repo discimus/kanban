@@ -226,6 +226,7 @@ setXpto(id: string, value: X): Entity {
 - Dark mode via `@media (prefers-color-scheme: dark)` e `[data-theme="dark"]`
 - Transições: `transition: background 0.15s, color 0.15s`
 - Nomenclatura BEM-like: `.card__title`, `.card__task--done`, `.chip--task`
+- Sempre considere as melhores práticas de UI, UX e o design system do Material Design 3
 
 ## Redução de tokens para agentes
 
