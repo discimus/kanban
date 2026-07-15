@@ -22,7 +22,8 @@ export function createProduct(props: CreateProductProps): Product {
     category: props.category ?? "development",
     autoArchiveDays: null,
     autoPasteLinks: true,
-    showReview: (props.category ?? "development") === "development"
+    showReview: (props.category ?? "development") === "development",
+    archivedAt: null
   };
 }
 
@@ -30,4 +31,12 @@ export function assertValidProductName(name: string): void {
   if (!name.trim()) {
     throw new Error("O nome do Projeto é obrigatório.");
   }
+}
+
+export function archive(product: Product, now: string): Product {
+  return { ...product, archivedAt: now };
+}
+
+export function restore(product: Product): Product {
+  return { ...product, archivedAt: null };
 }

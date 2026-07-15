@@ -38,7 +38,7 @@ function onGlobalKeydown(e: KeyboardEvent): void {
 
 export function renderBoard(productId: string, showArchived = false): HTMLElement {
   const product = productService.get(productId);
-  const locked = product?.status === "completed" || product?.status === "canceled";
+  const locked = product?.status === "completed" || product?.status === "canceled" || !!product?.archivedAt;
 
   const items = backlogService
     .byProduct(productId)

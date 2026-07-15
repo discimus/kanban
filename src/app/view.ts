@@ -120,6 +120,13 @@ export function renderApp(root: HTMLElement): void {
         }, hamburger, showArchived, () => {
           showArchived = !showArchived;
           renderApp(root);
+        }, () => {
+          if (product.archivedAt) {
+            productService.restore(product.id);
+          } else {
+            productService.archive(product.id);
+          }
+          renderApp(root);
         }),
         showStats ? renderStatistics(product.id) : renderBoard(product.id, showArchived)
       );

@@ -94,6 +94,7 @@
 
   /* MD3 shape scale */
   --radius: 12px;
+  --radius-sm: 8px;
   --radius-lg: 16px;
   --radius-xl: 28px;
   --radius-pill: 999px;
@@ -463,6 +464,59 @@ body {
 .product-item--active .product-item__desc {
   color: inherit;
   opacity: 0.75;
+}
+
+/* Archived projects section in sidebar */
+.sidebar__archived-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background-image 0.15s, border-color 0.15s;
+}
+
+.sidebar__archived-toggle:hover {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.06));
+  border-color: var(--md-outline-variant);
+}
+
+.sidebar__archived-toggle:active {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.10));
+}
+
+.sidebar__archived-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sidebar__archived-toggle .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.sidebar__archived-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 4px;
+}
+
+.sidebar__archived-body[hidden] {
+  display: none;
+}
+
+.sidebar__archived-body .product-item {
+  padding: 6px 12px;
+  opacity: 0.6;
 }
 
 .sidebar__actions {
@@ -1522,6 +1576,12 @@ button.chip--exercise:hover {
   :root:not([data-theme="light"]) .btn--ghost:active {
     background-image: linear-gradient(rgba(191, 194, 255, 0.12), rgba(191, 194, 255, 0.12));
   }
+  :root:not([data-theme="light"]) .sidebar__archived-toggle:hover {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06));
+  }
+  :root:not([data-theme="light"]) .sidebar__archived-toggle:active {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.10));
+  }
 }
 
 :root[data-theme="dark"] .btn:active,
@@ -1535,6 +1595,14 @@ button.chip--exercise:hover {
 
 :root[data-theme="dark"] .btn--ghost:active {
   background-image: linear-gradient(rgba(191, 194, 255, 0.12), rgba(191, 194, 255, 0.12));
+}
+
+:root[data-theme="dark"] .sidebar__archived-toggle:hover {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06));
+}
+
+:root[data-theme="dark"] .sidebar__archived-toggle:active {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.10));
 }
 
 .btn--sm {

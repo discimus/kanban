@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createProduct, assertValidProductName } from "@contexts/product/domain/product";
+import { createProduct, assertValidProductName, archive, restore } from "@contexts/product/domain/product";
 
 describe("createProduct", () => {
   it("returns a Product with a generated non-empty id", () => {
@@ -102,5 +102,37 @@ describe("assertValidProductName", () => {
 
   it("throws Error for a whitespace-only string", () => {
     expect(() => assertValidProductName("   \t  ")).toThrow("O nome do Projeto é obrigatório.");
+  });
+});
+
+describe("archive", () => {
+  const product = createProduct({ name: "P" });
+
+  it("returns product with archivedAt set", () => {
+    const result = archive(product, "2026-07-14T00:00:00.000Z");
+    expect(result.archivedAt).toBe("2026-07-14T00:00:00.000Z");
+  });
+
+  it("preserves other fields", () => {
+    const result = archive(product, "2026-07-14T00:00:00.000Z");
+    expect(result.id).toBe(product.id);
+    expect(result.name).toBe("P");
+    expect(result.status).toBe("backlog");
+  });
+});
+
+describe("restore", () => {
+  const product = { ...createProduct({ name: "P" }), archivedAt: "2026-07-14T00:00:00.000Z" };
+
+  it("clears archivedAt", () => {
+    const result = restore(product);
+    expect(result.archivedAt).toBeNull();
+  });
+
+  it("preserves other fields", () => {
+    const result = restore(product);
+    expect(result.id).toBe(product.id);
+    expect(result.name).toBe("P");
+    expect(result.status).toBe("backlog");
   });
 });

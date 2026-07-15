@@ -42,7 +42,8 @@ vi.mock("@contexts/product/application/product.service", () => ({
       category: "development",
       autoArchiveDays: null,
       autoPasteLinks: true,
-      showReview: true
+      showReview: true,
+      archivedAt: null
     })),
     recomputeStatus: vi.fn(),
     allItemsDone: vi.fn(() => false)
@@ -87,7 +88,8 @@ beforeEach(() => {
     category: "development",
     autoArchiveDays: null,
     autoPasteLinks: true,
-    showReview: true
+    showReview: true,
+      archivedAt: null
   });
   vi.mocked(productService.recomputeStatus).mockClear();
 });
@@ -137,10 +139,11 @@ describe("backlogService", () => {
       category: "development",
       autoArchiveDays: null,
       autoPasteLinks: true,
-      showReview: true
+      showReview: true,
+      archivedAt: null
       });
       expect(() => backlogService.create({ productId: "p1", title: "Item" })).toThrow(
-        /concluído ou cancelado/
+        /concluído/
       );
     });
   });
@@ -218,8 +221,10 @@ describe("backlogService", () => {
   describe("changeProduct", () => {
     beforeEach(() => {
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
-        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      archivedAt: null };
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      archivedAt: null };
         return undefined;
       });
     });
@@ -250,21 +255,25 @@ describe("backlogService", () => {
     it("throws when source product is completed", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
-        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        if (id === "p1") return { id: "p1", name: "Source", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      archivedAt: null };
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      archivedAt: null };
         return undefined;
       });
-      expect(() => backlogService.changeProduct("b1", "p2")).toThrow(/concluído ou cancelado/);
+      expect(() => backlogService.changeProduct("b1", "p2")).toThrow(/concluído/);
     });
 
     it("throws when target product is completed", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
-        if (id === "p2") return { id: "p2", name: "Target", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      archivedAt: null };
+        if (id === "p2") return { id: "p2", name: "Target", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      archivedAt: null };
         return undefined;
       });
-      expect(() => backlogService.changeProduct("b1", "p2")).toThrow(/concluído ou cancelado/);
+      expect(() => backlogService.changeProduct("b1", "p2")).toThrow(/concluído/);
     });
 
     it("throws when target product does not exist", () => {

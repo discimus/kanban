@@ -13,15 +13,16 @@ export function renderProductHeader(
   onToggleStats?: () => void,
   hamburger?: HTMLElement,
   showArchived = false,
-  onToggleArchived?: () => void
+  onToggleArchived?: () => void,
+  onArchive?: () => void
 ): HTMLElement {
-  const isLocked = product.status === "completed" || product.status === "canceled";
+  const isLocked = product.status === "completed" || product.status === "canceled" || !!product.archivedAt;
 
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), "Adicionar tarefa"]);
   addItem.addEventListener("click", () => {
     if (isLocked) {
       showAlert(
-        'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" para adicionar novos itens.'
+        'Este projeto está concluído, cancelado ou arquivado. Altere o status pelo menu "⋮" → "Editar" para adicionar novos itens.'
       );
       return;
     }
@@ -54,6 +55,11 @@ export function renderProductHeader(
   const menu = actionsMenu([
     { label: "Editar", icon: "edit", action: () => openProductForm(product) },
     { label: "Exportar", icon: "download", action: () => downloadExportProduct(product.name, product.id) },
+    {
+      label: product.archivedAt ? "Restaurar projeto" : "Arquivar projeto",
+      icon: product.archivedAt ? "unarchive" : "archive",
+      action: onArchive ?? (() => {})
+    },
     {
       label: "Excluir",
       icon: "delete",

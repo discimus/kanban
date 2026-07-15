@@ -87,6 +87,7 @@ export interface Product {
   autoArchiveDays: number | null;
   autoPasteLinks: boolean;
   showReview: boolean;
+  archivedAt: ISODate | null;
 }
 
 export interface BacklogItem {

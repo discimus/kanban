@@ -385,7 +385,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   const lockedAlert = (): void => {
     showAlert(
-      'Este projeto está concluído ou cancelado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
+      'Este projeto está concluído, cancelado ou arquivado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
     );
   };
 
@@ -428,6 +428,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           }
         ]
       : [
+          {
+            label: "Editar",
+            icon: "edit",
+            action: locked ? lockedAlert : () => openBacklogForm(item.productId, item)
+          },
           { label: "Adicionar...", icon: "add", submenu: [
             { label: "Subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
             { label: "Comentário", icon: "chat", action: locked ? lockedAlert : addComment },
@@ -436,11 +441,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
           { label: "Mover para projeto...", icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
           { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
-          {
-            label: "Editar",
-            icon: "edit",
-            action: locked ? lockedAlert : () => openBacklogForm(item.productId, item)
-          },
           {
             label: "Excluir",
             icon: "delete",

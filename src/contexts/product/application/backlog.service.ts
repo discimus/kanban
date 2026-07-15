@@ -8,8 +8,8 @@ import { productService } from "./product.service";
 
 function assertProductEditable(productId: string): void {
   const product = productService.get(productId);
-  if (product && (product.status === "completed" || product.status === "canceled")) {
-    throw new Error("O projeto está concluído ou cancelado. Não é possível modificar os itens.");
+  if (product && (product.status === "completed" || product.status === "canceled" || product.archivedAt)) {
+    throw new Error("O projeto está concluído, cancelado ou arquivado. Não é possível modificar os itens.");
   }
 }
 
@@ -89,8 +89,8 @@ export const backlogService = {
     const existing = backlogRepository.findById(id);
     if (!existing) throw new Error("Item de backlog não encontrado.");
     const product = productService.get(existing.productId);
-    if (product && (product.status === "completed" || product.status === "canceled")) {
-      throw new Error("O projeto está concluído ou cancelado. Não é possível mover os itens.");
+    if (product && (product.status === "completed" || product.status === "canceled" || product.archivedAt)) {
+      throw new Error("O projeto está concluído, cancelado ou arquivado. Não é possível mover os itens.");
     }
     if (existing.status === status) return existing;
     const completedAt = status === "done" ? (existing.completedAt ?? nowISO()) : null;
@@ -114,13 +114,13 @@ export const backlogService = {
     const existing = backlogRepository.findById(id);
     if (!existing) throw new Error("Item de backlog não encontrado.");
     const sourceProduct = productService.get(existing.productId);
-    if (sourceProduct && (sourceProduct.status === "completed" || sourceProduct.status === "canceled")) {
-      throw new Error("O projeto de origem está concluído ou cancelado. Não é possível mover os itens.");
+    if (sourceProduct && (sourceProduct.status === "completed" || sourceProduct.status === "canceled" || sourceProduct.archivedAt)) {
+      throw new Error("O projeto de origem está concluído, cancelado ou arquivado. Não é possível mover os itens.");
     }
     const targetProduct = productService.get(newProductId);
     if (!targetProduct) throw new Error("Projeto de destino não encontrado.");
-    if (targetProduct.status === "completed" || targetProduct.status === "canceled") {
-      throw new Error("O projeto de destino está concluído ou cancelado.");
+    if (targetProduct.status === "completed" || targetProduct.status === "canceled" || targetProduct.archivedAt) {
+      throw new Error("O projeto de destino está concluído, cancelado ou arquivado.");
     }
     if (existing.productId === newProductId) return existing;
     const oldProductId = existing.productId;

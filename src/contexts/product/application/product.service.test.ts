@@ -38,6 +38,7 @@ function makeProduct(overrides: Partial<ReturnType<typeof productService.create>
     autoArchiveDays: null,
     autoPasteLinks: true,
     showReview: true,
+    archivedAt: null,
     ...overrides
   };
 }
@@ -153,6 +154,34 @@ describe("productService", () => {
       productService.delete("p1");
       expect(state.products).toHaveLength(0);
       expect(mockEventBus.emit).toHaveBeenCalledWith("product:deleted", "p1");
+    });
+  });
+
+  describe("archive", () => {
+    it("saves product with archivedAt and emits product:archived", () => {
+      state.products = [makeProduct()];
+      const result = productService.archive("p1");
+      expect(result.archivedAt).toBeTruthy();
+      expect(mockStore.update).toHaveBeenCalled();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("product:archived", result);
+    });
+
+    it("throws when product not found", () => {
+      expect(() => productService.archive("ghost")).toThrow("Projeto não encontrado.");
+    });
+  });
+
+  describe("restore", () => {
+    it("clears archivedAt and emits product:restored", () => {
+      state.products = [makeProduct({ archivedAt: "2026-07-14T00:00:00.000Z" })];
+      const result = productService.restore("p1");
+      expect(result.archivedAt).toBeNull();
+      expect(mockStore.update).toHaveBeenCalled();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("product:restored", result);
+    });
+
+    it("throws when product not found", () => {
+      expect(() => productService.restore("ghost")).toThrow("Projeto não encontrado.");
     });
   });
 

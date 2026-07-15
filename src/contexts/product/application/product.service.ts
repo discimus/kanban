@@ -1,6 +1,7 @@
 import { Product, ProductStatus, ProductCategory } from "@shared/types";
 import { eventBus } from "@shared/events";
-import { createProduct, assertValidProductName } from "../domain/product";
+import { nowISO } from "@shared/utils";
+import { createProduct, assertValidProductName, archive as archiveItem, restore as restoreItem } from "../domain/product";
 import { productRepository } from "../infrastructure/product.repository";
 import { backlogRepository } from "../infrastructure/backlog.repository";
 
@@ -83,5 +84,23 @@ export const productService = {
   delete(id: string): void {
     productRepository.remove(id);
     eventBus.emit("product:deleted", id);
+  },
+
+  archive(id: string): Product {
+    const existing = productRepository.findById(id);
+    if (!existing) throw new Error("Projeto não encontrado.");
+    const updated = archiveItem(existing, nowISO());
+    productRepository.save(updated);
+    eventBus.emit("product:archived", updated);
+    return updated;
+  },
+
+  restore(id: string): Product {
+    const existing = productRepository.findById(id);
+    if (!existing) throw new Error("Projeto não encontrado.");
+    const updated = restoreItem(existing);
+    productRepository.save(updated);
+    eventBus.emit("product:restored", updated);
+    return updated;
   }
 };

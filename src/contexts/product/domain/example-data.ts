@@ -125,7 +125,8 @@ export function createExampleData(): AppState {
         category: "development",
         autoArchiveDays: null,
         autoPasteLinks: true,
-        showReview: true
+        showReview: true,
+        archivedAt: null
       }
     ],
     backlogItems: items,
