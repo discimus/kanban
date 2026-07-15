@@ -55,5 +55,12 @@ export function openProductSettings(product: Product): void {
     formActions("Salvar", submit)
   ]);
 
+  body.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    }
+  });
+
   openModal({ title: "Configurações do Projeto", body });
 }

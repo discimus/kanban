@@ -85,6 +85,13 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     formActions(existing ? "Salvar" : "Criar item", submit)
   ]);
 
+  body.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    }
+  });
+
   openModal({ title: existing ? "Editar item de backlog" : "Novo item de backlog", body });
 }
 

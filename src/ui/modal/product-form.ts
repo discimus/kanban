@@ -90,5 +90,12 @@ export function openProductForm(existing?: Product): void {
     body.append(createBtn, separator, importBtn);
   }
 
+  body.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    }
+  });
+
   openModal({ title: existing ? "Editar Projeto" : "Novo Projeto", body });
 }
