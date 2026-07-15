@@ -782,6 +782,7 @@ button.card__points:hover {
   margin: 0 0 8px;
   font-size: 0.82rem;
   color: var(--text-muted);
+  white-space: pre-line;
 }
 
 .card__meta {
