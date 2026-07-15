@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createBacklogItem, isValidTransition } from "@contexts/product/domain/backlog-item";
+import { createBacklogItem, isValidTransition, changeProduct } from "@contexts/product/domain/backlog-item";
 import type { CreateBacklogItemProps } from "@contexts/product/domain/backlog-item";
 
 describe("createBacklogItem", () => {
@@ -100,5 +100,49 @@ describe("isValidTransition", () => {
     expect(isValidTransition("invalid" as "todo", "doing" as "todo")).toBe(false);
     expect(isValidTransition("todo" as "todo", "invalid" as "todo")).toBe(false);
     expect(isValidTransition("invalid" as "todo", "nope" as "todo")).toBe(false);
+  });
+});
+
+describe("changeProduct", () => {
+  const item = {
+    id: "b1",
+    productId: "p1",
+    title: "Feature X",
+    description: "Desc",
+    priority: "high" as const,
+    status: "doing" as const,
+    storyPoints: 5,
+    classification: "task" as const,
+    archivedAt: "2025-01-01T00:00:00.000Z",
+    completedAt: "2025-01-01T00:00:00.000Z"
+  };
+
+  it("returns item with updated productId, status todo, and null dates", () => {
+    const result = changeProduct(item, "p2");
+    expect(result.productId).toBe("p2");
+    expect(result.status).toBe("todo");
+    expect(result.archivedAt).toBeNull();
+    expect(result.completedAt).toBeNull();
+  });
+
+  it("preserves other fields unchanged", () => {
+    const result = changeProduct(item, "p2");
+    expect(result.id).toBe("b1");
+    expect(result.title).toBe("Feature X");
+    expect(result.description).toBe("Desc");
+    expect(result.priority).toBe("high");
+    expect(result.storyPoints).toBe(5);
+    expect(result.classification).toBe("task");
+  });
+
+  it("throws when newProductId is empty", () => {
+    expect(() => changeProduct(item, "")).toThrow("O Projeto de destino é obrigatório.");
+  });
+
+  it("works when archivedAt and completedAt are already null", () => {
+    const active = { ...item, archivedAt: null, completedAt: null };
+    const result = changeProduct(active, "p2");
+    expect(result.archivedAt).toBeNull();
+    expect(result.completedAt).toBeNull();
   });
 });

@@ -40,3 +40,14 @@ export function archive(item: BacklogItem, now: string): BacklogItem {
 export function restore(item: BacklogItem): BacklogItem {
   return { ...item, archivedAt: null };
 }
+
+export function changeProduct(item: BacklogItem, newProductId: string): BacklogItem {
+  if (!newProductId) throw new Error("O Projeto de destino é obrigatório.");
+  return {
+    ...item,
+    productId: newProductId,
+    status: "todo",
+    archivedAt: null,
+    completedAt: null
+  };
+}

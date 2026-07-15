@@ -1,7 +1,7 @@
 import { BacklogItem, KanbanStatus, Priority, TaskClassification, Product } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
-import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem } from "../domain/backlog-item";
+import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem, changeProduct as changeProductDomain } from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
 import { productRepository } from "../infrastructure/product.repository";
 import { productService } from "./product.service";
@@ -107,6 +107,28 @@ export const backlogService = {
       }
     }
 
+    return updated;
+  },
+
+  changeProduct(id: string, newProductId: string): BacklogItem {
+    const existing = backlogRepository.findById(id);
+    if (!existing) throw new Error("Item de backlog não encontrado.");
+    const sourceProduct = productService.get(existing.productId);
+    if (sourceProduct && (sourceProduct.status === "completed" || sourceProduct.status === "canceled")) {
+      throw new Error("O projeto de origem está concluído ou cancelado. Não é possível mover os itens.");
+    }
+    const targetProduct = productService.get(newProductId);
+    if (!targetProduct) throw new Error("Projeto de destino não encontrado.");
+    if (targetProduct.status === "completed" || targetProduct.status === "canceled") {
+      throw new Error("O projeto de destino está concluído ou cancelado.");
+    }
+    if (existing.productId === newProductId) return existing;
+    const oldProductId = existing.productId;
+    const updated = changeProductDomain(existing, newProductId);
+    backlogRepository.save(updated);
+    eventBus.emit("backlog:product-changed", updated);
+    productService.recomputeStatus(oldProductId);
+    productService.recomputeStatus(newProductId);
     return updated;
   },
 

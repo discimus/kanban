@@ -214,4 +214,71 @@ describe("backlogService", () => {
       expect(mockEventBus.emit).toHaveBeenCalledWith("backlog:deleted", "b1");
     });
   });
+
+  describe("changeProduct", () => {
+    beforeEach(() => {
+      vi.mocked(productService.get).mockImplementation((id: string) => {
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        return undefined;
+      });
+    });
+
+    it("saves item with updated productId and status todo", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1", status: "doing", archivedAt: "2025-01-01T00:00:00.000Z", completedAt: "2025-01-01T00:00:00.000Z" })];
+      const result = backlogService.changeProduct("b1", "p2");
+      expect(result.productId).toBe("p2");
+      expect(result.status).toBe("todo");
+      expect(result.archivedAt).toBeNull();
+      expect(result.completedAt).toBeNull();
+      expect(mockStore.update).toHaveBeenCalled();
+    });
+
+    it("emits backlog:product-changed", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1" })];
+      const result = backlogService.changeProduct("b1", "p2");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("backlog:product-changed", result);
+    });
+
+    it("recomputes status for source and target products", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1" })];
+      backlogService.changeProduct("b1", "p2");
+      expect(productService.recomputeStatus).toHaveBeenCalledWith("p1");
+      expect(productService.recomputeStatus).toHaveBeenCalledWith("p2");
+    });
+
+    it("throws when source product is completed", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1" })];
+      vi.mocked(productService.get).mockImplementation((id: string) => {
+        if (id === "p1") return { id: "p1", name: "Source", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        return undefined;
+      });
+      expect(() => backlogService.changeProduct("b1", "p2")).toThrow(/concluído ou cancelado/);
+    });
+
+    it("throws when target product is completed", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1" })];
+      vi.mocked(productService.get).mockImplementation((id: string) => {
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        if (id === "p2") return { id: "p2", name: "Target", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true };
+        return undefined;
+      });
+      expect(() => backlogService.changeProduct("b1", "p2")).toThrow(/concluído ou cancelado/);
+    });
+
+    it("throws when target product does not exist", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1" })];
+      expect(() => backlogService.changeProduct("b1", "nonexistent")).toThrow("Projeto de destino não encontrado");
+    });
+
+    it("same productId returns existing without update", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1" })];
+      const existing = state.backlogItems[0];
+      const result = backlogService.changeProduct("b1", "p1");
+      expect(result).toBe(existing);
+      expect(mockStore.update).not.toHaveBeenCalled();
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -20,7 +20,8 @@ export type DomainEvent =
   | "comment:created"
   | "comment:updated"
   | "comment:deleted"
-  | "backlog:auto-archived";
+  | "backlog:auto-archived"
+  | "backlog:product-changed";
 
 type Handler = (payload?: unknown) => void;
 

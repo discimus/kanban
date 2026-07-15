@@ -8,6 +8,8 @@ import { productService } from "@contexts/product/application/product.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { timeAgo, formatDate } from "@shared/utils";
+import { openModal, closeModal } from "../modal";
+import { field, select, errorText } from "@ui/components/forms";
 
 function priorityLabel(p: BacklogItem["priority"]): string {
   return PRIORITIES.find((x) => x.value === p)?.label ?? p;
@@ -19,6 +21,48 @@ function classificationLabel(c: TaskClassification, category: ProductCategory): 
 
 function classificationIcon(c: TaskClassification, category: ProductCategory): string {
   return CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c)?.icon ?? "help";
+}
+
+function openMoveToProjectDialog(item: BacklogItem): void {
+  const projects = productService.list().filter(p => p.id !== item.productId);
+  if (projects.length === 0) {
+    showAlert("Não há outros projetos disponíveis.");
+    return;
+  }
+
+  const sel = select(
+    projects.map(p => ({ value: p.id, label: p.name })),
+    ""
+  );
+
+  const error = errorText();
+  const body = el("div", { class: "form" }, [
+    el("p", { style: "margin-bottom: 12px; color: var(--text-secondary);" }, [`Mover "${item.title}" para:`]),
+    field("Projeto de destino", sel),
+    error
+  ]);
+
+  const cancelBtn = el("button", { class: "btn", type: "button" }, ["Cancelar"]);
+  const moveBtn = el("button", { class: "btn btn--primary", type: "button" }, ["Mover"]);
+
+  const actions = el("div", { class: "form__actions" }, [cancelBtn, moveBtn]);
+  body.append(actions);
+
+  cancelBtn.addEventListener("click", closeModal);
+  moveBtn.addEventListener("click", () => {
+    if (!sel.value) {
+      error.textContent = "Selecione um projeto de destino.";
+      return;
+    }
+    try {
+      backlogService.changeProduct(item.id, sel.value);
+      closeModal();
+    } catch (e) {
+      error.textContent = (e as Error).message;
+    }
+  });
+
+  openModal({ title: "Mover card para outro projeto", body });
 }
 
 function nextClassification(current: TaskClassification, category: ProductCategory): TaskClassification {
@@ -390,6 +434,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: "Link", icon: "link", action: locked ? lockedAlert : addLink }
           ]},
           { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
+          { label: "Mover para projeto...", icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
           { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
           {
             label: "Editar",
