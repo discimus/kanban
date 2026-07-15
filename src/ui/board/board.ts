@@ -6,6 +6,7 @@ import { productService } from "@contexts/product/application/product.service";
 import { showAlert } from "@ui/components/dialog";
 import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
+import { openShortcutsHelp } from "@ui/components/help-menu";
 
 let kbRegistered = false;
 
@@ -13,7 +14,15 @@ function onGlobalKeydown(e: KeyboardEvent): void {
   const tag = (e.target as HTMLElement)?.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
   if (document.querySelector(".modal-overlay")) return;
-  if (e.key.toLowerCase() !== "n" || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if (e.key === "?") {
+    e.preventDefault();
+    openShortcutsHelp();
+    return;
+  }
+
+  if (e.key.toLowerCase() !== "n") return;
   e.preventDefault();
 
   const board = document.querySelector(".board");

@@ -2033,6 +2033,68 @@ h4 {
   font-size: 1.375rem;
 }
 
+/* Help button — fixed bottom-right, stacked above theme toggle */
+.help-btn {
+  position: fixed;
+  bottom: 68px;
+  right: 16px;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--md-surface-container-high);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.help-btn:hover {
+  background: var(--md-surface-container-highest);
+  border-color: var(--md-outline);
+}
+
+.help-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.help-btn .material-symbols-outlined {
+  font-size: 1.375rem;
+}
+
+/* Shortcuts help modal */
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shortcuts-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.shortcuts-item kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--md-surface-container-highest);
+  color: var(--text);
+}
+
 /* ============================================================
    Responsive — tablet and mobile
    ============================================================ */
@@ -2189,6 +2251,10 @@ h4 {
     right: 12px;
     width: 48px;
     height: 48px;
+  }
+
+  .help-btn {
+    display: none;
   }
 }
 

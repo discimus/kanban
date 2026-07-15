@@ -5,6 +5,7 @@ import { renderProductHeader } from "@ui/components/planning";
 import { renderBoard } from "@ui/board/board";
 import { renderStatistics } from "@ui/components/statistics";
 import { renderThemeMenu } from "@ui/components/theme-menu";
+import { renderHelpMenu } from "@ui/components/help-menu";
 
 let selectedProductId: string | null = null;
 let drawerOpen = false;
@@ -126,7 +127,7 @@ export function renderApp(root: HTMLElement): void {
   }
 
   layout.append(sidebar, scrim, content);
-  root.append(layout, renderThemeMenu());
+  root.append(layout, renderThemeMenu(), renderHelpMenu());
 
   requestAnimationFrame(() => {
     const list = root.querySelector(".product-list");
