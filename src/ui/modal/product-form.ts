@@ -97,5 +97,5 @@ export function openProductForm(existing?: Product): void {
     }
   });
 
-  openModal({ title: existing ? "Editar Projeto" : "Novo Projeto", body });
+  openModal({ title: existing ? "Editar Projeto" : "Novo Projeto", body, autoFocus: !existing });
 }

@@ -7,6 +7,7 @@ export interface ModalOptions {
   title: string;
   body: HTMLElement;
   onClose?: () => void;
+  autoFocus?: boolean;
 }
 
 export function openModal(options: ModalOptions): void {
@@ -27,8 +28,10 @@ export function openModal(options: ModalOptions): void {
   document.addEventListener("keydown", onEsc);
   pendingOnClose = options.onClose ?? null;
 
-  const firstField = dialog.querySelector<HTMLElement>(".modal__body input, .modal__body textarea");
-  firstField?.focus();
+  if (options.autoFocus !== false) {
+    const firstField = dialog.querySelector<HTMLElement>(".modal__body input, .modal__body textarea");
+    firstField?.focus();
+  }
 }
 
 function onEsc(ev: KeyboardEvent): void {

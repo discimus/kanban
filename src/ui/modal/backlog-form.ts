@@ -92,7 +92,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     }
   });
 
-  openModal({ title: existing ? "Editar item de backlog" : "Novo item de backlog", body });
+  openModal({ title: existing ? "Editar item de backlog" : "Novo item de backlog", body, autoFocus: !existing });
 }
 
 function buildSubtasksSection(
