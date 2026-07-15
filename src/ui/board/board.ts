@@ -7,6 +7,26 @@ import { showAlert } from "@ui/components/dialog";
 import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 
+let kbRegistered = false;
+
+function onGlobalKeydown(e: KeyboardEvent): void {
+  const tag = (e.target as HTMLElement)?.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+  if (document.querySelector(".modal-overlay")) return;
+  if (e.key.toLowerCase() !== "n" || e.ctrlKey || e.metaKey || e.altKey) return;
+  e.preventDefault();
+
+  const board = document.querySelector(".board");
+  if (!board) return;
+  const btn = board.querySelector<HTMLButtonElement>(".quick-add__btn");
+  const input = board.querySelector<HTMLInputElement>(".quick-add__input");
+  if (input) {
+    input.focus();
+  } else if (btn) {
+    btn.click();
+  }
+}
+
 export function renderBoard(productId: string, showArchived = false): HTMLElement {
   const product = productService.get(productId);
   const locked = product?.status === "completed" || product?.status === "canceled";
@@ -23,6 +43,11 @@ export function renderBoard(productId: string, showArchived = false): HTMLElemen
     if (column.status === "review" && product?.showReview === false) continue;
     const columnItems = items.filter((i) => i.status === column.status);
     board.append(renderColumn(column.status, column.label, column.icon, columnItems, locked, productId, product?.showPriority ?? true, product?.category ?? "development"));
+  }
+
+  if (!kbRegistered) {
+    document.addEventListener("keydown", onGlobalKeydown);
+    kbRegistered = true;
   }
 
   return board;
@@ -96,7 +121,7 @@ function renderColumn(
 function renderQuickAdd(productId: string): HTMLElement {
   const wrapper = el("div", { class: "quick-add" }, []);
 
-  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn" }, [
+  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn", title: "Adicionar tarefa (N)" }, [
     icon("add"),
     "Adicionar tarefa"
   ]);
