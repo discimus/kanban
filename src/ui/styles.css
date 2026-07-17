@@ -990,14 +990,14 @@ button.chip--exercise:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .filter-bar--chips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
@@ -1035,7 +1035,7 @@ button.chip--exercise:hover {
 /* Scrollable chip row (no wrap, hidden scrollbar) */
 .filter-bar--scroll {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
   flex-wrap: nowrap;
   scrollbar-width: none;
