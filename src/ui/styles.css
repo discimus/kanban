@@ -1034,6 +1034,8 @@ button.chip--exercise:hover {
 
 /* Scrollable chip row (no wrap, hidden scrollbar) */
 .filter-bar--scroll {
+  display: flex;
+  gap: 6px;
   overflow-x: auto;
   flex-wrap: nowrap;
   scrollbar-width: none;
