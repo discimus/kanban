@@ -56,7 +56,11 @@ export function renderBoard(productId: string, showArchived = false, onFilterCha
   displayItems = displayItems.slice().sort((a, b) => priorityRank(b) - priorityRank(a));
 
   const wrapper = el("div", { class: "board-wrapper" }, []);
-  wrapper.append(renderClassificationFilter(allItems, category, onFilterChange));
+  const uniqueClassifications = new Set(allItems.map(i => i.classification));
+  const activeFilter = classificationFilter !== null && classificationFilter.size > 0;
+  if (uniqueClassifications.size > 1 || activeFilter) {
+    wrapper.append(renderClassificationFilter(allItems, category, onFilterChange));
+  }
 
   const board = el("div", { class: "board" }, []);
 
