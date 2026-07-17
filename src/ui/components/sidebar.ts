@@ -54,7 +54,7 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
   for (const cat of PRODUCT_CATEGORIES) {
     const isSelected = filterCategory === cat.value;
     const chip = el("button", {
-      class: `chip chip--filter chip--compact${isSelected ? " chip--selected" : ""}`,
+      class: `chip chip--compact${isSelected ? ` chip--${cat.value} chip--selected` : " chip--filter"}`,
       type: "button",
       title: cat.label
     }, [icon(cat.icon)]);

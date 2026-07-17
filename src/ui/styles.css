@@ -914,6 +914,36 @@ button.chip--refactor:hover {
   color: var(--md-on-secondary);
 }
 
+.chip--development {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+button.chip--development:hover {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+}
+
+.chip--business {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+button.chip--business:hover {
+  background: var(--md-secondary);
+  color: var(--md-on-secondary);
+}
+
+.chip--study {
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+}
+
+button.chip--study:hover {
+  background: var(--md-tertiary);
+  color: var(--md-on-tertiary);
+}
+
 .chip--pending {
   background: var(--chip-pending-container);
   color: var(--chip-on-pending-container);
