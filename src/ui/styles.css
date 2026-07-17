@@ -984,6 +984,201 @@ button.chip--exercise:hover {
   color: var(--chip-on-exercise);
 }
 
+/* ── Filter bar ─────────────────────────────────────────── */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-bar--chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Non-selected filter chip: transparent outline */
+.chip--filter {
+  background: transparent;
+  border: 1px solid var(--md-outline);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chip--filter:hover {
+  background: var(--md-surface-container-high);
+  border-color: var(--md-outline-variant);
+}
+
+/* Selected state: just removes border (classification chips keep their own bg) */
+.chip--selected {
+  border-color: transparent;
+}
+
+/* "Todas" chip selected: filled with secondary color */
+.chip--filter.chip--selected {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+.chip--filter.chip--selected:hover {
+  background: var(--md-secondary);
+  color: var(--md-on-secondary);
+}
+
+/* Scrollable chip row (no wrap, hidden scrollbar) */
+.filter-bar--scroll {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-bar--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Compact filter chip: reduced padding for tight spaces */
+.chip--compact {
+  padding: 3px 5px;
+}
+
+/* ── Sort button ────────────────────────────────────────── */
+
+.sort-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.sort-btn:hover {
+  background: var(--md-surface-container-high);
+}
+
+.sort-btn .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* Compact sort button: icon only */
+.sort-btn--compact {
+  padding: 5px;
+  border: none;
+}
+
+.sort-btn--compact .material-symbols-outlined {
+  font-size: 1.2rem;
+}
+
+.sort-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  min-width: 160px;
+  padding: 4px;
+  background: var(--md-surface-container-high);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.sort-menu--open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sort-menu__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.sort-menu__item:hover {
+  background: var(--md-surface-container-highest);
+}
+
+.sort-menu__item--selected {
+  color: var(--primary);
+}
+
+/* ── Board wrapper + classification filters ────────────── */
+
+.board-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+
+.board-wrapper .board {
+  flex: 1;
+  min-height: 0;
+}
+
+.board__filters {
+  flex-shrink: 0;
+}
+
+.chip__label {
+  white-space: nowrap;
+}
+
+.chip__count {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .board__filters .chip {
+    padding: 3px 5px;
+  }
+
+  .board__filters .chip .chip__label {
+    display: none;
+  }
+}
+
+/* ── Sidebar filter bar inset ──────────────────────────── */
+
+.sidebar .filter-bar {
+  padding: 0 0 10px;
+}
+
 .card__actions {
   display: flex;
   align-items: center;

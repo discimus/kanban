@@ -3,6 +3,10 @@ import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATE
 import { openProductForm } from "@ui/modal/product-form";
 
 let archivedOpen = false;
+let filterCategory: ProductCategory | null = null;
+
+type SortOption = "name-asc" | "name-desc" | "created-desc" | "created-asc";
+let sortBy: SortOption = "name-asc";
 
 const STATUS_ICONS: Record<ProductStatus, string> = {
   backlog: "inbox",
@@ -21,6 +25,106 @@ function categoryLabel(cat: ProductCategory): string {
 
 function categoryIcon(cat: ProductCategory): string {
   return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.icon ?? "help";
+}
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "name-asc", label: "Nome A-Z" },
+  { value: "name-desc", label: "Nome Z-A" },
+  { value: "created-desc", label: "Mais recente" },
+  { value: "created-asc", label: "Mais antigo" }
+];
+
+function renderFilterBar(onChange?: () => void): HTMLElement {
+  const bar = el("div", { class: "filter-bar" }, []);
+
+  const chips = el("div", { class: "filter-bar--chips" }, []);
+
+  const allChip = el("button", {
+    class: `chip chip--filter${filterCategory === null ? " chip--selected" : ""}`,
+    type: "button"
+  }, ["Todas"]);
+  allChip.addEventListener("click", () => {
+    if (filterCategory !== null) {
+      filterCategory = null;
+      onChange?.();
+    }
+  });
+  chips.append(allChip);
+
+  for (const cat of PRODUCT_CATEGORIES) {
+    const isSelected = filterCategory === cat.value;
+    const chip = el("button", {
+      class: `chip chip--filter chip--compact${isSelected ? " chip--selected" : ""}`,
+      type: "button",
+      title: cat.label
+    }, [icon(cat.icon)]);
+    chip.addEventListener("click", () => {
+      filterCategory = filterCategory === cat.value ? null : cat.value;
+      onChange?.();
+    });
+    chips.append(chip);
+  }
+
+  bar.append(chips);
+
+  const wrapper = el("div", { class: "sort-wrapper" }, []);
+  const current = SORT_OPTIONS.find(o => o.value === sortBy)!;
+  const sortBtn = el("button", {
+    class: "sort-btn sort-btn--compact",
+    type: "button",
+    title: `Ordenar: ${current.label}`
+  }, [icon("sort")]);
+  const sortMenu = el("div", { class: "sort-menu" }, []);
+
+  const renderMenu = (): void => {
+    clear(sortMenu);
+    for (const opt of SORT_OPTIONS) {
+      const item = el("button", {
+        class: `sort-menu__item${opt.value === sortBy ? " sort-menu__item--selected" : ""}`,
+        type: "button"
+      }, [opt.label]);
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sortBy = opt.value;
+        sortBtn.title = `Ordenar: ${opt.label}`;
+        sortMenu.classList.remove("sort-menu--open");
+        onChange?.();
+      });
+      sortMenu.append(item);
+    }
+  };
+
+  renderMenu();
+
+  let outsideHandler: ((e: Event) => void) | null = null;
+
+  const closeMenu = (): void => {
+    sortMenu.classList.remove("sort-menu--open");
+    if (outsideHandler) {
+      document.removeEventListener("click", outsideHandler);
+      outsideHandler = null;
+    }
+  };
+
+  sortBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = sortMenu.classList.contains("sort-menu--open");
+    if (isOpen) {
+      closeMenu();
+    } else {
+      renderMenu();
+      sortMenu.classList.add("sort-menu--open");
+      outsideHandler = (ev: Event) => {
+        if (!wrapper.contains(ev.target as Node)) closeMenu();
+      };
+      setTimeout(() => document.addEventListener("click", outsideHandler!), 0);
+    }
+  });
+
+  wrapper.append(sortBtn, sortMenu);
+  bar.append(wrapper);
+
+  return bar;
 }
 
 const FADE_SIZE = 36;
@@ -49,8 +153,22 @@ export function setupScrollFade(el: HTMLElement): void {
   requestAnimationFrame(() => handler());
 }
 
-export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void): HTMLElement {
-  const active = products.filter(p => !p.archivedAt);
+export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void): HTMLElement {
+  let active = products.filter(p => !p.archivedAt);
+
+  if (filterCategory !== null) {
+    active = active.filter(p => p.category === filterCategory);
+  }
+
+  active = [...active].sort((a, b) => {
+    switch (sortBy) {
+      case "name-asc": return a.name.localeCompare(b.name);
+      case "name-desc": return b.name.localeCompare(a.name);
+      case "created-desc": return b.createdAt.localeCompare(a.createdAt);
+      case "created-asc": return a.createdAt.localeCompare(b.createdAt);
+    }
+  });
+
   const archived = products.filter(p => p.archivedAt);
 
   const list = el("div", { class: "product-list" }, []);
@@ -126,6 +244,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     el("p", { class: "sidebar__subtitle" }, ["Dashboard de gestão de projetos"]),
     addBtn,
     el("h2", { class: "sidebar__section" }, ["Projetos"]),
+    renderFilterBar(onFilterChange),
     list
   ]);
 }

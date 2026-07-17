@@ -87,7 +87,7 @@ export function renderApp(root: HTMLElement): void {
     persistSelection(id);
     setDrawer(false);
     renderApp(root);
-  }, () => setDrawer(false));
+  }, () => setDrawer(false), () => renderApp(root));
 
   const scrim = el("div", { class: "drawer-scrim", "aria-hidden": "true" }, []);
   scrim.addEventListener("click", () => setDrawer(false));
@@ -128,7 +128,7 @@ export function renderApp(root: HTMLElement): void {
           }
           renderApp(root);
         }),
-        showStats ? renderStatistics(product.id) : renderBoard(product.id, showArchived)
+        showStats ? renderStatistics(product.id) : renderBoard(product.id, showArchived, () => renderApp(root))
       );
     }
   }

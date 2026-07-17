@@ -1,5 +1,5 @@
 import { el, icon } from "@ui/components/dom";
-import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory } from "@shared/types";
+import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory, TaskClassification, CATEGORY_CLASSIFICATIONS } from "@shared/types";
 
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
@@ -9,6 +9,7 @@ import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
 
 let kbRegistered = false;
+let classificationFilter: Set<TaskClassification> | null = null;
 
 function onGlobalKeydown(e: KeyboardEvent): void {
   const tag = (e.target as HTMLElement)?.tagName;
@@ -36,34 +37,104 @@ function onGlobalKeydown(e: KeyboardEvent): void {
   }
 }
 
-export function renderBoard(productId: string, showArchived = false): HTMLElement {
+export function renderBoard(productId: string, showArchived = false, onFilterChange?: () => void): HTMLElement {
   const product = productService.get(productId);
   const locked = product?.status === "completed" || product?.status === "canceled" || !!product?.archivedAt;
 
-  const items = backlogService
+  const allItems = backlogService
     .byProduct(productId)
-    .filter((i) => showArchived || !i.archivedAt)
-    .slice()
-    .sort((a, b) => priorityRank(b) - priorityRank(a));
+    .filter((i) => showArchived || !i.archivedAt);
+
+  const category = product?.category ?? "development";
+
+  let displayItems = allItems;
+
+  if (classificationFilter !== null && classificationFilter.size > 0) {
+    displayItems = allItems.filter(i => classificationFilter!.has(i.classification));
+  }
+
+  displayItems = displayItems.slice().sort((a, b) => priorityRank(b) - priorityRank(a));
+
+  const wrapper = el("div", { class: "board-wrapper" }, []);
+  wrapper.append(renderClassificationFilter(allItems, category, onFilterChange));
 
   const board = el("div", { class: "board" }, []);
 
   for (const column of KANBAN_COLUMNS) {
     if (column.status === "review" && product?.showReview === false) continue;
-    const columnItems = items.filter((i) => i.status === column.status);
-    board.append(renderColumn(column.status, column.label, column.icon, columnItems, locked, productId, product?.showPriority ?? true, product?.category ?? "development"));
+    const columnItems = displayItems.filter((i) => i.status === column.status);
+    board.append(renderColumn(column.status, column.label, column.icon, columnItems, locked, productId, product?.showPriority ?? true, category));
   }
+
+  wrapper.append(board);
 
   if (!kbRegistered) {
     document.addEventListener("keydown", onGlobalKeydown);
     kbRegistered = true;
   }
 
-  return board;
+  return wrapper;
 }
 
 function priorityRank(item: BacklogItem): number {
   return { low: 0, medium: 1, high: 2, critical: 3 }[item.priority];
+}
+
+function renderClassificationFilter(
+  allItems: BacklogItem[],
+  category: ProductCategory,
+  onFilterChange?: () => void
+): HTMLElement {
+  const classifications = CATEGORY_CLASSIFICATIONS[category];
+  const bar = el("div", { class: "filter-bar board__filters" }, []);
+
+  const allChip = el("button", {
+    class: `chip chip--filter${classificationFilter === null ? " chip--selected" : ""}`,
+    type: "button",
+    title: "Mostrar todas as classificações"
+  }, ["Todas"]);
+  allChip.addEventListener("click", () => {
+    if (classificationFilter !== null) {
+      classificationFilter = null;
+      onFilterChange?.();
+    }
+  });
+  bar.append(allChip);
+
+  const scrollRow = el("div", { class: "filter-bar--scroll" }, []);
+
+  for (const cl of classifications) {
+    const count = allItems.filter(i => i.classification === cl.value).length;
+    const selected = classificationFilter !== null && classificationFilter.has(cl.value);
+
+    const chip = el("button", {
+      class: selected
+        ? `chip chip--${cl.value} chip--selected`
+        : `chip chip--filter`,
+      type: "button",
+      title: `${cl.label} (${count})`
+    }, [
+      icon(cl.icon),
+      el("span", { class: "chip__label" }, [cl.label]),
+      el("span", { class: "chip__count" }, [`(${count})`])
+    ]);
+
+    chip.addEventListener("click", () => {
+      if (classificationFilter === null) {
+        classificationFilter = new Set([cl.value]);
+      } else if (classificationFilter.has(cl.value)) {
+        classificationFilter.delete(cl.value);
+        if (classificationFilter.size === 0) classificationFilter = null;
+      } else {
+        classificationFilter.add(cl.value);
+      }
+      onFilterChange?.();
+    });
+    scrollRow.append(chip);
+  }
+
+  bar.append(scrollRow);
+  return bar;
 }
 
 function renderColumn(
