@@ -2881,6 +2881,13 @@ h4 {
 /* ── Note Card ── */
 
 .card--note {
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
+}
+
+.card--note .card__footer {
+  margin-top: auto;
 }
 
 .card--note .chip--compact {
