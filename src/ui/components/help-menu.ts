@@ -1,14 +1,21 @@
 import { el, icon } from "@ui/components/dom";
 import { openModal } from "../modal";
 
-const SHORTCUTS: [string, string][] = [
-  ["N", "Nova tarefa na coluna Todo"],
+const TASK_SHORTCUTS: [string, string][] = [
+  ["N", "Nova tarefa"],
+  ["Ctrl + Enter", "Salvar formulário"],
+  ["Esc", "Fechar / Cancelar"],
+];
+
+const NOTES_SHORTCUTS: [string, string][] = [
+  ["N", "Nova anotação"],
   ["Ctrl + Enter", "Salvar formulário"],
   ["Esc", "Fechar / Cancelar"],
 ];
 
 export function openShortcutsHelp(): void {
-  const items = SHORTCUTS.map(([key, desc]) =>
+  const isNotes = !!document.querySelector(".board--notes");
+  const items = (isNotes ? NOTES_SHORTCUTS : TASK_SHORTCUTS).map(([key, desc]) =>
     el("div", { class: "shortcuts-item" }, [
       el("kbd", {}, [key]),
       el("span", {}, [desc]),
