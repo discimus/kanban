@@ -241,7 +241,10 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   });
 
   const notesBtn = el("button", { class: "btn btn--icon btn--notes", type: "button", title: "Criar nova board de notas" }, [icon("note_stack_add")]);
-  notesBtn.addEventListener("click", () => openNotesForm());
+  notesBtn.addEventListener("click", () => {
+    onNewProject?.();
+    openNotesForm();
+  });
 
   const actionsBar = el("div", { class: "sidebar__actions" }, [addBtn, notesBtn]);
 
