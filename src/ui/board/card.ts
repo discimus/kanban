@@ -65,12 +65,6 @@ function openMoveToProjectDialog(item: BacklogItem): void {
   openModal({ title: "Mover card para outro projeto", body });
 }
 
-function nextClassification(current: TaskClassification, category: ProductCategory): TaskClassification {
-  const list = CATEGORY_CLASSIFICATIONS[category];
-  const idx = list.findIndex((c) => c.value === current);
-  return list[(idx + 1) % list.length].value;
-}
-
 const FIBONACCI = [1, 2, 3, 5, 8];
 
 function nextFibonacci(current: number): number {
@@ -466,7 +460,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     : [icon(classificationIcon(item.classification, category)), el("span", {}, [classificationLabel(item.classification, category)])]
   );
   if (!readOnly) {
-    if (minimal) {
       classifyChip.addEventListener("click", (ev) => {
         ev.stopPropagation();
         const existing = document.querySelector(".classify-popup");
@@ -511,11 +504,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         document.addEventListener("click", close);
         document.addEventListener("scroll", close);
       });
-    } else {
-      classifyChip.addEventListener("click", () => {
-        backlogService.classify(item.id, nextClassification(item.classification, category));
-      });
-    }
   }
 
   const pointsBtn = minimal ? null : el("button", {
