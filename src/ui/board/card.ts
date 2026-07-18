@@ -425,14 +425,15 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   };
 
   const addImage = (): void => {
-    if (!cardBody.classList.contains("card__body--expanded")) {
+    const expandCard = (): void => {
+      if (cardBody.classList.contains("card__body--expanded")) return;
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
       if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
-    }
+    };
 
     const tryClipboard = (): void => {
-      if (productService.get(item.productId)?.autoPasteImages === false) return;
+      if (productService.get(item.productId)?.autoPasteImages === false) { openFilePicker(); return; }
       navigator.clipboard.read()
         .then((items) => {
           for (const clipItem of items) {
@@ -441,6 +442,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             clipItem.getType(mime).then((blob) => {
               const reader = new FileReader();
               reader.addEventListener("load", () => {
+                expandCard();
                 imageService.create({
                   backlogItemId: item.id,
                   dataUrl: reader.result as string,
@@ -468,6 +470,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         if (!file) return;
         const reader = new FileReader();
         reader.addEventListener("load", () => {
+          expandCard();
           imageService.create({
             backlogItemId: item.id,
             dataUrl: reader.result as string,
