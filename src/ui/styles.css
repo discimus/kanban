@@ -1256,8 +1256,17 @@ button.chip--todo:hover {
 }
 
 @media (max-width: 720px) {
+  .board__filters {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
   .board__filters .chip {
-    padding: 3px 5px;
+    padding: 2px 5px;
+  }
+
+  .board__filters .filter-bar--scroll {
+    gap: 4px;
   }
 
   .board__filters .chip .chip__label {
