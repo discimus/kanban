@@ -12,9 +12,10 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   const product = productService.get(productId);
   const category = product?.category ?? "development";
   const showMeta = category !== "notes";
+  const isNotes = !showMeta;
   const clist = CATEGORY_CLASSIFICATIONS[category];
 
-  const title = textInput(existing?.title ?? "", "Título do item");
+  const title = textInput(existing?.title ?? "", isNotes ? "Título da nota" : "Título do item");
   const description = textArea(existing?.description ?? "", "Descrição");
   const priority = showMeta
     ? select(PRIORITIES.map((p) => ({ value: p.value, label: p.label })), existing?.priority ?? "medium")
@@ -87,7 +88,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     linksSection,
     commentsSection,
     error,
-    formActions(existing ? "Salvar" : "Criar item", submit)
+    formActions(existing ? "Salvar" : (isNotes ? "Criar nota" : "Criar item"), submit)
   ]);
 
   body.addEventListener("keydown", (e) => {
@@ -97,7 +98,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     }
   });
 
-  openModal({ title: existing ? "Editar item de backlog" : "Novo item de backlog", body, autoFocus: !existing });
+  openModal({ title: existing ? (isNotes ? "Editar nota" : "Editar item de backlog") : (isNotes ? "Nova nota" : "Novo item de backlog"), body, autoFocus: !existing });
 
   if (existing && !showMeta) {
     description.focus();
