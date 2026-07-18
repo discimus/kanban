@@ -30,6 +30,7 @@ function makeBacklogItem(overrides: Partial<BacklogItem> = {}): BacklogItem {
     status: "todo",
     storyPoints: 1,
     classification: "task",
+    createdAt: "2024-01-01T00:00:00.000Z",
     archivedAt: null,
     completedAt: null,
     ...overrides,

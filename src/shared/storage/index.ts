@@ -6,7 +6,7 @@ const STORAGE_KEY = "kanban-ddd-state";
 const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "refactor", "idea", "pending", "improvement", "meeting", "content", "project", "note", "exercise", "todo"];
 
 export function normalizeBacklogItem(item: BacklogItem): BacklogItem {
-  const base: BacklogItem = { ...item, archivedAt: (item as any).archivedAt ?? null, completedAt: (item as any).completedAt ?? null };
+  const base: BacklogItem = { ...item, archivedAt: (item as any).archivedAt ?? null, completedAt: (item as any).completedAt ?? null, createdAt: (item as any).createdAt ?? new Date().toISOString() };
   if (!VALID_CLASSIFICATIONS.includes(item.classification)) {
     return { ...base, classification: "task" };
   }

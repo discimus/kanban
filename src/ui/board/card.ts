@@ -558,6 +558,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           critical: "priority_high"
         }[item.priority])]) : null
       ]),
+      minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
       pointsBtn
     ]),
     el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),

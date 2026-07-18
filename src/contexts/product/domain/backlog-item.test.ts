@@ -113,6 +113,7 @@ describe("changeProduct", () => {
     status: "doing" as const,
     storyPoints: 5,
     classification: "task" as const,
+    createdAt: "2025-01-01T00:00:00.000Z",
     archivedAt: "2025-01-01T00:00:00.000Z",
     completedAt: "2025-01-01T00:00:00.000Z"
   };

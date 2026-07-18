@@ -54,6 +54,7 @@ function makeBacklogItem(overrides: Record<string, unknown> = {}) {
     status: "todo" as const,
     storyPoints: 1,
     classification: "task" as const,
+    createdAt: "2024-01-01T00:00:00.000Z",
     archivedAt: null,
     completedAt: null,
     ...overrides
