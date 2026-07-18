@@ -2,7 +2,7 @@ import { el, clear, icon } from "@ui/components/dom";
 import { productService } from "@contexts/product/application/product.service";
 import { renderSidebar, setupScrollFade } from "@ui/components/sidebar";
 import { renderProductHeader } from "@ui/components/planning";
-import { renderBoard } from "@ui/board/board";
+import { renderBoard, renderNotesBoard } from "@ui/board/board";
 import { renderStatistics } from "@ui/components/statistics";
 import { renderThemeMenu } from "@ui/components/theme-menu";
 import { renderHelpMenu } from "@ui/components/help-menu";
@@ -128,7 +128,11 @@ export function renderApp(root: HTMLElement): void {
           }
           renderApp(root);
         }),
-        showStats ? renderStatistics(product.id) : renderBoard(product.id, showArchived, () => renderApp(root))
+        showStats ? renderStatistics(product.id) : (
+          product.boardMode === "notes"
+            ? renderNotesBoard(product.id, showArchived, () => renderApp(root))
+            : renderBoard(product.id, showArchived, () => renderApp(root))
+        )
       );
     }
   }

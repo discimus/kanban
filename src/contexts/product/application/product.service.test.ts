@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { AppState } from "@shared/types";
+import type { AppState, Product } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
   const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], estimations: [] };
@@ -26,7 +26,7 @@ vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
 
 import { productService } from "@contexts/product/application/product.service";
 
-function makeProduct(overrides: Partial<ReturnType<typeof productService.create>> = {}) {
+function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
     id: "p1",
     name: "Projeto A",
@@ -38,6 +38,7 @@ function makeProduct(overrides: Partial<ReturnType<typeof productService.create>
     autoArchiveDays: null,
     autoPasteLinks: true,
     showReview: true,
+    boardMode: "kanban",
     archivedAt: null,
     ...overrides
   };

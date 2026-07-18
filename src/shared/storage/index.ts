@@ -3,7 +3,7 @@ import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
 
-const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "idea", "refactor"];
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "refactor", "idea", "pending", "improvement", "meeting", "content", "project", "note", "exercise", "todo"];
 
 export function normalizeBacklogItem(item: BacklogItem): BacklogItem {
   const base: BacklogItem = { ...item, archivedAt: (item as any).archivedAt ?? null, completedAt: (item as any).completedAt ?? null };
@@ -42,6 +42,7 @@ export function normalizeProduct(product: Product): Product {
     autoArchiveDays: (product as any).autoArchiveDays ?? null,
     autoPasteLinks: (product as any).autoPasteLinks !== false,
     showReview: (product as any).showReview !== false,
+    boardMode: (product as any).boardMode === "notes" ? "notes" : "kanban",
     archivedAt: (product as any).archivedAt ?? null
   };
   if (!VALID_STATUSES.includes(normalized.status)) {

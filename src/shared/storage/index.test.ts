@@ -14,6 +14,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     autoArchiveDays: null,
     autoPasteLinks: true,
     showReview: true,
+    boardMode: "kanban",
     archivedAt: null,
     ...overrides,
   };

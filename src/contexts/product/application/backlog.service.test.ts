@@ -43,6 +43,7 @@ vi.mock("@contexts/product/application/product.service", () => ({
       autoArchiveDays: null,
       autoPasteLinks: true,
       showReview: true,
+      boardMode: "kanban",
       archivedAt: null
     })),
     recomputeStatus: vi.fn(),
@@ -89,6 +90,7 @@ beforeEach(() => {
     autoArchiveDays: null,
     autoPasteLinks: true,
     showReview: true,
+      boardMode: "kanban",
       archivedAt: null
   });
   vi.mocked(productService.recomputeStatus).mockClear();
@@ -140,6 +142,7 @@ describe("backlogService", () => {
       autoArchiveDays: null,
       autoPasteLinks: true,
       showReview: true,
+      boardMode: "kanban",
       archivedAt: null
       });
       expect(() => backlogService.create({ productId: "p1", title: "Item" })).toThrow(
@@ -222,8 +225,10 @@ describe("backlogService", () => {
     beforeEach(() => {
       vi.mocked(productService.get).mockImplementation((id: string) => {
         if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      boardMode: "kanban",
       archivedAt: null };
         if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      boardMode: "kanban",
       archivedAt: null };
         return undefined;
       });
@@ -256,8 +261,10 @@ describe("backlogService", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
         if (id === "p1") return { id: "p1", name: "Source", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      boardMode: "kanban",
       archivedAt: null };
         if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      boardMode: "kanban",
       archivedAt: null };
         return undefined;
       });
@@ -268,8 +275,10 @@ describe("backlogService", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
         if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      boardMode: "kanban",
       archivedAt: null };
         if (id === "p2") return { id: "p2", name: "Target", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+      boardMode: "kanban",
       archivedAt: null };
         return undefined;
       });

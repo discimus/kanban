@@ -5,7 +5,7 @@ const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
 const VALID_PRIORITIES = ["low", "medium", "high", "critical"];
 const VALID_TASK_STATUSES = ["todo", "doing", "done"];
-const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "refactor", "idea", "pending", "improvement", "meeting", "content", "project", "note", "exercise"];
+const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "refactor", "idea", "pending", "improvement", "meeting", "content", "project", "note", "exercise", "todo"];
 const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study"];
 
 interface ExportResult {

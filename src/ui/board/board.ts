@@ -1,5 +1,5 @@
 import { el, icon } from "@ui/components/dom";
-import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory, TaskClassification, CATEGORY_CLASSIFICATIONS } from "@shared/types";
+import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory, TaskClassification, CATEGORY_CLASSIFICATIONS, NOTE_CLASSIFICATIONS } from "@shared/types";
 
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
@@ -10,6 +10,7 @@ import { openShortcutsHelp } from "@ui/components/help-menu";
 
 let kbRegistered = false;
 let classificationFilter: Set<TaskClassification> | null = null;
+let notesFilter: Set<TaskClassification> | null = null;
 
 function onGlobalKeydown(e: KeyboardEvent): void {
   const tag = (e.target as HTMLElement)?.tagName;
@@ -26,7 +27,7 @@ function onGlobalKeydown(e: KeyboardEvent): void {
   if (e.key.toLowerCase() !== "n") return;
   e.preventDefault();
 
-  const board = document.querySelector(".board");
+  const board = document.querySelector<HTMLElement>(".board, .board--notes");
   if (!board) return;
   const btn = board.querySelector<HTMLButtonElement>(".quick-add__btn");
   const input = board.querySelector<HTMLInputElement>(".quick-add__input");
@@ -248,5 +249,171 @@ function renderQuickAdd(productId: string): HTMLElement {
 
   addBtn.addEventListener("click", showInput);
   wrapper.append(addBtn);
+  return wrapper;
+}
+
+function renderNotesQuickAdd(productId: string): HTMLElement {
+  const wrapper = el("div", { class: "quick-add quick-add--notes" }, []);
+
+  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn", title: "Adicionar nota (N)" }, [
+    icon("add"),
+    "Adicionar nota"
+  ]);
+
+  const showInput = (): void => {
+    const input = el("input", {
+      class: "quick-add__input",
+      type: "text",
+      placeholder: "Título da nota…"
+    }) as HTMLInputElement;
+
+    let done = false;
+    const reset = (): void => {
+      if (done) return;
+      done = true;
+      wrapper.replaceChildren(addBtn);
+    };
+
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        const title = input.value.trim();
+        if (title) {
+          try {
+            backlogService.create({ productId, title, priority: "medium", classification: "note" });
+          } catch (e) {
+            showAlert((e as Error).message);
+          }
+        } else {
+          reset();
+        }
+      } else if (ev.key === "Escape") {
+        reset();
+      }
+    });
+    input.addEventListener("blur", () => setTimeout(reset, 150));
+
+    wrapper.replaceChildren(input);
+    input.focus();
+  };
+
+  addBtn.addEventListener("click", showInput);
+  wrapper.append(addBtn);
+  return wrapper;
+}
+
+function renderNotesFilter(
+  allItems: BacklogItem[],
+  onFilterChange?: () => void
+): HTMLElement {
+  const bar = el("div", { class: "filter-bar board__filters" }, []);
+
+  const allChip = el("button", {
+    class: `chip chip--filter${notesFilter === null ? " chip--selected" : ""}`,
+    type: "button",
+    title: "Mostrar todas as categorias"
+  }, ["Todas"]);
+  allChip.addEventListener("click", () => {
+    if (notesFilter !== null) {
+      notesFilter = null;
+      onFilterChange?.();
+    }
+  });
+  bar.append(allChip);
+
+  const scrollRow = el("div", { class: "filter-bar--scroll" }, []);
+
+  for (const cl of NOTE_CLASSIFICATIONS) {
+    const count = allItems.filter(i => i.classification === cl.value).length;
+    if (count === 0) continue;
+    const selected = notesFilter !== null && notesFilter.has(cl.value);
+
+    const chip = el("button", {
+      class: selected
+        ? `chip chip--${cl.value} chip--selected`
+        : `chip chip--filter`,
+      type: "button",
+      title: `${cl.label} (${count})`
+    }, [
+      icon(cl.icon),
+      el("span", { class: "chip__label" }, [cl.label]),
+      el("span", { class: "chip__count" }, [`(${count})`])
+    ]);
+
+    chip.addEventListener("click", () => {
+      if (notesFilter === null) {
+        notesFilter = new Set([cl.value]);
+      } else if (notesFilter.has(cl.value)) {
+        notesFilter.delete(cl.value);
+        if (notesFilter.size === 0) notesFilter = null;
+      } else {
+        notesFilter.add(cl.value);
+      }
+      onFilterChange?.();
+    });
+    scrollRow.append(chip);
+  }
+
+  bar.append(scrollRow);
+  return bar;
+}
+
+export function renderNotesBoard(productId: string, showArchived = false, onFilterChange?: () => void): HTMLElement {
+  const product = productService.get(productId);
+  const locked = product?.status === "completed" || product?.status === "canceled" || !!product?.archivedAt;
+
+  const allItems = backlogService
+    .byProduct(productId)
+    .filter((i) => showArchived || !i.archivedAt);
+
+  let displayItems = allItems;
+
+  if (notesFilter !== null && notesFilter.size > 0) {
+    displayItems = allItems.filter(i => notesFilter!.has(i.classification));
+  }
+
+  const wrapper = el("div", { class: "board-wrapper" }, []);
+
+  const uniqueClassifications = new Set(allItems.map(i => i.classification));
+  const noteClassValues = new Set(NOTE_CLASSIFICATIONS.map(c => c.value));
+  const hasNoteClasses = [...uniqueClassifications].some(c => noteClassValues.has(c));
+
+  if (hasNoteClasses || (notesFilter !== null && notesFilter.size > 0)) {
+    wrapper.append(renderNotesFilter(allItems, onFilterChange));
+  }
+
+  const board = el("div", { class: "board board--notes" }, []);
+
+  if (!locked) {
+    board.append(renderNotesQuickAdd(productId));
+  }
+
+  for (const cl of NOTE_CLASSIFICATIONS) {
+    const groupItems = displayItems.filter(i => i.classification === cl.value);
+    if (groupItems.length === 0) continue;
+
+    const group = el("div", { class: "notes-group" }, [
+      el("header", { class: "notes-group__header" }, [
+        icon(cl.icon),
+        cl.label,
+        el("span", { class: "notes-group__count" }, [String(groupItems.length)])
+      ]),
+      el("div", { class: "notes-group__cards" },
+        groupItems.map(item => backlogCard(item, locked, false, "development", true))
+      )
+    ]);
+    board.append(group);
+  }
+
+  if (board.children.length <= 1 && !locked) {
+    board.append(el("p", { class: "notes-empty" }, ["Nenhuma nota ainda. Crie uma acima."]));
+  }
+
+  wrapper.append(board);
+
+  if (!kbRegistered) {
+    document.addEventListener("keydown", onGlobalKeydown);
+    kbRegistered = true;
+  }
+
   return wrapper;
 }

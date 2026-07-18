@@ -126,6 +126,7 @@ export function createExampleData(): AppState {
         autoArchiveDays: null,
         autoPasteLinks: true,
         showReview: true,
+        boardMode: "kanban",
         archivedAt: null
       }
     ],

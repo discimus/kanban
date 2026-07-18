@@ -1,5 +1,5 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
-import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
+import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, NOTE_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
@@ -21,6 +21,14 @@ function classificationLabel(c: TaskClassification, category: ProductCategory): 
 
 function classificationIcon(c: TaskClassification, category: ProductCategory): string {
   return CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c)?.icon ?? "help";
+}
+
+function noteClassificationLabel(c: TaskClassification): string {
+  return NOTE_CLASSIFICATIONS.find((x) => x.value === c)?.label ?? c;
+}
+
+function noteClassificationIcon(c: TaskClassification): string {
+  return NOTE_CLASSIFICATIONS.find((x) => x.value === c)?.icon ?? "help";
 }
 
 function openMoveToProjectDialog(item: BacklogItem): void {
@@ -71,6 +79,11 @@ function nextClassification(current: TaskClassification, category: ProductCatego
   return list[(idx + 1) % list.length].value;
 }
 
+function nextNoteClassification(current: TaskClassification): TaskClassification {
+  const idx = NOTE_CLASSIFICATIONS.findIndex((c) => c.value === current);
+  return NOTE_CLASSIFICATIONS[(idx + 1) % NOTE_CLASSIFICATIONS.length].value;
+}
+
 const FIBONACCI = [1, 2, 3, 5, 8];
 
 function nextFibonacci(current: number): number {
@@ -113,7 +126,7 @@ function fullDateTime(iso: string): string {
 
 const expandedCards = new Map<string, boolean>();
 
-export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development"): HTMLElement {
+export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development", minimal = false): HTMLElement {
   const isArchived = !!item.archivedAt;
   const readOnly = locked || isArchived;
   const taskList = el("div", { class: "card__tasks" }, []);
@@ -457,25 +470,25 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   );
 
   const classifyChip = el("button", {
-    class: `chip chip--${item.classification}`,
+    class: `chip chip--${item.classification}${minimal ? " chip--compact" : ""}`,
     type: "button",
-    "aria-label": `Classificação: ${classificationLabel(item.classification, category)}`
-  }, [
-    icon(classificationIcon(item.classification, category)),
-    el("span", {}, [classificationLabel(item.classification, category)])
-  ]);
+    "aria-label": `Classificação: ${minimal ? noteClassificationLabel(item.classification) : classificationLabel(item.classification, category)}`
+  }, minimal
+    ? [icon(minimal ? noteClassificationIcon(item.classification) : classificationIcon(item.classification, category))]
+    : [icon(classificationIcon(item.classification, category)), el("span", {}, [classificationLabel(item.classification, category)])]
+  );
   if (!readOnly) {
     classifyChip.addEventListener("click", () => {
-      backlogService.classify(item.id, nextClassification(item.classification, category));
+      backlogService.classify(item.id, minimal ? nextNoteClassification(item.classification) : nextClassification(item.classification, category));
     });
   }
 
-  const pointsBtn = el("button", {
+  const pointsBtn = minimal ? null : el("button", {
     class: "card__points",
     type: "button",
     "aria-label": `${item.storyPoints} story points`
   }, [`${item.storyPoints} pts`]);
-  if (!readOnly) {
+  if (pointsBtn && !readOnly) {
     pointsBtn.addEventListener("click", () => {
       backlogService.setStoryPoints(item.id, nextFibonacci(item.storyPoints));
     });
@@ -495,12 +508,16 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   }
   cardBody.append(taskList, linkList, commentList);
 
+  const descPreview = minimal && item.description
+    ? el("p", { class: "card__desc-preview" }, [item.description])
+    : null;
+
   const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
       el("div", { class: "card__badges" }, [
         classifyChip,
-        showPriority ? el("span", { class: `badge badge--${item.priority}`, title: `Prioridade: ${priorityLabel(item.priority)}` }, [icon({
+        !minimal && showPriority ? el("span", { class: `badge badge--${item.priority}`, title: `Prioridade: ${priorityLabel(item.priority)}` }, [icon({
           low: "arrow_downward",
           medium: "remove",
           high: "arrow_upward",
@@ -509,8 +526,9 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       ]),
       pointsBtn
     ]),
-    el("h4", { class: "card__title" }, [item.title]),
-    progressBar,
+    el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
+    descPreview,
+    !minimal ? progressBar : null,
     cardBody
   ];
 
@@ -550,13 +568,14 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     cardChildren.push(footer);
   }
 
+  const cardClass = `card${locked ? " card--locked" : ""}${isArchived ? " card--archived" : ""}${minimal ? " card--note" : ""}`;
   const card = el("article", {
-    class: `card${locked ? " card--locked" : ""}${isArchived ? " card--archived" : ""}`,
-    draggable: readOnly ? "false" : "true",
+    class: cardClass,
+    draggable: minimal || readOnly ? "false" : "true",
     "data-id": item.id
   }, cardChildren as Node[]);
 
-  if (!readOnly) {
+  if (!minimal && !readOnly) {
     card.addEventListener("dragstart", (ev) => {
       ev.dataTransfer?.setData("text/plain", item.id);
       card.classList.add("card--dragging");

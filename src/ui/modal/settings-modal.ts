@@ -1,8 +1,32 @@
-import { el } from "@ui/components/dom";
+import { el, icon } from "@ui/components/dom";
 import { formActions, errorText } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
-import { Product } from "@shared/types";
+import { Product, BoardMode } from "@shared/types";
+
+function renderModeSwitch(current: BoardMode): { el: HTMLElement; getValue: () => BoardMode } {
+  let mode: BoardMode = current;
+  const kanbanBtn = el("button", {
+    class: `segmented-btn${mode === "kanban" ? " segmented-btn--selected" : ""}`,
+    type: "button"
+  }, [icon("view_column"), "Kanban"]);
+  const notesBtn = el("button", {
+    class: `segmented-btn${mode === "notes" ? " segmented-btn--selected" : ""}`,
+    type: "button"
+  }, [icon("sticky_note_2"), "Notas"]);
+
+  const select = (m: BoardMode): void => {
+    mode = m;
+    kanbanBtn.classList.toggle("segmented-btn--selected", m === "kanban");
+    notesBtn.classList.toggle("segmented-btn--selected", m === "notes");
+  };
+
+  kanbanBtn.addEventListener("click", () => select("kanban"));
+  notesBtn.addEventListener("click", () => select("notes"));
+
+  const container = el("div", { class: "segmented-control" }, [kanbanBtn, notesBtn]);
+  return { el: container, getValue: () => mode };
+}
 
 export function openProductSettings(product: Product): void {
   const showPriority = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
@@ -14,6 +38,8 @@ export function openProductSettings(product: Product): void {
   const showReviewCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   showReviewCb.checked = product.showReview !== false;
 
+  const modeSwitch = renderModeSwitch(product.boardMode);
+
   const error = errorText();
 
   const submit = () => {
@@ -21,7 +47,8 @@ export function openProductSettings(product: Product): void {
       productService.edit(product.id, {
         showPriority: showPriority.checked,
         autoPasteLinks: autoPasteCb.checked,
-        showReview: showReviewCb.checked
+        showReview: showReviewCb.checked,
+        boardMode: modeSwitch.getValue()
       });
       closeModal();
     } catch (e) {
@@ -50,6 +77,11 @@ export function openProductSettings(product: Product): void {
         el("span", { class: "field__label" }, ["Exibir coluna Review"]),
         el("span", { class: "field__description" }, ["Mostra a coluna Review no quadro Kanban."])
       ])
+    ]),
+    el("label", { class: "field" }, [
+      el("span", { class: "field__label" }, ["Modo do quadro"]),
+      el("span", { class: "field__description" }, ["Kanban: colunas de status. Notas: layout livre com categorias."]),
+      modeSwitch.el
     ]),
     error,
     formActions("Salvar", submit)
