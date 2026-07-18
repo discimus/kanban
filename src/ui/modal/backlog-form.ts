@@ -15,7 +15,9 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   const isNotes = !showMeta;
   const clist = CATEGORY_CLASSIFICATIONS[category];
 
-  const title = textInput(existing?.title ?? "", isNotes ? "Título da nota" : "Título do item");
+  const title = isNotes
+    ? textArea(existing?.title ?? "", "Título da nota")
+    : textInput(existing?.title ?? "", "Título do item");
   const description = textArea(existing?.description ?? "", "Descrição");
   const priority = showMeta
     ? select(PRIORITIES.map((p) => ({ value: p.value, label: p.label })), existing?.priority ?? "medium")

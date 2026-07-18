@@ -867,6 +867,9 @@ button.card__points:hover {
   margin: 0 0 6px;
   font-size: 0.95rem;
   font-weight: 500;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .card__desc {
@@ -2934,11 +2937,9 @@ h4 {
   line-height: 1.4;
   margin: 0 0 6px;
   color: var(--text);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .card__desc-preview {
