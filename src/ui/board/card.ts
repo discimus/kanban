@@ -397,6 +397,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
   };
 
+  const isNotes = category === "notes";
   const showReview = productService.get(item.productId)?.showReview !== false;
   const columnSubmenu: MenuItem[] = KANBAN_COLUMNS
     .filter((col) => col.status !== "review" || showReview)
@@ -438,7 +439,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: "Comentário", icon: "chat", action: locked ? lockedAlert : addComment },
             { label: "Link", icon: "link", action: locked ? lockedAlert : addLink }
           ]},
-          { label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu },
+          ...(isNotes ? [] : [{ label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu }]),
           { label: "Mover para projeto...", icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
           { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
           {
