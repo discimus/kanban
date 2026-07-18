@@ -171,6 +171,19 @@ describe("validateAndImport", () => {
     const p1 = state.products.find((p) => p.id === "p1");
     expect(p1?.name).toBe("Existente");
   });
+
+  it("notes is accepted as valid category", () => {
+    const json = JSON.stringify({
+      products: [validProduct({ category: "notes" })],
+      backlogItems: [],
+      tasks: [],
+      links: [],
+      comments: [],
+      estimations: []
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(true);
+  });
 });
 
 describe("exportAllState", () => {
