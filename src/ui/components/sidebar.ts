@@ -187,10 +187,10 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
           icon(categoryIcon(product.category))
         ]),
         el("span", { class: "product-item__name-text" }, [product.name]),
-        el("span", { class: `product-item__status product-item__status--${status}` }, [
+        product.category !== "notes" ? el("span", { class: `product-item__status product-item__status--${status}` }, [
           icon(STATUS_ICONS[status]),
           statusLabel(status)
-        ])
+        ]) : null
       ]),
       el("span", { class: "product-item__desc" }, [
         product.description || "Sem descrição"
