@@ -465,9 +465,54 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     : [icon(classificationIcon(item.classification, category)), el("span", {}, [classificationLabel(item.classification, category)])]
   );
   if (!readOnly) {
-    classifyChip.addEventListener("click", () => {
-      backlogService.classify(item.id, nextClassification(item.classification, category));
-    });
+    if (minimal) {
+      classifyChip.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const existing = document.querySelector(".classify-popup");
+        if (existing) { existing.remove(); return; }
+
+        const popup = el("div", {
+          class: "actions-menu__dropdown classify-popup"
+        },
+          CATEGORY_CLASSIFICATIONS[category].map((c) => {
+            const active = c.value === item.classification;
+            const btn = el("button", {
+              class: "actions-menu__item",
+              type: "button",
+              disabled: active || undefined
+            }, [
+              active ? icon("check") : icon(c.icon),
+              el("span", { class: "actions-menu__label" }, [c.label])
+            ]);
+            if (!active) {
+              btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                backlogService.classify(item.id, c.value as TaskClassification);
+                popup.remove();
+              });
+            }
+            return btn;
+          })
+        );
+
+        const rect = classifyChip.getBoundingClientRect();
+        popup.style.cssText = `display:flex;flex-direction:column;gap:2px;position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;z-index:1000;min-width:180px`;
+
+        document.body.appendChild(popup);
+
+        const close = (e: Event) => {
+          if (!popup.contains(e.target as Node) && e.target !== classifyChip) {
+            popup.remove();
+            document.removeEventListener("click", close);
+          }
+        };
+        document.addEventListener("click", close);
+      });
+    } else {
+      classifyChip.addEventListener("click", () => {
+        backlogService.classify(item.id, nextClassification(item.classification, category));
+      });
+    }
   }
 
   const pointsBtn = minimal ? null : el("button", {

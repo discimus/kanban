@@ -1945,6 +1945,7 @@ button.chip--todo:hover {
   background: var(--md-surface-container-high);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  width: fit-content;
 }
 
 .actions-menu--open .actions-menu__dropdown {
@@ -2927,12 +2928,6 @@ h4 {
 
 .card--note .card__footer {
   margin-top: auto;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.card--note:hover .card__footer {
-  opacity: 1;
 }
 
 @media (max-width: 640px) {
@@ -2941,10 +2936,7 @@ h4 {
   }
 }
 
-@media (hover: none) {
-  .card--note .card__footer {
-    opacity: 1;
-  }
-}
+
+
 
 
