@@ -1,7 +1,7 @@
 import { BacklogItem, KanbanStatus, Priority, TaskClassification, Product } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
-import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem, changeProduct as changeProductDomain } from "../domain/backlog-item";
+import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem, changeProduct as changeProductDomain, defaultClassificationForCategory } from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
 import { productRepository } from "../infrastructure/product.repository";
 import { productService } from "./product.service";
@@ -124,7 +124,8 @@ export const backlogService = {
     }
     if (existing.productId === newProductId) return existing;
     const oldProductId = existing.productId;
-    const updated = changeProductDomain(existing, newProductId);
+    const defaultClassification = defaultClassificationForCategory(targetProduct.category);
+    const updated = changeProductDomain(existing, newProductId, defaultClassification);
     backlogRepository.save(updated);
     eventBus.emit("backlog:product-changed", updated);
     productService.recomputeStatus(oldProductId);

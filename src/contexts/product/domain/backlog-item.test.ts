@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createBacklogItem, isValidTransition, changeProduct } from "@contexts/product/domain/backlog-item";
+import { createBacklogItem, isValidTransition, changeProduct, defaultClassificationForCategory } from "@contexts/product/domain/backlog-item";
 import type { CreateBacklogItemProps } from "@contexts/product/domain/backlog-item";
 
 describe("createBacklogItem", () => {
@@ -145,5 +145,33 @@ describe("changeProduct", () => {
     const result = changeProduct(active, "p2");
     expect(result.archivedAt).toBeNull();
     expect(result.completedAt).toBeNull();
+  });
+
+  it("overrides classification when classification param is provided", () => {
+    const result = changeProduct(item, "p2", "bug");
+    expect(result.classification).toBe("bug");
+  });
+
+  it("preserves classification when no classification param is provided", () => {
+    const result = changeProduct(item, "p2");
+    expect(result.classification).toBe(item.classification);
+  });
+});
+
+describe("defaultClassificationForCategory", () => {
+  it("returns 'task' for development", () => {
+    expect(defaultClassificationForCategory("development")).toBe("task");
+  });
+
+  it("returns 'task' for business", () => {
+    expect(defaultClassificationForCategory("business")).toBe("task");
+  });
+
+  it("returns 'task' for study", () => {
+    expect(defaultClassificationForCategory("study")).toBe("task");
+  });
+
+  it("returns 'note' for notes", () => {
+    expect(defaultClassificationForCategory("notes")).toBe("note");
   });
 });

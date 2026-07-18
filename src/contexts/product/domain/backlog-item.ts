@@ -1,4 +1,4 @@
-import { BacklogItem, KanbanStatus, Priority, TaskClassification } from "@shared/types";
+import { BacklogItem, KanbanStatus, Priority, TaskClassification, ProductCategory, CATEGORY_CLASSIFICATIONS } from "@shared/types";
 import { uuid } from "@shared/utils";
 
 export interface CreateBacklogItemProps {
@@ -42,12 +42,17 @@ export function restore(item: BacklogItem): BacklogItem {
   return { ...item, archivedAt: null };
 }
 
-export function changeProduct(item: BacklogItem, newProductId: string): BacklogItem {
+export function defaultClassificationForCategory(category: ProductCategory): TaskClassification {
+  return CATEGORY_CLASSIFICATIONS[category][0].value;
+}
+
+export function changeProduct(item: BacklogItem, newProductId: string, classification?: TaskClassification): BacklogItem {
   if (!newProductId) throw new Error("O Projeto de destino é obrigatório.");
   return {
     ...item,
     productId: newProductId,
     status: "todo",
+    classification: classification ?? item.classification,
     archivedAt: null,
     completedAt: null
   };

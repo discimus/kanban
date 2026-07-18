@@ -299,5 +299,16 @@ describe("backlogService", () => {
       expect(mockStore.update).not.toHaveBeenCalled();
       expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
+
+    it("resets classification to target board's default when categories differ", () => {
+      state.backlogItems = [makeBacklogItem({ productId: "p1", classification: "bug" })];
+      vi.mocked(productService.get).mockImplementation((id: string) => {
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true, archivedAt: null };
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "notes", autoArchiveDays: null, autoPasteLinks: true, showReview: true, archivedAt: null };
+        return undefined;
+      });
+      const result = backlogService.changeProduct("b1", "p2");
+      expect(result.classification).toBe("note");
+    });
   });
 });
