@@ -27,6 +27,7 @@ vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
 
 import {
   validateAndImport,
+  checkImportConflicts,
   exportAllState,
   exportProductState
 } from "@contexts/product/application/export.service";
@@ -183,6 +184,65 @@ describe("validateAndImport", () => {
     });
     const result = validateAndImport(json);
     expect(result.success).toBe(true);
+  });
+
+  it("checkImportConflicts returns conflicts when product exists", () => {
+    state.products = [validProduct({ id: "p1", name: "Existente" }) as Product];
+    const json = JSON.stringify({
+      products: [validProduct({ id: "p1", name: "Existente" }), validProduct({ id: "p2", name: "Novo" })]
+    });
+    const result = checkImportConflicts(json);
+    expect(result.hasConflicts).toBe(true);
+    expect(result.conflicting).toHaveLength(1);
+    expect(result.conflicting[0].name).toBe("Existente");
+  });
+
+  it("checkImportConflicts returns no conflicts when product does not exist", () => {
+    state.products = [validProduct({ id: "p1" }) as Product];
+    const json = JSON.stringify({
+      products: [validProduct({ id: "p2", name: "Sem conflito" })]
+    });
+    const result = checkImportConflicts(json);
+    expect(result.hasConflicts).toBe(false);
+    expect(result.conflicting).toHaveLength(0);
+  });
+
+  it("overwrite replaces existing product and its children", () => {
+    state.products = [validProduct({ id: "p1", name: "Antigo" }) as Product];
+    state.backlogItems = [
+      { id: "b1", productId: "p1", title: "Item velho", description: "", priority: "medium" as const, status: "todo" as const, storyPoints: 1, classification: "task" as const, createdAt: "2024-01-01T00:00:00.000Z", archivedAt: null, completedAt: null }
+    ];
+    const json = JSON.stringify({
+      products: [validProduct({ id: "p1", name: "Novo" })],
+      backlogItems: [{ id: "b2", productId: "p1", title: "Item novo", description: "", priority: "high" as const, status: "doing" as const, storyPoints: 2, classification: "task" as const, createdAt: "2025-01-01T00:00:00.000Z", archivedAt: null, completedAt: null }],
+      tasks: [],
+      links: [],
+      comments: [],
+      estimations: []
+    });
+    const result = validateAndImport(json, true);
+    expect(result.success).toBe(true);
+    expect(state.products).toHaveLength(1);
+    expect(state.products[0].name).toBe("Novo");
+    expect(state.backlogItems).toHaveLength(1);
+    expect(state.backlogItems[0].id).toBe("b2");
+  });
+
+  it("overwrite false skips existing product (current behavior)", () => {
+    state.products = [validProduct({ id: "p1", name: "Original" }) as Product];
+    const json = JSON.stringify({
+      products: [validProduct({ id: "p1", name: "Tentativa" }), validProduct({ id: "p2", name: "Novo" })],
+      backlogItems: [],
+      tasks: [],
+      links: [],
+      comments: [],
+      estimations: []
+    });
+    const result = validateAndImport(json, false);
+    expect(result.success).toBe(true);
+    expect(state.products).toHaveLength(2);
+    const p1 = state.products.find((p) => p.id === "p1");
+    expect(p1?.name).toBe("Original");
   });
 });
 

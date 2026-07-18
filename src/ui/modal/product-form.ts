@@ -3,8 +3,8 @@ import { field, textInput, textArea, select, formActions, errorText } from "@ui/
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
 import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
-import { openImportPicker, validateAndImport } from "@contexts/product/application/export.service";
-import { showAlert } from "@ui/components/dialog";
+import { openImportPicker, validateAndImport, checkImportConflicts } from "@contexts/product/application/export.service";
+import { showAlert, showConfirm } from "@ui/components/dialog";
 
 export function openProductForm(existing?: Product): void {
   const name = textInput(existing?.name ?? "", "Nome do Projeto");
@@ -77,11 +77,23 @@ export function openProductForm(existing?: Product): void {
     const importBtn = el("button", { class: "btn btn--ghost btn--block" }, [icon("upload"), "Importar dados"]);
     importBtn.addEventListener("click", () => {
       openImportPicker((content) => {
-        const result = validateAndImport(content);
-        if (!result.success) {
-          showAlert(result.error!);
+        const { hasConflicts, conflicting } = checkImportConflicts(content);
+        if (hasConflicts) {
+          const names = conflicting.map(c => c.name);
+          const msg = names.length === 1
+            ? `O projeto "{{text}}" já existe. Deseja sobrescrevê-lo?`
+            : `Os projetos "{{text}}" já existem. Deseja sobrescrevê-los?`;
+          showConfirm(msg, names.join(", ")).then((ok) => {
+            if (ok) {
+              const result = validateAndImport(content, true);
+              if (!result.success) showAlert(result.error!);
+              else closeModal();
+            }
+          });
         } else {
-          closeModal();
+          const result = validateAndImport(content);
+          if (!result.success) showAlert(result.error!);
+          else closeModal();
         }
       });
     });

@@ -74,6 +74,21 @@ export function downloadExportProduct(productName: string, productId: string): v
   downloadFile(json, `${safeName}-${formatDateLabel()}.json`);
 }
 
+export function checkImportConflicts(jsonString: string): { hasConflicts: boolean; conflicting: { id: string; name: string }[] } {
+  let data: unknown;
+  try { data = JSON.parse(jsonString); } catch { return { hasConflicts: false, conflicting: [] }; }
+  if (!data || typeof data !== "object") return { hasConflicts: false, conflicting: [] };
+  const obj = data as Record<string, unknown>;
+  if (!Array.isArray(obj.products)) return { hasConflicts: false, conflicting: [] };
+
+  const state = store.getState();
+  const conflicting = (obj.products as Product[]).filter((p) =>
+    state.products.some((existing) => existing.id === p.id)
+  ).map((p) => ({ id: p.id, name: p.name }));
+
+  return { hasConflicts: conflicting.length > 0, conflicting };
+}
+
 export function openImportPicker(onFile: (content: string) => void): void {
   const input = document.createElement("input");
   input.type = "file";
@@ -91,7 +106,7 @@ export function openImportPicker(onFile: (content: string) => void): void {
   input.click();
 }
 
-export function validateAndImport(jsonString: string): ExportResult {
+export function validateAndImport(jsonString: string, overwrite = false): ExportResult {
   let data: unknown;
   try {
     data = JSON.parse(jsonString);
@@ -178,12 +193,26 @@ export function validateAndImport(jsonString: string): ExportResult {
     }
   }
 
-  doImport(data as AppState);
+  doImport(data as AppState, overwrite);
   return { success: true };
 }
 
-function doImport(data: AppState): void {
+function doImport(data: AppState, overwrite = false): void {
   store.update((state) => {
+    if (overwrite) {
+      for (const product of data.products) {
+        if (state.products.some((p) => p.id === product.id)) {
+          const removedItems = state.backlogItems.filter((b) => b.productId === product.id).map((b) => b.id);
+          state.backlogItems = state.backlogItems.filter((b) => b.productId !== product.id);
+          const removedTasks = state.tasks.filter((t) => removedItems.includes(t.backlogItemId)).map((t) => t.id);
+          state.tasks = state.tasks.filter((t) => !removedItems.includes(t.backlogItemId));
+          state.links = state.links.filter((l) => !removedItems.includes(l.backlogItemId));
+          state.comments = state.comments.filter((c) => !removedItems.includes(c.backlogItemId));
+          state.estimations = state.estimations.filter((e) => !removedTasks.includes(e.taskId));
+          state.products = state.products.filter((p) => p.id !== product.id);
+        }
+      }
+    }
     for (const product of data.products) {
       if (!state.products.some((p) => p.id === product.id)) {
         state.products.push(product);
