@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AppState, Product } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
-  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], estimations: [] };
+  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], estimations: [] };
   return {
     state,
     mockStore: {
@@ -37,6 +37,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     category: "development" as const,
     autoArchiveDays: null,
     autoPasteLinks: true,
+    autoPasteImages: true,
     showReview: true,
 
     archivedAt: null,
@@ -67,6 +68,7 @@ beforeEach(() => {
   state.tasks.length = 0;
   state.links.length = 0;
   state.comments.length = 0;
+  state.images.length = 0;
   state.estimations.length = 0;
   mockStore.update.mockClear();
   mockEventBus.emit.mockClear();

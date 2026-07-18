@@ -556,6 +556,52 @@ body {
   opacity: 0.6;
 }
 
+.sidebar__storage {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--md-surface-container-low);
+  flex-shrink: 0;
+}
+
+.sidebar__storage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.sidebar__storage-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sidebar__storage-value {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.sidebar__storage-bar {
+  height: 4px;
+  background: var(--md-surface-container-highest);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sidebar__storage-fill {
+  height: 100%;
+  background: var(--md-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.sidebar__storage-fill--warn {
+  background: var(--md-error);
+}
+
 .sidebar__actions {
   display: flex;
   flex-direction: row;
@@ -1530,6 +1576,60 @@ button.chip--todo:hover {
   -webkit-mask-image: none;
 }
 
+.card__images {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.card__image-wrap {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: 100%;
+}
+
+.card__image-thumb {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.card__image-thumb:hover {
+  opacity: 0.85;
+}
+
+.card__image-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.card__image-wrap:hover .card__image-delete {
+  opacity: 1;
+}
+
+.card__image-delete .material-symbols-outlined {
+  font-size: 14px;
+}
+
 .card__footer {
   display: flex;
   align-items: center;
@@ -2158,6 +2258,36 @@ button.chip--todo:hover {
 
 .modal__body {
   padding: 24px;
+}
+
+.modal--image {
+  width: min(90vw, 900px);
+  background: transparent;
+  border: none;
+}
+
+.modal--image .modal__header {
+  background: var(--elevation-4);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal--image .modal__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: var(--elevation-4);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  min-height: 200px;
+}
+
+.modal__image-full {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
 
 /* Forms — MD3 outlined fields */

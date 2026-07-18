@@ -21,7 +21,7 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; showReview?: boolean }): Product {
+  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; autoPasteImages?: boolean; showReview?: boolean }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     if (changes.name !== undefined) assertValidProductName(changes.name);
@@ -44,6 +44,7 @@ export const productService = {
       category: changes.category ?? existing.category,
       autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays,
       autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks,
+      autoPasteImages: changes.autoPasteImages ?? existing.autoPasteImages,
       showReview: changes.showReview ?? existing.showReview
     };
     productRepository.save(updated);

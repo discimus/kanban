@@ -132,6 +132,7 @@ export function createExampleData(): AppState {
         category: "development",
         autoArchiveDays: null,
         autoPasteLinks: true,
+        autoPasteImages: true,
         showReview: true,
         archivedAt: null
       }
@@ -140,6 +141,7 @@ export function createExampleData(): AppState {
     tasks,
     links,
     comments: [],
+    images: [],
     estimations: []
   };
 }

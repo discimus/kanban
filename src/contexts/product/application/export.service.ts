@@ -44,6 +44,7 @@ export function exportProductState(productId: string): AppState | null {
     tasks,
     links,
     comments,
+    images: [],
     estimations
   };
 }

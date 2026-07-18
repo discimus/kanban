@@ -20,6 +20,8 @@ export type DomainEvent =
   | "comment:created"
   | "comment:updated"
   | "comment:deleted"
+  | "image:created"
+  | "image:deleted"
   | "backlog:auto-archived"
   | "backlog:product-changed"
   | "product:archived"

@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, Link, TaskClassification, ProductCategory, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, Image, TaskClassification, ProductCategory, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
@@ -23,6 +23,7 @@ export function reviveState(raw: unknown): AppState {
     tasks: Array.isArray(data.tasks) ? data.tasks : base.tasks,
     links: Array.isArray(data.links) ? data.links.map(normalizeLink) : base.links,
     comments: Array.isArray(data.comments) ? data.comments : base.comments,
+    images: Array.isArray(data.images) ? data.images.map(normalizeImage) : base.images,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
   };
 }
@@ -34,6 +35,10 @@ export function normalizeLink(link: Link): Link {
   return { ...link, visitedAt: (link as any).visitedAt ?? null };
 }
 
+export function normalizeImage(image: Image): Image {
+  return { ...image, fileSize: (image as any).fileSize ?? 0 };
+}
+
 export function normalizeProduct(product: Product): Product {
   const normalized: Product = {
     ...product,
@@ -41,6 +46,7 @@ export function normalizeProduct(product: Product): Product {
     category: VALID_CATEGORIES.includes(product.category) ? product.category : "development",
     autoArchiveDays: (product as any).autoArchiveDays ?? null,
     autoPasteLinks: (product as any).autoPasteLinks !== false,
+    autoPasteImages: (product as any).autoPasteImages !== false,
     showReview: (product as any).showReview !== false,
     archivedAt: (product as any).archivedAt ?? null
   };

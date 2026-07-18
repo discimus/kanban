@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink } from "@shared/storage";
-import { emptyState, type Link, type Product, type BacklogItem } from "@shared/types";
+import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage } from "@shared/storage";
+import { emptyState, type Link, type Image, type Product, type BacklogItem } from "@shared/types";
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
@@ -13,6 +13,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     category: "development",
     autoArchiveDays: null,
     autoPasteLinks: true,
+    autoPasteImages: true,
     showReview: true,
 
     archivedAt: null,
@@ -44,6 +45,8 @@ describe("emptyState", () => {
     expect(state.backlogItems).toEqual([]);
     expect(state.tasks).toEqual([]);
     expect(state.links).toEqual([]);
+    expect(state.comments).toEqual([]);
+    expect(state.images).toEqual([]);
     expect(state.estimations).toEqual([]);
   });
 });
@@ -70,6 +73,8 @@ describe("reviveState", () => {
     expect(result.backlogItems).toEqual([]);
     expect(result.tasks).toEqual([]);
     expect(result.links).toEqual([]);
+    expect(result.comments).toEqual([]);
+    expect(result.images).toEqual([]);
     expect(result.estimations).toEqual([]);
   });
 
@@ -238,6 +243,29 @@ describe("normalizeProduct", () => {
     const result = normalizeProduct(product);
     expect(result.showReview).toBe(false);
   });
+
+  it("sets autoPasteImages to true for legacy product without it", () => {
+    const legacy = {
+      id: "p1",
+      name: "Old",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+      category: "development",
+      autoArchiveDays: null,
+      autoPasteLinks: true,
+      showReview: true,
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.autoPasteImages).toBe(true);
+  });
+
+  it("preserves autoPasteImages: false", () => {
+    const product = makeProduct({ autoPasteImages: false });
+    const result = normalizeProduct(product);
+    expect(result.autoPasteImages).toBe(false);
+  });
 });
 
 describe("normalizeLink", () => {
@@ -304,5 +332,34 @@ describe("normalizeBacklogItem", () => {
     } as unknown as BacklogItem;
     const result = normalizeBacklogItem(legacy);
     expect(result.completedAt).toBeNull();
+  });
+});
+
+describe("normalizeImage", () => {
+  it("sets fileSize to 0 for legacy image without it", () => {
+    const legacy = {
+      id: "img1",
+      backlogItemId: "b1",
+      dataUrl: "data:image/png;base64,abc=",
+      filename: "foto.png",
+      mimeType: "image/png",
+      createdAt: "2026-07-13T00:00:00.000Z",
+    } as unknown as Image;
+    const result = normalizeImage(legacy);
+    expect(result.fileSize).toBe(0);
+  });
+
+  it("preserves existing fileSize", () => {
+    const img = {
+      id: "img1",
+      backlogItemId: "b1",
+      dataUrl: "data:image/png;base64,abc=",
+      filename: "foto.png",
+      mimeType: "image/png",
+      fileSize: 2048,
+      createdAt: "2026-07-13T00:00:00.000Z",
+    } as Image;
+    const result = normalizeImage(img);
+    expect(result.fileSize).toBe(2048);
   });
 });

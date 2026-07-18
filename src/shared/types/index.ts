@@ -105,6 +105,7 @@ export interface Product {
   category: ProductCategory;
   autoArchiveDays: number | null;
   autoPasteLinks: boolean;
+  autoPasteImages: boolean;
   showReview: boolean;
   archivedAt: ISODate | null;
 }
@@ -146,6 +147,16 @@ export interface Comment {
   updatedAt?: ISODate;
 }
 
+export interface Image {
+  id: ID;
+  backlogItemId: ID;
+  dataUrl: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  createdAt: ISODate;
+}
+
 export interface EstimationLog {
   id: ID;
   taskId: ID;
@@ -160,6 +171,7 @@ export interface AppState {
   tasks: Task[];
   links: Link[];
   comments: Comment[];
+  images: Image[];
   estimations: EstimationLog[];
 }
 
@@ -170,6 +182,7 @@ export function emptyState(): AppState {
     tasks: [],
     links: [],
     comments: [],
+    images: [],
     estimations: []
   };
 }

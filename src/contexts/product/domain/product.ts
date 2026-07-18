@@ -22,6 +22,7 @@ export function createProduct(props: CreateProductProps): Product {
     category: props.category ?? "development",
     autoArchiveDays: null,
     autoPasteLinks: true,
+    autoPasteImages: true,
     showReview: (props.category ?? "development") === "development",
     archivedAt: null
   };

@@ -2,6 +2,7 @@ import { el, icon, clear } from "@ui/components/dom";
 import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
+import { getStorageUsage } from "@shared/storage/storage-usage";
 
 let archivedOpen = false;
 let filterCategory: ProductCategory | null = null;
@@ -248,12 +249,27 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
 
   const actionsBar = el("div", { class: "sidebar__actions" }, [addBtn, notesBtn]);
 
+  const storage = getStorageUsage();
+  const storageBar = el("div", { class: "sidebar__storage" }, [
+    el("div", { class: "sidebar__storage-header" }, [
+      el("span", { class: "sidebar__storage-label" }, ["Armazenamento"]),
+      el("span", { class: "sidebar__storage-value" }, [storage.label])
+    ]),
+    el("div", { class: "sidebar__storage-bar" }, [
+      el("div", {
+        class: `sidebar__storage-fill${storage.percentage >= 90 ? " sidebar__storage-fill--warn" : ""}`,
+        style: `width:${storage.percentage}%`
+      })
+    ])
+  ]);
+
   return el("aside", { class: "sidebar" }, [
     el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban"]),
     el("p", { class: "sidebar__subtitle" }, ["Dashboard de gestão de projetos"]),
     actionsBar,
     el("h2", { class: "sidebar__section" }, ["Projetos"]),
     renderFilterBar(onFilterChange),
-    list
+    list,
+    storageBar
   ]);
 }

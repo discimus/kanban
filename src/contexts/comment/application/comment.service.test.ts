@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AppState } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
-  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], estimations: [] };
+  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], estimations: [] };
   return {
     state,
     mockStore: {

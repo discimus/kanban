@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AppState } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
-  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], estimations: [] };
+  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], estimations: [] };
   return {
     state,
     mockStore: {
@@ -42,6 +42,7 @@ vi.mock("@contexts/product/application/product.service", () => ({
       category: "development",
       autoArchiveDays: null,
       autoPasteLinks: true,
+      autoPasteImages: true,
       showReview: true,
 
       archivedAt: null
@@ -77,6 +78,7 @@ beforeEach(() => {
   state.tasks.length = 0;
   state.links.length = 0;
   state.comments.length = 0;
+  state.images.length = 0;
   state.estimations.length = 0;
   mockStore.update.mockClear();
   mockEventBus.emit.mockClear();
@@ -90,6 +92,7 @@ beforeEach(() => {
     category: "development",
     autoArchiveDays: null,
     autoPasteLinks: true,
+    autoPasteImages: true,
     showReview: true,
 
       archivedAt: null
@@ -142,6 +145,7 @@ describe("backlogService", () => {
       category: "development",
       autoArchiveDays: null,
       autoPasteLinks: true,
+      autoPasteImages: true,
       showReview: true,
 
       archivedAt: null
@@ -225,10 +229,10 @@ describe("backlogService", () => {
   describe("changeProduct", () => {
     beforeEach(() => {
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true,
 
       archivedAt: null };
-        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true,
 
       archivedAt: null };
         return undefined;
@@ -261,10 +265,10 @@ describe("backlogService", () => {
     it("throws when source product is completed", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+        if (id === "p1") return { id: "p1", name: "Source", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true,
 
       archivedAt: null };
-        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true,
 
       archivedAt: null };
         return undefined;
@@ -275,10 +279,10 @@ describe("backlogService", () => {
     it("throws when target product is completed", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true,
 
       archivedAt: null };
-        if (id === "p2") return { id: "p2", name: "Target", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true,
+        if (id === "p2") return { id: "p2", name: "Target", status: "completed", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true,
 
       archivedAt: null };
         return undefined;
@@ -303,8 +307,8 @@ describe("backlogService", () => {
     it("resets classification to target board's default when categories differ", () => {
       state.backlogItems = [makeBacklogItem({ productId: "p1", classification: "bug" })];
       vi.mocked(productService.get).mockImplementation((id: string) => {
-        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, showReview: true, archivedAt: null };
-        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "notes", autoArchiveDays: null, autoPasteLinks: true, showReview: true, archivedAt: null };
+        if (id === "p1") return { id: "p1", name: "Source", status: "backlog", description: "", createdAt: "", showPriority: true, category: "development", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true, archivedAt: null };
+        if (id === "p2") return { id: "p2", name: "Target", status: "backlog", description: "", createdAt: "", showPriority: true, category: "notes", autoArchiveDays: null, autoPasteLinks: true, autoPasteImages: true, showReview: true, archivedAt: null };
         return undefined;
       });
       const result = backlogService.changeProduct("b1", "p2");

@@ -13,6 +13,9 @@ export function openProductSettings(product: Product): void {
   const autoPasteCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   autoPasteCb.checked = product.autoPasteLinks !== false;
 
+  const autoPasteImageCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+  autoPasteImageCb.checked = product.autoPasteImages !== false;
+
   const showReviewCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   showReviewCb.checked = product.showReview !== false;
 
@@ -24,6 +27,7 @@ export function openProductSettings(product: Product): void {
         ...(!isNotes && { showPriority: showPriority.checked }),
         ...(!isNotes && { showReview: showReviewCb.checked }),
         autoPasteLinks: autoPasteCb.checked,
+        autoPasteImages: autoPasteImageCb.checked,
       });
       closeModal();
     } catch (e) {
@@ -44,6 +48,13 @@ export function openProductSettings(product: Product): void {
       el("span", { class: "field__text-wrapper" }, [
         el("span", { class: "field__label" }, ["Colar link automaticamente"]),
         el("span", { class: "field__description" }, ["Ao adicionar um link, preenche automaticamente com o conteúdo da área de transferência."])
+      ])
+    ]),
+    el("label", { class: "field field--checkbox" }, [
+      autoPasteImageCb,
+      el("span", { class: "field__text-wrapper" }, [
+        el("span", { class: "field__label" }, ["Colar imagem automaticamente"]),
+        el("span", { class: "field__description" }, ["Ao adicionar uma imagem, cola automaticamente o conteúdo da área de transferência."])
       ])
     ]),
     ...(isNotes ? [] : [el("label", { class: "field field--checkbox" }, [

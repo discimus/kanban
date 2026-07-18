@@ -32,6 +32,7 @@ export const productRepository = {
       s.tasks = s.tasks.filter((t) => !removedItems.includes(t.backlogItemId));
       s.links = s.links.filter((l) => !removedItems.includes(l.backlogItemId));
       s.comments = s.comments.filter((c) => !removedItems.includes(c.backlogItemId));
+      s.images = s.images.filter((img) => !removedItems.includes(img.backlogItemId));
       s.estimations = s.estimations.filter((e) => !removedTasks.includes(e.taskId));
     });
   }

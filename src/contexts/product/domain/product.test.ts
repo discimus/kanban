@@ -36,6 +36,11 @@ describe("createProduct", () => {
     expect(product.autoPasteLinks).toBe(true);
   });
 
+  it("returns autoPasteImages as true", () => {
+    const product = createProduct({ name: "My Project" });
+    expect(product.autoPasteImages).toBe(true);
+  });
+
   it("returns showReview as true for development", () => {
     const product = createProduct({ name: "My Project" });
     expect(product.showReview).toBe(true);

@@ -3,6 +3,7 @@ import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, Task
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
+import { imageService } from "@contexts/image/application/image.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
@@ -106,6 +107,23 @@ function fullDateTime(iso: string): string {
 }
 
 const expandedCards = new Map<string, boolean>();
+
+function openImageModal(dataUrl: string, filename: string): void {
+  const img = el("img", {
+    class: "modal__image-full",
+    src: dataUrl,
+    alt: filename
+  }) as HTMLImageElement;
+
+  openModal({
+    title: filename,
+    body: img,
+    autoFocus: false
+  });
+
+  const dialog = document.querySelector(".modal");
+  if (dialog) dialog.classList.add("modal--image");
+}
 
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development", minimal = false): HTMLElement {
   const isArchived = !!item.archivedAt;
@@ -302,6 +320,35 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   };
 
   const commentList = el("div", { class: "card__links" }, []);
+  const imageList = el("div", { class: "card__images" }, []);
+
+  const renderImages = (): void => {
+    clear(imageList);
+    const images = imageService.byBacklogItem(item.id);
+    for (const img of images) {
+      const thumb = el("img", {
+        class: "card__image-thumb",
+        src: img.dataUrl,
+        alt: img.filename,
+        loading: "lazy"
+      }) as HTMLImageElement;
+
+      const del = el("button", { class: "card__task-delete card__image-delete", "aria-label": "Excluir imagem" }, [icon("close")]);
+      del.disabled = readOnly;
+      if (!readOnly) {
+        del.addEventListener("click", () => {
+          showConfirm('Excluir imagem "{{text}}"?', img.filename).then((ok) => {
+            if (ok) imageService.delete(img.id);
+          });
+        });
+      }
+
+      const wrap = el("div", { class: "card__image-wrap" }, [thumb, del]);
+      thumb.addEventListener("click", () => openImageModal(img.dataUrl, img.filename));
+      imageList.append(wrap);
+    }
+  };
+  renderImages();
 
   const renderComments = (): void => {
     clear(commentList);
@@ -377,6 +424,68 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     input.focus();
   };
 
+  const addImage = (): void => {
+    if (!cardBody.classList.contains("card__body--expanded")) {
+      expandedCards.set(item.id, true);
+      cardBody.classList.add("card__body--expanded");
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
+    }
+
+    const tryClipboard = (): void => {
+      if (productService.get(item.productId)?.autoPasteImages === false) return;
+      navigator.clipboard.read()
+        .then((items) => {
+          for (const clipItem of items) {
+            const mime = clipItem.types.find((t) => t.startsWith("image/"));
+            if (!mime) continue;
+            clipItem.getType(mime).then((blob) => {
+              const reader = new FileReader();
+              reader.addEventListener("load", () => {
+                imageService.create({
+                  backlogItemId: item.id,
+                  dataUrl: reader.result as string,
+                  filename: `clipboard-${Date.now()}.png`,
+                  mimeType: mime,
+                  fileSize: blob.size
+                });
+              });
+              reader.readAsDataURL(blob);
+            });
+            return;
+          }
+          openFilePicker();
+        })
+        .catch(() => openFilePicker());
+    };
+
+    const openFilePicker = (): void => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.hidden = true;
+      input.addEventListener("change", () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          imageService.create({
+            backlogItemId: item.id,
+            dataUrl: reader.result as string,
+            filename: file.name,
+            mimeType: file.type,
+            fileSize: file.size
+          });
+        });
+        reader.readAsDataURL(file);
+      });
+      document.body.append(input);
+      input.click();
+      input.remove();
+    };
+
+    tryClipboard();
+  };
+
   const lockedAlert = (): void => {
     showAlert(
       'Este projeto está concluído, cancelado ou arquivado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
@@ -431,7 +540,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           { label: "Adicionar...", icon: "add", submenu: [
             { label: "Subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
             { label: "Comentário", icon: "chat", action: locked ? lockedAlert : addComment },
-            { label: "Link", icon: "link", action: locked ? lockedAlert : addLink }
+            { label: "Link", icon: "link", action: locked ? lockedAlert : addLink },
+            { label: "Imagem", icon: "add_photo_alternate", action: locked ? lockedAlert : addImage }
           ]},
           ...(isNotes ? [] : [{ label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu }]),
           { label: "Mover para projeto...", icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
@@ -519,7 +629,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   const linkCount = linkService.byBacklogItem(item.id).length;
   const commentCount = commentService.byBacklogItem(item.id).length;
-  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0;
+  const imageCount = imageService.byBacklogItem(item.id).length;
+  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0;
 
   const bodyExpanded = expandedCards.get(item.id) === true;
   const cardBody = el("div", {
@@ -529,7 +640,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   if (item.description) {
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
-  cardBody.append(taskList, linkList, commentList);
+  cardBody.append(taskList, linkList, imageList, commentList);
 
   const cardChildren: (Node | null)[] = [
     menu,
@@ -579,7 +690,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       const actionsFooter = el("div", { class: "card__footer-actions" }, [
         cardActionBtn("playlist_add", "Adicionar subtarefa", locked ? lockedAlert : addSubtask),
         cardActionBtn("chat", "Adicionar comentário", locked ? lockedAlert : addComment),
-        cardActionBtn("link", "Adicionar link", locked ? lockedAlert : addLink)
+        cardActionBtn("link", "Adicionar link", locked ? lockedAlert : addLink),
+        cardActionBtn("add_photo_alternate", "Adicionar imagem", locked ? lockedAlert : addImage)
       ]);
       footer.append(actionsFooter);
     }
