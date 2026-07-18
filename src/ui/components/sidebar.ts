@@ -1,6 +1,7 @@
 import { el, icon, clear } from "@ui/components/dom";
 import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { openProductForm } from "@ui/modal/product-form";
+import { openNotesForm } from "@ui/modal/notes-form";
 
 let archivedOpen = false;
 let filterCategory: ProductCategory | null = null;
@@ -233,16 +234,21 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     list.append(headerBtn, archivedBody);
   }
 
-  const addBtn = el("button", { class: "btn btn--primary btn--block" }, [icon("add"), "Novo Projeto"]);
+  const addBtn = el("button", { class: "btn btn--primary" }, [icon("add"), "Novo Projeto"]);
   addBtn.addEventListener("click", () => {
     onNewProject?.();
     openProductForm();
   });
 
+  const notesBtn = el("button", { class: "btn btn--icon btn--tonal", type: "button", title: "Nova Nota" }, [icon("note_add")]);
+  notesBtn.addEventListener("click", () => openNotesForm());
+
+  const actionsBar = el("div", { class: "sidebar__actions" }, [addBtn, notesBtn]);
+
   return el("aside", { class: "sidebar" }, [
     el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban"]),
     el("p", { class: "sidebar__subtitle" }, ["Dashboard de gestão de projetos"]),
-    addBtn,
+    actionsBar,
     el("h2", { class: "sidebar__section" }, ["Projetos"]),
     renderFilterBar(onFilterChange),
     list

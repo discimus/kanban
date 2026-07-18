@@ -92,6 +92,11 @@
   --chip-exercise: #00897b;
   --chip-on-exercise: #ffffff;
 
+  --chip-todo-container: #e8f5e9;
+  --chip-on-todo-container: #2e7d32;
+  --chip-todo: #43a047;
+  --chip-on-todo: #ffffff;
+
   /* MD3 shape scale */
   --radius: 12px;
   --radius-sm: 8px;
@@ -182,6 +187,11 @@
     --chip-exercise: #26a69a;
     --chip-on-exercise: #001a16;
 
+    --chip-todo-container: #1b3d1b;
+    --chip-on-todo-container: #66bb6a;
+    --chip-todo: #66bb6a;
+    --chip-on-todo: #001a16;
+
     --primary-hover: #d0d2ff;
     --danger-hover: #ffb4ab;
     --success: #81c784;
@@ -255,6 +265,11 @@
   --chip-exercise: #26a69a;
   --chip-on-exercise: #001a16;
 
+  --chip-todo-container: #1b3d1b;
+  --chip-on-todo-container: #66bb6a;
+  --chip-todo: #66bb6a;
+  --chip-on-todo: #001a16;
+
   --primary-hover: #d0d2ff;
   --danger-hover: #ffb4ab;
   --success: #81c784;
@@ -324,6 +339,23 @@ body {
   margin: 0 0 8px;
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+.sidebar__actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.sidebar__actions .btn {
+  height: 40px;
+}
+.sidebar__actions .btn--primary {
+  flex: 1;
+  min-width: 0;
+}
+.sidebar__actions .btn--icon {
+  width: 40px;
+  flex-shrink: 0;
 }
 
 .sidebar__section {
@@ -453,6 +485,11 @@ body {
   color: var(--md-on-tertiary-container);
 }
 
+.product-item__category--notes {
+  background: var(--chip-note-container);
+  color: var(--chip-on-note-container);
+}
+
 .product-item__desc {
   font-size: 0.78rem;
   color: var(--text-muted);
@@ -521,7 +558,7 @@ body {
 
 .sidebar__actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 6px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
@@ -1012,6 +1049,16 @@ button.chip--note:hover {
 button.chip--exercise:hover {
   background: var(--chip-exercise);
   color: var(--chip-on-exercise);
+}
+
+.chip--todo {
+  background: var(--chip-todo-container);
+  color: var(--chip-on-todo-container);
+}
+
+button.chip--todo:hover {
+  background: var(--chip-todo);
+  color: var(--chip-on-todo);
 }
 
 /* ── Filter bar ─────────────────────────────────────────── */
@@ -1789,6 +1836,12 @@ button.chip--exercise:hover {
 
 .btn--ghost:active {
   background-image: linear-gradient(rgba(79, 91, 213, 0.12), rgba(79, 91, 213, 0.12));
+}
+
+.btn--tonal {
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+  border-color: transparent;
 }
 
 /* MD3 state layers adapt to dark scheme (overlay uses the surface's on-color) */
@@ -2851,6 +2904,11 @@ h4 {
   line-height: 1.4;
   margin: 0 0 6px;
   color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .card__desc-preview {
@@ -2889,49 +2947,4 @@ h4 {
   }
 }
 
-/* ── Segmented Control (MD3) ── */
 
-.segmented-control {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-top: 4px;
-}
-
-.segmented-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.segmented-btn .material-symbols-outlined {
-  font-size: 16px;
-}
-
-.segmented-btn:not(:last-child) {
-  border-right: 1px solid var(--border);
-}
-
-.segmented-btn:hover {
-  background: var(--md-surface-variant);
-}
-
-.segmented-btn--selected {
-  background: var(--md-primary-container);
-  color: var(--md-on-primary-container);
-}
-
-.segmented-btn--selected:hover {
-  background: var(--md-primary-container);
-}

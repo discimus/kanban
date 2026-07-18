@@ -129,7 +129,7 @@ export function renderApp(root: HTMLElement): void {
           renderApp(root);
         }),
         showStats ? renderStatistics(product.id) : (
-          product.boardMode === "notes"
+          product.category === "notes"
             ? renderNotesBoard(product.id, showArchived, () => renderApp(root))
             : renderBoard(product.id, showArchived, () => renderApp(root))
         )

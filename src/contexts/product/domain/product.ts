@@ -23,7 +23,6 @@ export function createProduct(props: CreateProductProps): Product {
     autoArchiveDays: null,
     autoPasteLinks: true,
     showReview: (props.category ?? "development") === "development",
-    boardMode: "kanban",
     archivedAt: null
   };
 }

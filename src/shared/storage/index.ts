@@ -28,7 +28,7 @@ export function reviveState(raw: unknown): AppState {
 }
 
 const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
-const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study"];
+const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study", "notes"];
 
 export function normalizeLink(link: Link): Link {
   return { ...link, visitedAt: (link as any).visitedAt ?? null };
@@ -42,7 +42,6 @@ export function normalizeProduct(product: Product): Product {
     autoArchiveDays: (product as any).autoArchiveDays ?? null,
     autoPasteLinks: (product as any).autoPasteLinks !== false,
     showReview: (product as any).showReview !== false,
-    boardMode: (product as any).boardMode === "notes" ? "notes" : "kanban",
     archivedAt: (product as any).archivedAt ?? null
   };
   if (!VALID_STATUSES.includes(normalized.status)) {

@@ -15,10 +15,10 @@ export function openProductForm(existing?: Product): void {
   );
   const error = errorText();
 
-  const catSel = select(
-    PRODUCT_CATEGORIES.map((c) => ({ value: c.value, label: `${c.label}` })),
-    existing?.category ?? "development"
-  );
+  const catOptions = PRODUCT_CATEGORIES
+    .filter((c) => existing || c.value !== "notes")
+    .map((c) => ({ value: c.value, label: `${c.label}` }));
+  const catSel = select(catOptions, existing?.category ?? "development");
 
   const AUTO_ARCHIVE_OPTIONS = [
     { value: "", label: "Nunca" },

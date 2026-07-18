@@ -21,14 +21,13 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
 
 export type TaskClassification = "task" | "bug" | "refactor" | "idea" | "pending" | "improvement" | "meeting" | "content" | "project" | "note" | "exercise" | "todo";
 
-export type BoardMode = "kanban" | "notes";
-
-export type ProductCategory = "development" | "business" | "study";
+export type ProductCategory = "development" | "business" | "study" | "notes";
 
 export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string; icon: string }[] = [
   { value: "development", label: "Desenvolvimento", icon: "code" },
   { value: "business", label: "Negócios", icon: "business_center" },
-  { value: "study", label: "Estudo", icon: "school" }
+  { value: "study", label: "Estudo", icon: "school" },
+  { value: "notes", label: "Notas", icon: "sticky_note_2" }
 ];
 
 export const NOTE_CLASSIFICATIONS: { value: TaskClassification; label: string; icon: string }[] = [
@@ -59,6 +58,14 @@ export const CATEGORY_CLASSIFICATIONS: Record<ProductCategory, { value: TaskClas
     { value: "project", label: "Projeto", icon: "build" },
     { value: "note", label: "Anotação", icon: "sticky_note_2" },
     { value: "exercise", label: "Exercício", icon: "fitness_center" }
+  ],
+  notes: [
+    { value: "note", label: "Anotação", icon: "sticky_note_2" },
+    { value: "idea", label: "Ideia", icon: "lightbulb" },
+    { value: "todo", label: "Tarefa", icon: "checklist" },
+    { value: "meeting", label: "Reunião", icon: "groups" },
+    { value: "content", label: "Conteúdo", icon: "menu_book" },
+    { value: "project", label: "Projeto", icon: "build" }
   ]
 };
 
@@ -99,7 +106,6 @@ export interface Product {
   autoArchiveDays: number | null;
   autoPasteLinks: boolean;
   showReview: boolean;
-  boardMode: BoardMode;
   archivedAt: ISODate | null;
 }
 

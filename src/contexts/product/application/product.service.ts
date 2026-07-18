@@ -1,4 +1,4 @@
-import { Product, ProductStatus, ProductCategory, BoardMode } from "@shared/types";
+import { Product, ProductStatus, ProductCategory } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
 import { createProduct, assertValidProductName, archive as archiveItem, restore as restoreItem } from "../domain/product";
@@ -21,10 +21,15 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; showReview?: boolean; boardMode?: BoardMode }): Product {
+  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; showReview?: boolean }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     if (changes.name !== undefined) assertValidProductName(changes.name);
+    if (changes.category && changes.category !== existing.category) {
+      if (changes.category === "notes" || existing.category === "notes") {
+        throw new Error("Não é possível alterar a categoria de/para Notas.");
+      }
+    }
     if (changes.showReview === false) {
       const itemsInReview = backlogRepository.byProduct(id).filter((i) => i.status === "review");
       if (itemsInReview.length > 0) {
@@ -39,8 +44,7 @@ export const productService = {
       category: changes.category ?? existing.category,
       autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays,
       autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks,
-      showReview: changes.showReview ?? existing.showReview,
-      boardMode: changes.boardMode ?? existing.boardMode
+      showReview: changes.showReview ?? existing.showReview
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);
@@ -93,15 +97,6 @@ export const productService = {
     const updated = archiveItem(existing, nowISO());
     productRepository.save(updated);
     eventBus.emit("product:archived", updated);
-    return updated;
-  },
-
-  setBoardMode(id: string, mode: BoardMode): Product {
-    const existing = productRepository.findById(id);
-    if (!existing) throw new Error("Projeto não encontrado.");
-    const updated: Product = { ...existing, boardMode: mode };
-    productRepository.save(updated);
-    eventBus.emit("product:updated", updated);
     return updated;
   },
 

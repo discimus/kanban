@@ -18,7 +18,7 @@ export function renderProductHeader(
 ): HTMLElement {
   const isLocked = product.status === "completed" || product.status === "canceled" || !!product.archivedAt;
 
-  const addLabel = product.boardMode === "notes" ? "Adicionar nota" : "Adicionar tarefa";
+  const addLabel = product.category === "notes" ? "Adicionar nota" : "Adicionar tarefa";
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), addLabel]);
   addItem.addEventListener("click", () => {
     if (isLocked) {

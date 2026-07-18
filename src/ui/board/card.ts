@@ -1,5 +1,5 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
-import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, NOTE_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
+import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
@@ -21,14 +21,6 @@ function classificationLabel(c: TaskClassification, category: ProductCategory): 
 
 function classificationIcon(c: TaskClassification, category: ProductCategory): string {
   return CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c)?.icon ?? "help";
-}
-
-function noteClassificationLabel(c: TaskClassification): string {
-  return NOTE_CLASSIFICATIONS.find((x) => x.value === c)?.label ?? c;
-}
-
-function noteClassificationIcon(c: TaskClassification): string {
-  return NOTE_CLASSIFICATIONS.find((x) => x.value === c)?.icon ?? "help";
 }
 
 function openMoveToProjectDialog(item: BacklogItem): void {
@@ -77,11 +69,6 @@ function nextClassification(current: TaskClassification, category: ProductCatego
   const list = CATEGORY_CLASSIFICATIONS[category];
   const idx = list.findIndex((c) => c.value === current);
   return list[(idx + 1) % list.length].value;
-}
-
-function nextNoteClassification(current: TaskClassification): TaskClassification {
-  const idx = NOTE_CLASSIFICATIONS.findIndex((c) => c.value === current);
-  return NOTE_CLASSIFICATIONS[(idx + 1) % NOTE_CLASSIFICATIONS.length].value;
 }
 
 const FIBONACCI = [1, 2, 3, 5, 8];
@@ -472,14 +459,14 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const classifyChip = el("button", {
     class: `chip chip--${item.classification}${minimal ? " chip--compact" : ""}`,
     type: "button",
-    "aria-label": `Classificação: ${minimal ? noteClassificationLabel(item.classification) : classificationLabel(item.classification, category)}`
+    "aria-label": `Classificação: ${classificationLabel(item.classification, category)}`
   }, minimal
-    ? [icon(minimal ? noteClassificationIcon(item.classification) : classificationIcon(item.classification, category))]
+    ? [icon(classificationIcon(item.classification, category))]
     : [icon(classificationIcon(item.classification, category)), el("span", {}, [classificationLabel(item.classification, category)])]
   );
   if (!readOnly) {
     classifyChip.addEventListener("click", () => {
-      backlogService.classify(item.id, minimal ? nextNoteClassification(item.classification) : nextClassification(item.classification, category));
+      backlogService.classify(item.id, nextClassification(item.classification, category));
     });
   }
 
