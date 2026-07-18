@@ -563,7 +563,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     ]),
     el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
     descPreview,
-    !minimal ? progressBar : null,
+    progressBar,
     cardBody
   ];
 
