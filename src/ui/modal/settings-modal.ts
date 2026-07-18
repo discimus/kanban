@@ -5,6 +5,8 @@ import { productService } from "@contexts/product/application/product.service";
 import { Product } from "@shared/types";
 
 export function openProductSettings(product: Product): void {
+  const isNotes = product.category === "notes";
+
   const showPriority = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   showPriority.checked = product.showPriority !== false;
 
@@ -19,9 +21,9 @@ export function openProductSettings(product: Product): void {
   const submit = () => {
     try {
       productService.edit(product.id, {
-        showPriority: showPriority.checked,
+        ...(!isNotes && { showPriority: showPriority.checked }),
+        ...(!isNotes && { showReview: showReviewCb.checked }),
         autoPasteLinks: autoPasteCb.checked,
-        showReview: showReviewCb.checked
       });
       closeModal();
     } catch (e) {
@@ -30,13 +32,13 @@ export function openProductSettings(product: Product): void {
   };
 
   const body = el("div", { class: "form" }, [
-    el("label", { class: "field field--checkbox" }, [
+    ...(isNotes ? [] : [el("label", { class: "field field--checkbox" }, [
       showPriority,
       el("span", { class: "field__text-wrapper" }, [
         el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"]),
         el("span", { class: "field__description" }, ["Mostra indicadores de prioridade (baixa, média, alta, crítica) nos cards do quadro."])
       ])
-    ]),
+    ])]),
     el("label", { class: "field field--checkbox" }, [
       autoPasteCb,
       el("span", { class: "field__text-wrapper" }, [
@@ -44,13 +46,13 @@ export function openProductSettings(product: Product): void {
         el("span", { class: "field__description" }, ["Ao adicionar um link, preenche automaticamente com o conteúdo da área de transferência."])
       ])
     ]),
-    el("label", { class: "field field--checkbox" }, [
+    ...(isNotes ? [] : [el("label", { class: "field field--checkbox" }, [
       showReviewCb,
       el("span", { class: "field__text-wrapper" }, [
         el("span", { class: "field__label" }, ["Exibir coluna Review"]),
         el("span", { class: "field__description" }, ["Mostra a coluna Review no quadro Kanban."])
       ])
-    ]),
+    ])]),
     error,
     formActions("Salvar", submit)
   ]);
