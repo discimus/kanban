@@ -543,10 +543,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   }
   cardBody.append(taskList, linkList, commentList);
 
-  const descPreview = minimal && item.description
-    ? el("p", { class: "card__desc-preview" }, [item.description])
-    : null;
-
   const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
@@ -563,7 +559,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       pointsBtn
     ]),
     el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
-    descPreview,
     progressBar,
     cardBody
   ];
