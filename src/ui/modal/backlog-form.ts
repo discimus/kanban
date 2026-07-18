@@ -102,7 +102,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
 
   openModal({ title: existing ? (isNotes ? "Editar nota" : "Editar item de backlog") : (isNotes ? "Nova nota" : "Novo item de backlog"), body, autoFocus: !existing });
 
-  if (existing && !showMeta) {
+  if (existing && !existing.description) {
     description.focus();
   }
 }
