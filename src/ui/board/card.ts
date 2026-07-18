@@ -572,5 +572,12 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     });
   }
 
+  if (minimal && !readOnly) {
+    card.addEventListener("dblclick", (ev) => {
+      if ((ev.target as HTMLElement).closest("button, a, input, select, textarea")) return;
+      openBacklogForm(item.productId, item);
+    });
+  }
+
   return card;
 }

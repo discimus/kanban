@@ -11,15 +11,17 @@ import { BacklogItem, Priority, PRIORITIES, CATEGORY_CLASSIFICATIONS, TaskClassi
 export function openBacklogForm(productId: string, existing?: BacklogItem): void {
   const product = productService.get(productId);
   const category = product?.category ?? "development";
+  const showMeta = category !== "notes";
   const clist = CATEGORY_CLASSIFICATIONS[category];
 
   const title = textInput(existing?.title ?? "", "Título do item");
   const description = textArea(existing?.description ?? "", "Descrição");
-  const priority = select(
-    PRIORITIES.map((p) => ({ value: p.value, label: p.label })),
-    existing?.priority ?? "medium"
-  );
-  const points = numberInput(existing?.storyPoints ?? 0, 0);
+  const priority = showMeta
+    ? select(PRIORITIES.map((p) => ({ value: p.value, label: p.label })), existing?.priority ?? "medium")
+    : null;
+  const points = showMeta
+    ? numberInput(existing?.storyPoints ?? 0, 0)
+    : null;
   const classification = select(
     clist.map((c) => ({ value: c.value, label: c.label })),
     existing?.classification ?? clist[0].value
@@ -53,19 +55,22 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
         backlogService.edit(existing.id, {
           title: title.value,
           description: description.value,
-          priority: priority.value as Priority,
-          storyPoints: Number(points.value),
+          priority: showMeta ? (priority!.value as Priority) : existing.priority,
+          storyPoints: showMeta ? Number(points!.value) : existing.storyPoints,
           classification: classification.value as TaskClassification
         });
       } else {
-        backlogService.create({
+        const createProps: Record<string, unknown> = {
           productId,
           title: title.value,
           description: description.value,
-          priority: priority.value as Priority,
-          storyPoints: Number(points.value),
           classification: classification.value as TaskClassification
-        });
+        };
+        if (showMeta) {
+          createProps.priority = priority!.value;
+          createProps.storyPoints = Number(points!.value);
+        }
+        backlogService.create(createProps as any);
       }
       closeModal();
     } catch (e) {
@@ -76,7 +81,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   const body = el("div", { class: "form" }, [
     field("Título", title),
     field("Descrição", description),
-    el("div", { class: "form__row" }, [field("Prioridade", priority), field("Story Points", points)]),
+    showMeta ? el("div", { class: "form__row" }, [field("Prioridade", priority!), field("Story Points", points!)]) : null,
     field("Classificação", classification),
     subtasksSection,
     linksSection,

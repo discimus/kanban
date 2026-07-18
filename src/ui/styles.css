@@ -2235,7 +2235,7 @@ button.chip--todo:hover {
 }
 
 .input--area {
-  min-height: 72px;
+  min-height: 96px;
   resize: vertical;
 }
 
@@ -2854,8 +2854,8 @@ h4 {
 }
 
 .notes-group__cards {
-  display: flex;
-  flex-flow: row wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
 }
 
@@ -2869,9 +2869,8 @@ h4 {
 /* ── Note Card ── */
 
 .card--note {
-  width: 280px;
-  min-height: 100px;
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   container-type: unset;
   transition: box-shadow 0.2s, transform 0.2s;
 }
@@ -2927,6 +2926,7 @@ h4 {
 }
 
 .card--note .card__footer {
+  margin-top: auto;
   opacity: 0;
   transition: opacity 0.15s;
 }
