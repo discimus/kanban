@@ -981,6 +981,16 @@ button.chip--study:hover {
   color: var(--md-on-tertiary);
 }
 
+.chip--notes {
+  background: var(--chip-note-container);
+  color: var(--chip-on-note-container);
+}
+
+button.chip--notes:hover {
+  background: var(--chip-note);
+  color: var(--chip-on-note);
+}
+
 .chip--pending {
   background: var(--chip-pending-container);
   color: var(--chip-on-pending-container);
