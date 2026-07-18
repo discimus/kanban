@@ -1865,6 +1865,17 @@ button.chip--todo:hover {
   border-color: transparent;
 }
 
+.btn--notes {
+  background: var(--chip-note-container);
+  color: var(--chip-on-note-container);
+  border-color: transparent;
+}
+
+.btn--notes:hover {
+  background: var(--chip-note);
+  color: var(--chip-on-note);
+}
+
 /* MD3 state layers adapt to dark scheme (overlay uses the surface's on-color) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .btn:active,

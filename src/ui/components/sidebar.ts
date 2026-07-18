@@ -234,13 +234,13 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     list.append(headerBtn, archivedBody);
   }
 
-  const addBtn = el("button", { class: "btn btn--primary" }, [icon("add"), "Novo Projeto"]);
+  const addBtn = el("button", { class: "btn btn--primary", title: "Criar nova board de projeto" }, [icon("add"), "Novo Projeto"]);
   addBtn.addEventListener("click", () => {
     onNewProject?.();
     openProductForm();
   });
 
-  const notesBtn = el("button", { class: "btn btn--icon btn--tonal", type: "button", title: "Nova Nota" }, [icon("note_add")]);
+  const notesBtn = el("button", { class: "btn btn--icon btn--notes", type: "button", title: "Criar nova board de notas" }, [icon("note_stack_add")]);
   notesBtn.addEventListener("click", () => openNotesForm());
 
   const actionsBar = el("div", { class: "sidebar__actions" }, [addBtn, notesBtn]);

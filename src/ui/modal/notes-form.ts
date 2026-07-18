@@ -20,7 +20,7 @@ export function openNotesForm(): void {
     }
   };
 
-  const createBtn = el("button", { class: "btn btn--primary btn--block", type: "button" }, [icon("note_add"), "Criar board"]);
+  const createBtn = el("button", { class: "btn btn--primary btn--block", type: "button" }, [icon("note_stack_add"), "Criar board"]);
   createBtn.addEventListener("click", submit);
 
   const body = el("div", { class: "form" }, [
