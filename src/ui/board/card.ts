@@ -116,9 +116,9 @@ function openImageModal(dataUrl: string, filename: string): void {
   }) as HTMLImageElement;
 
   openModal({
-    title: filename,
     body: img,
-    autoFocus: false
+    autoFocus: false,
+    noHeader: true
   });
 
   const dialog = document.querySelector(".modal");

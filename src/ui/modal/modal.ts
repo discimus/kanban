@@ -4,10 +4,11 @@ let overlay: HTMLDivElement | null = null;
 let pendingOnClose: (() => void) | null = null;
 
 export interface ModalOptions {
-  title: string;
+  title?: string;
   body: HTMLElement;
   onClose?: () => void;
   autoFocus?: boolean;
+  noHeader?: boolean;
 }
 
 export function openModal(options: ModalOptions): void {
@@ -15,10 +16,15 @@ export function openModal(options: ModalOptions): void {
   const closeBtn = el("button", { class: "modal__close", "aria-label": "Fechar" }, [icon("close")]);
   closeBtn.addEventListener("click", () => closeModal());
 
-  const dialog = el("div", { class: "modal" }, [
-    el("div", { class: "modal__header" }, [el("h2", { class: "modal__title" }, [options.title]), closeBtn]),
-    el("div", { class: "modal__body" }, [options.body])
-  ]);
+  const children: (Node | null)[] = [];
+  if (options.noHeader) {
+    children.push(closeBtn);
+  } else {
+    children.push(el("div", { class: "modal__header" }, [el("h2", { class: "modal__title" }, [options.title ?? ""]), closeBtn]));
+  }
+  children.push(el("div", { class: "modal__body" }, [options.body]));
+
+  const dialog = el("div", { class: "modal" }, children);
 
   overlay = el("div", { class: "modal-overlay" }, [dialog]);
   overlay.addEventListener("click", (ev) => {
