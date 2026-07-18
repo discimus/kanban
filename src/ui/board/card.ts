@@ -719,12 +719,19 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     });
   }
 
-  if (!readOnly) {
-    card.addEventListener("dblclick", (ev) => {
-      if ((ev.target as HTMLElement).closest("button, a, input, select, textarea")) return;
-      openBacklogForm(item.productId, item);
-    });
-  }
+  card.addEventListener("dblclick", (ev) => {
+    if ((ev.target as HTMLElement).closest("button, a, input, select, textarea")) return;
+    if (!hasContent) return;
+    const isExpanded = !expandedCards.get(item.id);
+    expandedCards.set(item.id, isExpanded);
+    cardBody.classList.toggle("card__body--expanded", isExpanded);
+    if (expandBtn) {
+      expandBtn.replaceChildren(
+        icon(isExpanded ? "expand_less" : "expand_more"),
+        el("span", { class: "card__expand-btn-text" }, [isExpanded ? "Recolher" : "Expandir"])
+      );
+    }
+  });
 
   return card;
 }
