@@ -2870,15 +2870,6 @@ h4 {
 /* ── Note Card ── */
 
 .card--note {
-  display: flex;
-  flex-direction: column;
-  container-type: unset;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.card--note:hover {
-  box-shadow: var(--elevation-2);
-  transform: translateY(-1px);
 }
 
 .card--note .chip--compact {
@@ -2926,9 +2917,6 @@ h4 {
   display: none;
 }
 
-.card--note .card__footer {
-  margin-top: auto;
-}
 
 @media (max-width: 640px) {
   .card--note {
@@ -2936,7 +2924,10 @@ h4 {
   }
 }
 
-
-
-
+.classify-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+}
 

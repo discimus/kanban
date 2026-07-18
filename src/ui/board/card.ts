@@ -495,8 +495,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           })
         );
 
-        const rect = classifyChip.getBoundingClientRect();
-        popup.style.cssText = `display:flex;flex-direction:column;gap:2px;position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;z-index:1000;min-width:180px`;
+        const chipRect = classifyChip.getBoundingClientRect();
+        popup.style.cssText = `position:fixed;top:${chipRect.bottom + 4}px;left:${chipRect.left}px;z-index:300`;
 
         document.body.appendChild(popup);
 
@@ -504,9 +504,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           if (!popup.contains(e.target as Node) && e.target !== classifyChip) {
             popup.remove();
             document.removeEventListener("click", close);
+            document.removeEventListener("scroll", close);
           }
         };
         document.addEventListener("click", close);
+        document.addEventListener("scroll", close);
       });
     } else {
       classifyChip.addEventListener("click", () => {
