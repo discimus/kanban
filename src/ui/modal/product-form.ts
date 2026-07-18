@@ -37,13 +37,14 @@ export function openProductForm(existing?: Product): void {
   const submit = () => {
     try {
       if (existing) {
+        const isNotes = existing.category === "notes";
         productService.edit(existing.id, {
           name: name.value,
           description: description.value,
           category: catSel.value as ProductCategory,
-          autoArchiveDays: autoArchiveSel.value ? Number(autoArchiveSel.value) : null
+          autoArchiveDays: isNotes ? null : (autoArchiveSel.value ? Number(autoArchiveSel.value) : null)
         });
-        if (statusSel.value !== existing.status) {
+        if (!isNotes && statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
         }
         closeModal();
@@ -63,8 +64,12 @@ export function openProductForm(existing?: Product): void {
     field("Nome", name),
     field("Descrição", description),
     field("Categoria", catSel),
-    existing ? field("Status", statusSel) : null,
-    existing ? field("Arquivar automático", autoArchiveSel) : null,
+    existing && existing.category !== "notes" ? field("Status", statusSel) : null,
+    existing && existing.category !== "notes" ? el("label", { class: "field" }, [
+      el("span", { class: "field__label" }, ["Arquivar automático"]),
+      autoArchiveSel,
+      el("span", { class: "field__description" }, ["Arquiva automaticamente cartões na coluna Done após o período selecionado."])
+    ]) : null,
     error
   ]);
 
