@@ -812,6 +812,12 @@ body {
   }
 }
 
+@container (max-width: 260px) {
+  .card--note .card__expand-btn-text {
+    display: none;
+  }
+}
+
 .card:hover {
   background: var(--elevation-4);
   border-color: var(--md-outline);
