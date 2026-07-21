@@ -8,6 +8,7 @@ import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
+import { showToast } from "@ui/components/notification";
 import { timeAgo, formatDate } from "@shared/utils";
 import { openModal, closeModal } from "../modal";
 import { field, select, errorText } from "@ui/components/forms";
@@ -108,15 +109,49 @@ function fullDateTime(iso: string): string {
 
 const expandedCards = new Map<string, boolean>();
 
-function openImageModal(dataUrl: string, filename: string): void {
+async function copyImageToClipboard(dataUrl: string, mimeType: string): Promise<void> {
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    await navigator.clipboard.write([new ClipboardItem({ [mimeType]: blob })]);
+    showToast("Imagem copiada", "content_copy");
+  } catch {
+    showToast("Erro ao copiar imagem", "error");
+  }
+}
+
+function downloadImage(dataUrl: string, filename: string): void {
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function openImageModal(dataUrl: string, filename: string, mimeType = "image/png"): void {
   const img = el("img", {
     class: "modal__image-full",
     src: dataUrl,
     alt: filename
   }) as HTMLImageElement;
 
+  const copyBtn = el("button", { class: "modal__image-action", "aria-label": "Copiar imagem", type: "button" }, [
+    icon("content_copy"), " Copiar"
+  ]);
+  copyBtn.addEventListener("click", () => copyImageToClipboard(dataUrl, mimeType));
+
+  const downloadBtn = el("button", { class: "modal__image-action", "aria-label": "Download imagem", type: "button" }, [
+    icon("download"), " Download"
+  ]);
+  downloadBtn.addEventListener("click", () => downloadImage(dataUrl, filename));
+
+  const toolbar = el("div", { class: "modal__image-toolbar" }, [copyBtn, downloadBtn]);
+
+  const body = el("div", { class: "modal__image-body" }, [img, toolbar]);
+
   openModal({
-    body: img,
+    body,
     autoFocus: false,
     noHeader: true
   });
@@ -333,18 +368,25 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         loading: "lazy"
       }) as HTMLImageElement;
 
-      const del = el("button", { class: "card__task-delete card__image-delete", "aria-label": "Excluir imagem" }, [icon("close")]);
-      del.disabled = readOnly;
+      const copyBtn = el("button", { class: "card__image-action", "aria-label": "Copiar imagem", type: "button" }, [icon("content_copy")]);
+      copyBtn.addEventListener("click", () => copyImageToClipboard(img.dataUrl, img.mimeType));
+
+      const downloadBtn = el("button", { class: "card__image-action", "aria-label": "Download imagem", type: "button" }, [icon("download")]);
+      downloadBtn.addEventListener("click", () => downloadImage(img.dataUrl, img.filename));
+
+      const delBtn = el("button", { class: "card__image-action card__image-action--delete", "aria-label": "Excluir imagem", type: "button" }, [icon("delete")]);
+      delBtn.disabled = readOnly;
       if (!readOnly) {
-        del.addEventListener("click", () => {
+        delBtn.addEventListener("click", () => {
           showConfirm('Excluir imagem "{{text}}"?', img.filename).then((ok) => {
             if (ok) imageService.delete(img.id);
           });
         });
       }
 
-      const wrap = el("div", { class: "card__image-wrap" }, [thumb, del]);
-      thumb.addEventListener("click", () => openImageModal(img.dataUrl, img.filename));
+      const actions = el("div", { class: "card__image-actions" }, [copyBtn, downloadBtn, delBtn]);
+      const wrap = el("div", { class: "card__image-wrap" }, [thumb, actions]);
+      thumb.addEventListener("click", () => openImageModal(img.dataUrl, img.filename, img.mimeType));
       imageList.append(wrap);
     }
   };

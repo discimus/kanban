@@ -1610,30 +1610,44 @@ button.chip--todo:hover {
   opacity: 0.85;
 }
 
-.card__image-delete {
+.card__image-actions {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
   opacity: 0;
   transition: opacity 0.15s;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
+}
+
+.card__image-wrap:hover .card__image-actions {
+  opacity: 1;
+}
+
+.card__image-action {
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-pill);
-  width: 24px;
-  height: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
+  transition: background 0.15s;
 }
 
-.card__image-wrap:hover .card__image-delete {
-  opacity: 1;
+.card__image-action:hover {
+  background: rgba(0, 0, 0, 0.75);
 }
 
-.card__image-delete .material-symbols-outlined {
-  font-size: 14px;
+.card__image-action .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.card__image-action--delete:hover {
+  background: #c62828;
 }
 
 .card__footer {
@@ -2316,6 +2330,46 @@ button.chip--todo:hover {
   object-fit: contain;
 }
 
+.modal__image-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.modal__image-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--md-surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modal__image-toolbar .modal__image-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--md-surface-container-high);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modal__image-toolbar .modal__image-action:hover {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.modal__image-toolbar .modal__image-action .material-symbols-outlined {
+  font-size: 1.15rem;
+}
+
 /* Forms — MD3 outlined fields */
 .form {
   display: flex;
@@ -2970,6 +3024,10 @@ h4 {
   }
 
   .card__task-delete {
+    opacity: 1;
+  }
+
+  .card__image-actions {
     opacity: 1;
   }
 
