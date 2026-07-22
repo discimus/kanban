@@ -597,6 +597,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: "Link", icon: "link", action: locked ? lockedAlert : addLink },
             { label: "Imagem", icon: "add_photo_alternate", action: locked ? lockedAlert : addImage }
           ]},
+          {
+            label: "Copiar título",
+            icon: "content_copy",
+            action: () => copyCardTitle(item.title)
+          },
           ...(isNotes ? [] : [{ label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu }]),
           { label: "Mover para projeto...", icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
           { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
@@ -694,19 +699,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   if (item.description) {
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
-  cardBody.append(taskList, linkList, imageList, commentList);
-
-  const copyTitleBtn = el("button", {
-    class: "card__title-copy",
-    type: "button",
-    "aria-label": "Copiar título",
-    title: "Copiar título"
-  }, [icon("content_copy")]);
-  copyTitleBtn.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    copyCardTitle(item.title);
-  });
-
   const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
@@ -722,10 +714,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
       pointsBtn
     ]),
-    el("div", { class: "card__title-row" }, [
-      el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
-      copyTitleBtn
-    ]),
+    el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
     progressBar,
     cardBody
   ];
