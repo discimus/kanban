@@ -803,17 +803,14 @@ body {
   container-type: inline-size;
 }
 
-@container (max-width: 200px) {
+@container (max-width: 260px) {
   .card__expand-btn-text {
-    display: none;
-  }
-  .chip > :last-child {
     display: none;
   }
 }
 
-@container (max-width: 260px) {
-  .card--note .card__expand-btn-text {
+@container (max-width: 200px) {
+  .chip > :last-child {
     display: none;
   }
 }
