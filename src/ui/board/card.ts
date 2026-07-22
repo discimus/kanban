@@ -699,6 +699,9 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   if (item.description) {
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
+
+  cardBody.append(taskList, linkList, imageList, commentList);
+
   const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
