@@ -120,6 +120,15 @@ async function copyImageToClipboard(dataUrl: string, mimeType: string): Promise<
   }
 }
 
+async function copyCardTitle(title: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(title);
+    showToast("Título copiado!", "content_copy");
+  } catch {
+    showToast("Erro ao copiar título", "error");
+  }
+}
+
 function downloadImage(dataUrl: string, filename: string): void {
   const a = document.createElement("a");
   a.href = dataUrl;
@@ -687,6 +696,17 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   }
   cardBody.append(taskList, linkList, imageList, commentList);
 
+  const copyTitleBtn = el("button", {
+    class: "card__title-copy",
+    type: "button",
+    "aria-label": "Copiar título",
+    title: "Copiar título"
+  }, [icon("content_copy")]);
+  copyTitleBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    copyCardTitle(item.title);
+  });
+
   const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
@@ -702,7 +722,10 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
       pointsBtn
     ]),
-    el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
+    el("div", { class: "card__title-row" }, [
+      el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
+      copyTitleBtn
+    ]),
     progressBar,
     cardBody
   ];
