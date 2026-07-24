@@ -63,3 +63,7 @@ O `Store` (`shared/storage`) é a única fonte de verdade. Os *repositories* de 
 5. Criar **Tasks** por item (status + responsável)
 6. Registrar e consultar histórico de **estimativas**
 7. Persistência automática via `localStorage`
+
+## Licença
+
+Este projeto está licenciado sob a **GNU General Public License v3.0** — veja o arquivo [LICENSE](LICENSE) para detalhes.
