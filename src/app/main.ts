@@ -7,6 +7,7 @@ import { productService } from "@contexts/product/application/product.service";
 import { runAutoArchive } from "@contexts/product/application/backlog.service";
 import { showToast } from "@ui/components/notification";
 import { createExampleData } from "@contexts/product/domain/example-data";
+import { t } from "@shared/i18n";
 
 const root = document.getElementById("app");
 
@@ -23,21 +24,19 @@ eventBus.on("state:changed", () => {
 });
 
 eventBus.on("backlog:archived", () => {
-  showToast("Card arquivado", "archive");
+  showToast(t("main.cardArquivado"), "archive");
 });
 
 eventBus.on("backlog:auto-archived", (count) => {
-  showToast(`${count} ${Number(count) === 1 ? "card arquivado" : "cards arquivados"} automaticamente`, "archive");
+  const label = Number(count) === 1 ? t("main.cardArquivadoSingle") : t("main.cardsArquivados");
+  showToast(`${count} ${label} automaticamente`, "archive");
 });
 
 eventBus.on("product:pending-completion", (productId) => {
   const product = productService.get(productId as string);
   if (!product) return;
   setTimeout(async () => {
-    const ok = await showConfirm(
-      'Todos os cards estão em "Done". Deseja concluir o projeto "{{text}}"?\n\nProjetos concluídos ficam em modo somente leitura.',
-      product.name
-    );
+    const ok = await showConfirm(t("main.concluirProjeto"), product.name);
     if (ok) {
       productService.setStatus(productId as string, "completed");
     }

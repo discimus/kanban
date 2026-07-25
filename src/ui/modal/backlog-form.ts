@@ -7,6 +7,7 @@ import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
 import { BacklogItem, Priority, PRIORITIES, CATEGORY_CLASSIFICATIONS, TaskClassification } from "@shared/types";
+import { t, loc } from "@shared/i18n";
 
 export function openBacklogForm(productId: string, existing?: BacklogItem): void {
   const product = productService.get(productId);
@@ -16,17 +17,17 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   const clist = CATEGORY_CLASSIFICATIONS[category];
 
   const title = isNotes
-    ? textArea(existing?.title ?? "", "Título da nota")
-    : textInput(existing?.title ?? "", "Título do item");
-  const description = textArea(existing?.description ?? "", "Descrição");
+    ? textArea(existing?.title ?? "", t("form.tituloNota"))
+    : textInput(existing?.title ?? "", t("form.tituloItem"));
+  const description = textArea(existing?.description ?? "", t("form.descricao"));
   const priority = showMeta
-    ? select(PRIORITIES.map((p) => ({ value: p.value, label: p.label })), existing?.priority ?? "medium")
+    ? select(PRIORITIES.map((p) => ({ value: p.value, label: loc(p) })), existing?.priority ?? "medium")
     : null;
   const points = showMeta
     ? numberInput(existing?.storyPoints ?? 0, 0)
     : null;
   const classification = select(
-    clist.map((c) => ({ value: c.value, label: c.label })),
+    clist.map((c) => ({ value: c.value, label: loc(c) })),
     existing?.classification ?? clist[0].value
   );
   const error = errorText();
@@ -82,15 +83,15 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
   };
 
   const body = el("div", { class: "form" }, [
-    field("Título", title),
-    field("Descrição", description),
-    showMeta ? el("div", { class: "form__row" }, [field("Prioridade", priority!), field("Story Points", points!)]) : null,
-    field("Classificação", classification),
+    field(t("form.titulo"), title),
+    field(t("form.descricao"), description),
+    showMeta ? el("div", { class: "form__row" }, [field(t("form.prioridade"), priority!), field(t("form.storyPoints"), points!)]) : null,
+    field(t("form.classificacao"), classification),
     subtasksSection,
     linksSection,
     commentsSection,
     error,
-    formActions(existing ? "Salvar" : (isNotes ? "Criar nota" : "Criar item"), submit)
+    formActions(existing ? t("form.salvar") : (isNotes ? t("form.criarNota") : t("form.criarItem")), submit)
   ]);
 
   body.addEventListener("keydown", (e) => {
@@ -100,7 +101,7 @@ export function openBacklogForm(productId: string, existing?: BacklogItem): void
     }
   });
 
-  openModal({ title: existing ? (isNotes ? "Editar nota" : "Editar item de backlog") : (isNotes ? "Nova nota" : "Novo item de backlog"), body, autoFocus: !existing });
+  openModal({ title: existing ? (isNotes ? t("form.editarNota") : t("form.editarItem")) : (isNotes ? t("form.novaNota") : t("form.novoItem")), body, autoFocus: !existing });
 
   if (existing && !existing.description) {
     description.focus();
@@ -115,13 +116,13 @@ function buildSubtasksSection(
   if (tasks.length === 0) return null;
 
   const rows = tasks.map((task) => {
-    const input = textInput(task.title, "Título da subtarefa");
+    const input = textInput(task.title, t("form.tituloSubtarefa"));
     subtaskInputs.push({ taskId: task.id, input });
     return input;
   });
 
   return el("div", { class: "field" }, [
-    el("span", { class: "field__label" }, ["Subtarefas"]),
+    el("span", { class: "field__label" }, [t("form.subtarefas")]),
     ...rows
   ]);
 }
@@ -135,13 +136,13 @@ function buildLinksSection(
 
   const rows: HTMLElement[] = [];
   for (const link of links) {
-    const urlInput = textInput(link.url, "URL");
+    const urlInput = textInput(link.url, t("form.url"));
     linkInputs.push({ linkId: link.id, urlInput });
     rows.push(urlInput);
   }
 
   return el("div", { class: "field" }, [
-    el("span", { class: "field__label" }, ["Links"]),
+    el("span", { class: "field__label" }, [t("form.links")]),
     ...rows
   ]);
 }
@@ -155,13 +156,13 @@ function buildCommentsSection(
 
   const rows: HTMLElement[] = [];
   for (const c of comments) {
-    const input = textInput(c.text, "Editar comentário");
+    const input = textInput(c.text, t("form.editarComentario"));
     commentInputs.push({ commentId: c.id, original: c.text, input });
     rows.push(input);
   }
 
   return el("div", { class: "field" }, [
-    el("span", { class: "field__label" }, ["Comentários"]),
+    el("span", { class: "field__label" }, [t("form.comentarios")]),
     ...rows
   ]);
 }

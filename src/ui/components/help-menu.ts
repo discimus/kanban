@@ -1,21 +1,26 @@
 import { el, icon } from "@ui/components/dom";
 import { openModal } from "../modal";
+import { t } from "@shared/i18n";
 
-const TASK_SHORTCUTS: [string, string][] = [
-  ["N", "Nova tarefa"],
-  ["Ctrl + Enter", "Salvar formulário"],
-  ["Esc", "Fechar / Cancelar"],
-];
+function getTaskShortcuts(): [string, string][] {
+  return [
+    ["N", t("help.novaTarefa")],
+    ["Ctrl + Enter", t("help.salvarFormulario")],
+    ["Esc", t("help.fechar")],
+  ];
+}
 
-const NOTES_SHORTCUTS: [string, string][] = [
-  ["N", "Nova anotação"],
-  ["Ctrl + Enter", "Salvar formulário"],
-  ["Esc", "Fechar / Cancelar"],
-];
+function getNotesShortcuts(): [string, string][] {
+  return [
+    ["N", t("help.novaAnotacao")],
+    ["Ctrl + Enter", t("help.salvarFormulario")],
+    ["Esc", t("help.fechar")],
+  ];
+}
 
 export function openShortcutsHelp(): void {
   const isNotes = !!document.querySelector(".board--notes");
-  const items = (isNotes ? NOTES_SHORTCUTS : TASK_SHORTCUTS).map(([key, desc]) =>
+  const items = (isNotes ? getNotesShortcuts() : getTaskShortcuts()).map(([key, desc]) =>
     el("div", { class: "shortcuts-item" }, [
       el("kbd", {}, [key]),
       el("span", {}, [desc]),
@@ -37,7 +42,7 @@ export function openShortcutsHelp(): void {
   body.append(credits);
 
   openModal({
-    title: "Atalhos do teclado",
+    title: t("help.title"),
     body,
   });
 }
@@ -46,8 +51,8 @@ export function renderHelpMenu(): HTMLElement {
   const btn = el("button", {
     class: "help-btn",
     type: "button",
-    title: "Atalhos do teclado (?)",
-    "aria-label": "Atalhos do teclado",
+    title: t("help.title") + " (?)",
+    "aria-label": t("help.title"),
   }, [icon("help_outline")]);
 
   btn.addEventListener("click", openShortcutsHelp);

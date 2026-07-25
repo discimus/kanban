@@ -7,6 +7,7 @@ import { showAlert } from "@ui/components/dialog";
 import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
+import { t } from "@shared/i18n";
 
 let kbRegistered = false;
 let classificationFilter: Set<TaskClassification> | null = null;
@@ -95,8 +96,8 @@ function renderClassificationFilter(
   const allChip = el("button", {
     class: `chip chip--filter${classificationFilter === null ? " chip--selected" : ""}`,
     type: "button",
-    title: "Mostrar todas as classificações"
-  }, ["Todas"]);
+    title: t("board.mostrarTodas")
+  }, [t("board.todas")]);
   allChip.addEventListener("click", () => {
     if (classificationFilter !== null) {
       classificationFilter = null;
@@ -154,7 +155,7 @@ function renderColumn(
   const body = el("div", { class: "column__body", "data-status": status }, []);
 
   if (items.length === 0) {
-    body.append(el("p", { class: "column__empty" }, ["Sem itens"]));
+    body.append(el("p", { class: "column__empty" }, [t("board.semItens")]));
   } else {
     for (const item of items) body.append(backlogCard(item, locked, showPriority, category));
   }
@@ -205,16 +206,16 @@ function renderColumn(
 function renderQuickAdd(productId: string): HTMLElement {
   const wrapper = el("div", { class: "quick-add" }, []);
 
-  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn", title: "Adicionar tarefa (N)" }, [
+  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn", title: t("board.adicionarTarefaTitle") }, [
     icon("add"),
-    "Adicionar tarefa"
+    t("board.adicionarTarefa")
   ]);
 
   const showInput = (): void => {
     const input = el("input", {
       class: "quick-add__input",
       type: "text",
-      placeholder: "Título da tarefa…"
+      placeholder: t("board.tituloTarefa")
     }) as HTMLInputElement;
 
     let done = false;
@@ -254,16 +255,16 @@ function renderQuickAdd(productId: string): HTMLElement {
 function renderNotesQuickAdd(productId: string): HTMLElement {
   const wrapper = el("div", { class: "quick-add quick-add--notes" }, []);
 
-  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn", title: "Adicionar nota (N)" }, [
+  const addBtn = el("button", { class: "btn btn--ghost btn--sm btn--block quick-add__btn", title: t("board.adicionarNotaTitle") }, [
     icon("add"),
-    "Adicionar nota"
+    t("board.adicionarNota")
   ]);
 
   const showInput = (): void => {
     const input = el("input", {
       class: "quick-add__input",
       type: "text",
-      placeholder: "Título da nota…"
+      placeholder: t("board.tituloNota")
     }) as HTMLInputElement;
 
     let done = false;
@@ -350,7 +351,7 @@ export function renderNotesBoard(productId: string, showArchived = false, onFilt
   }
 
   if (board.children.length <= 1 && !locked) {
-    board.append(el("p", { class: "notes-empty" }, ["Nenhuma nota ainda. Crie uma acima."]));
+    board.append(el("p", { class: "notes-empty" }, [t("board.nenhumaNota")]));
   }
 
   wrapper.append(board);

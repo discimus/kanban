@@ -2634,6 +2634,45 @@ h4 {
   font-size: 1.375rem;
 }
 
+/* Locale button — fixed bottom-right, stacked above help button */
+.locale-btn {
+  position: fixed;
+  bottom: 120px;
+  right: 16px;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--md-surface-container-high);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.locale-btn:hover {
+  background: var(--md-surface-container-highest);
+  border-color: var(--md-outline);
+}
+
+.locale-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.locale-btn .material-symbols-outlined {
+  font-size: 1.375rem;
+}
+
+.locale-btn__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-left: 1px;
+}
+
 /* Help button — fixed bottom-right, stacked above theme toggle */
 .help-btn {
   position: fixed;
@@ -2879,6 +2918,15 @@ h4 {
     right: 12px;
     width: 48px;
     height: 48px;
+  }
+
+  .locale-btn {
+    bottom: 68px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    line-height: 1;
   }
 
   .help-btn {

@@ -10,15 +10,18 @@ import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { showToast } from "@ui/components/notification";
 import { timeAgo, formatDate } from "@shared/utils";
+import { t, loc, localeDateTimeString } from "@shared/i18n";
 import { openModal, closeModal } from "../modal";
 import { field, select, errorText } from "@ui/components/forms";
 
 function priorityLabel(p: BacklogItem["priority"]): string {
-  return PRIORITIES.find((x) => x.value === p)?.label ?? p;
+  const found = PRIORITIES.find((x) => x.value === p);
+  return found ? loc(found) : p;
 }
 
 function classificationLabel(c: TaskClassification, category: ProductCategory): string {
-  return CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c)?.label ?? c;
+  const found = CATEGORY_CLASSIFICATIONS[category].find((x) => x.value === c);
+  return found ? loc(found) : c;
 }
 
 function classificationIcon(c: TaskClassification, category: ProductCategory): string {
@@ -28,7 +31,7 @@ function classificationIcon(c: TaskClassification, category: ProductCategory): s
 function openMoveToProjectDialog(item: BacklogItem): void {
   const projects = productService.list().filter(p => p.id !== item.productId);
   if (projects.length === 0) {
-    showAlert("Não há outros projetos disponíveis.");
+    showAlert(t("card.naoHaProjetos"));
     return;
   }
 
@@ -39,13 +42,13 @@ function openMoveToProjectDialog(item: BacklogItem): void {
 
   const error = errorText();
   const body = el("div", { class: "form" }, [
-    el("p", { style: "margin-bottom: 12px; color: var(--text-secondary);" }, [`Mover "${item.title}" para:`]),
-    field("Projeto de destino", sel),
+    el("p", { style: "margin-bottom: 12px; color: var(--text-secondary);" }, [t("card.moverPara", { title: item.title })]),
+    field(t("card.projetoDestino"), sel),
     error
   ]);
 
-  const cancelBtn = el("button", { class: "btn", type: "button" }, ["Cancelar"]);
-  const moveBtn = el("button", { class: "btn btn--primary", type: "button" }, ["Mover"]);
+  const cancelBtn = el("button", { class: "btn", type: "button" }, [t("card.cancelar")]);
+  const moveBtn = el("button", { class: "btn btn--primary", type: "button" }, [t("card.mover")]);
 
   const actions = el("div", { class: "form__actions" }, [cancelBtn, moveBtn]);
   body.append(actions);
@@ -53,7 +56,7 @@ function openMoveToProjectDialog(item: BacklogItem): void {
   cancelBtn.addEventListener("click", closeModal);
   moveBtn.addEventListener("click", () => {
     if (!sel.value) {
-      error.textContent = "Selecione um projeto de destino.";
+      error.textContent = t("card.selecioneProjeto");
       return;
     }
     try {
@@ -64,7 +67,7 @@ function openMoveToProjectDialog(item: BacklogItem): void {
     }
   });
 
-  openModal({ title: "Mover card para outro projeto", body });
+  openModal({ title: t("card.moverCard"), body });
 }
 
 const FIBONACCI = [1, 2, 3, 5, 8];
@@ -92,19 +95,18 @@ function cardActionBtn(iconName: string, label: string, action: () => void): HTM
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const seg = Math.floor(diff / 1000);
-  if (seg < 60) return "agora";
+  if (seg < 60) return t("utils.visitadoAgora");
   const min = Math.floor(seg / 60);
-  if (min < 60) return `há ${min}min`;
+  if (min < 60) return t("utils.haMinutos", { n: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `há ${hr}h`;
+  if (hr < 24) return t("utils.haHoras", { n: hr });
   const dias = Math.floor(hr / 24);
-  if (dias < 30) return `há ${dias}d`;
+  if (dias < 30) return t("card.haTempo", { n: dias });
   return formatDate(iso);
 }
 
 function fullDateTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return localeDateTimeString(new Date(iso));
 }
 
 const expandedCards = new Map<string, boolean>();
@@ -114,18 +116,18 @@ async function copyImageToClipboard(dataUrl: string, mimeType: string): Promise<
     const res = await fetch(dataUrl);
     const blob = await res.blob();
     await navigator.clipboard.write([new ClipboardItem({ [mimeType]: blob })]);
-    showToast("Imagem copiada", "content_copy");
+    showToast(t("card.imageCopied"), "content_copy");
   } catch {
-    showToast("Erro ao copiar imagem", "error");
+    showToast(t("card.erroCopiarImagem"), "error");
   }
 }
 
 async function copyCardTitle(title: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(title);
-    showToast("Título copiado!", "content_copy");
+    showToast(t("card.titleCopied"), "content_copy");
   } catch {
-    showToast("Erro ao copiar título", "error");
+    showToast(t("card.erroCopiarTitulo"), "error");
   }
 }
 
@@ -189,11 +191,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         });
       }
 
-      const del = el("button", { class: "card__task-delete", "aria-label": "Excluir subtarefa" }, [icon("close")]);
+      const del = el("button", { class: "card__task-delete", "aria-label": t("card.excluirSubtarefa") }, [icon("close")]);
       del.disabled = readOnly;
       if (!readOnly) {
         del.addEventListener("click", () => {
-          showConfirm('Excluir subtarefa "{{text}}"?', task.title).then((ok) => {
+          showConfirm(t("card.excluirSubtarefa"), task.title).then((ok) => {
             if (ok) taskService.delete(task.id);
           });
         });
@@ -235,7 +237,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         href: link.url,
         target: "_blank",
         rel: "noopener",
-        "aria-label": `Abrir ${link.url}`
+        "aria-label": t("card.abrirLink", { url: link.url })
       }, [icon("link")]);
 
       if (link.visitedAt) {
@@ -247,11 +249,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         linkService.markAsVisited(link.id);
       });
 
-      const del = el("button", { class: "card__task-delete", "aria-label": "Excluir link" }, [icon("close")]);
+      const del = el("button", { class: "card__task-delete", "aria-label": t("card.excluirLink") }, [icon("close")]);
       del.disabled = readOnly;
       if (!readOnly) {
         del.addEventListener("click", () => {
-          showConfirm('Excluir link "{{text}}"?', displayUrl).then((ok) => {
+          showConfirm(t("card.excluirLink"), displayUrl).then((ok) => {
             if (ok) linkService.delete(link.id);
           });
         });
@@ -275,12 +277,12 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     if (!cardBody.classList.contains("card__body--expanded")) {
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, [t("card.recolher")]));
     }
 
-    const urlInput = el("input", { class: "card__task-input", type: "text", placeholder: "URL do link…" }) as HTMLInputElement;
+    const urlInput = el("input", { class: "card__task-input", type: "text", placeholder: t("card.urlLink") }) as HTMLInputElement;
 
-    const save = el("button", { class: "card__subtask-save", "aria-label": "Salvar link", type: "button" }, [
+    const save = el("button", { class: "card__subtask-save", "aria-label": t("card.salvarLink"), type: "button" }, [
       icon("check")
     ]);
 
@@ -326,12 +328,12 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     if (!cardBody.classList.contains("card__body--expanded")) {
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, [t("card.recolher")]));
     }
 
-    const input = el("input", { class: "card__task-input", type: "text", placeholder: "Nova subtarefa…" }) as HTMLInputElement;
+    const input = el("input", { class: "card__task-input", type: "text", placeholder: t("card.novaSubtarefa") }) as HTMLInputElement;
 
-    const save = el("button", { class: "card__subtask-save", "aria-label": "Salvar subtarefa", type: "button" }, [
+    const save = el("button", { class: "card__subtask-save", "aria-label": t("card.salvarSubtarefa"), type: "button" }, [
       icon("check")
     ]);
 
@@ -377,17 +379,17 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         loading: "lazy"
       }) as HTMLImageElement;
 
-      const copyBtn = el("button", { class: "card__image-action", "aria-label": "Copiar imagem", type: "button" }, [icon("content_copy")]);
+      const copyBtn = el("button", { class: "card__image-action", "aria-label": t("card.copiarImagem"), type: "button" }, [icon("content_copy")]);
       copyBtn.addEventListener("click", () => copyImageToClipboard(img.dataUrl, img.mimeType));
 
-      const downloadBtn = el("button", { class: "card__image-action", "aria-label": "Download imagem", type: "button" }, [icon("download")]);
+      const downloadBtn = el("button", { class: "card__image-action", "aria-label": t("card.downloadImagem"), type: "button" }, [icon("download")]);
       downloadBtn.addEventListener("click", () => downloadImage(img.dataUrl, img.filename));
 
-      const delBtn = el("button", { class: "card__image-action card__image-action--delete", "aria-label": "Excluir imagem", type: "button" }, [icon("delete")]);
+      const delBtn = el("button", { class: "card__image-action card__image-action--delete", "aria-label": t("card.excluirImagem"), type: "button" }, [icon("delete")]);
       delBtn.disabled = readOnly;
       if (!readOnly) {
         delBtn.addEventListener("click", () => {
-          showConfirm('Excluir imagem "{{text}}"?', img.filename).then((ok) => {
+          showConfirm(t("card.excluirImagem"), img.filename).then((ok) => {
             if (ok) imageService.delete(img.id);
           });
         });
@@ -405,11 +407,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     clear(commentList);
     const comments = commentService.byBacklogItem(item.id);
     for (const c of comments) {
-      const delBtn = el("button", { class: "card__task-delete", "aria-label": "Excluir comentário" }, [icon("close")]);
+      const delBtn = el("button", { class: "card__task-delete", "aria-label": t("card.excluirComentario") }, [icon("close")]);
       delBtn.disabled = readOnly;
       if (!readOnly) {
         delBtn.addEventListener("click", () => {
-          showConfirm('Excluir comentário "{{text}}"?', c.text).then((ok) => {
+          showConfirm(t("card.excluirComentario"), c.text).then((ok) => {
             if (ok) commentService.delete(c.id);
           });
         });
@@ -418,7 +420,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       const timeSpan = el("span", {
         class: "card__comment-time",
         title: c.updatedAt
-          ? `Criado ${fullDateTime(c.createdAt)} · Editado ${fullDateTime(c.updatedAt)}`
+          ? t("card.criadoEditado", { created: fullDateTime(c.createdAt), edited: fullDateTime(c.updatedAt) })
           : fullDateTime(c.createdAt)
       }, [relativeTime(c.updatedAt ?? c.createdAt)]);
 
@@ -439,11 +441,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     if (!cardBody.classList.contains("card__body--expanded")) {
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, [t("card.recolher")]));
     }
 
-    const input = el("input", { class: "card__task-input", type: "text", placeholder: "Adicionar comentário…" }) as HTMLInputElement;
-    const save = el("button", { class: "card__subtask-save", "aria-label": "Salvar comentário", type: "button" }, [
+    const input = el("input", { class: "card__task-input", type: "text", placeholder: t("card.adicionarComentarioPH") }) as HTMLInputElement;
+    const save = el("button", { class: "card__subtask-save", "aria-label": t("card.salvarComentario"), type: "button" }, [
       icon("check")
     ]);
 
@@ -480,7 +482,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       if (cardBody.classList.contains("card__body--expanded")) return;
       expandedCards.set(item.id, true);
       cardBody.classList.add("card__body--expanded");
-      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, ["Recolher"]));
+      if (expandBtn) expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, [t("card.recolher")]));
     };
 
     const tryClipboard = (): void => {
@@ -541,9 +543,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   };
 
   const lockedAlert = (): void => {
-    showAlert(
-      'Este projeto está concluído, cancelado ou arquivado. Altere o status pelo menu "⋮" → "Editar" do projeto para modificar os itens.'
-    );
+    showAlert(t("card.projetoLocked"));
   };
 
   const moveTo = (status: (typeof KANBAN_COLUMNS)[number]["status"]): void => {
@@ -570,16 +570,16 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     isArchived
       ? [
           {
-            label: "Restaurar",
+            label: t("card.restaurar"),
             icon: "restore",
             action: () => backlogService.restore(item.id)
           },
           {
-            label: "Excluir",
+            label: t("card.excluir"),
             icon: "delete",
             danger: true,
             action: () => {
-              showConfirm('Excluir "{{text}}"?', item.title).then((ok) => {
+              showConfirm(t("card.excluirItem"), item.title).then((ok) => {
                 if (ok) backlogService.delete(item.id);
               });
             }
@@ -587,32 +587,32 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         ]
       : [
           {
-            label: "Editar",
+            label: t("card.editar"),
             icon: "edit",
             action: locked ? lockedAlert : () => openBacklogForm(item.productId, item)
           },
-          { label: "Adicionar...", icon: "add", submenu: [
-            { label: "Subtarefa", icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
-            { label: "Comentário", icon: "chat", action: locked ? lockedAlert : addComment },
-            { label: "Link", icon: "link", action: locked ? lockedAlert : addLink },
-            { label: "Imagem", icon: "add_photo_alternate", action: locked ? lockedAlert : addImage }
+          { label: t("card.adicionar"), icon: "add", submenu: [
+            { label: t("card.subtarefa"), icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
+            { label: t("card.comentario"), icon: "chat", action: locked ? lockedAlert : addComment },
+            { label: t("card.link"), icon: "link", action: locked ? lockedAlert : addLink },
+            { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage }
           ]},
           {
-            label: "Copiar título",
+            label: t("card.copiarTitulo"),
             icon: "content_copy",
             action: () => copyCardTitle(item.title)
           },
-          ...(isNotes ? [] : [{ label: "Mover para", icon: "swap_horiz", submenu: columnSubmenu }]),
-          { label: "Mover para projeto...", icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
-          { label: "Arquivar", icon: "archive", action: () => backlogService.archive(item.id) },
+          ...(isNotes ? [] : [{ label: t("card.moverParaColuna"), icon: "swap_horiz", submenu: columnSubmenu }]),
+          { label: t("card.moverParaProjeto"), icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
+          { label: t("card.arquivar"), icon: "archive", action: () => backlogService.archive(item.id) },
           {
-            label: "Excluir",
+            label: t("card.excluir"),
             icon: "delete",
             danger: true,
             action: locked
               ? lockedAlert
               : () => {
-                  showConfirm('Excluir "{{text}}"?', item.title).then((ok) => {
+                  showConfirm(t("card.excluirItem"), item.title).then((ok) => {
                     if (ok) backlogService.delete(item.id);
                   });
                 }
@@ -623,7 +623,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const classifyChip = el("button", {
     class: `chip chip--${item.classification}${minimal ? " chip--compact" : ""}`,
     type: "button",
-    "aria-label": `Classificação: ${classificationLabel(item.classification, category)}`
+    "aria-label": t("card.classificacao", { label: classificationLabel(item.classification, category) })
   }, minimal
     ? [icon(classificationIcon(item.classification, category))]
     : [icon(classificationIcon(item.classification, category)), el("span", {}, [classificationLabel(item.classification, category)])]
@@ -645,7 +645,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
               disabled: active || undefined
             }, [
               active ? icon("check") : icon(c.icon),
-              el("span", { class: "actions-menu__label" }, [c.label])
+              el("span", { class: "actions-menu__label" }, [loc(c)])
             ]);
             if (!active) {
               btn.addEventListener("click", (e) => {
@@ -678,8 +678,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const pointsBtn = minimal ? null : el("button", {
     class: "card__points",
     type: "button",
-    "aria-label": `${item.storyPoints} story points`
-  }, [`${item.storyPoints} pts`]);
+    "aria-label": t("card.storyPoints", { n: item.storyPoints })
+  }, [t("card.pts", { n: item.storyPoints })]);
   if (pointsBtn && !readOnly) {
     pointsBtn.addEventListener("click", () => {
       backlogService.setStoryPoints(item.id, nextFibonacci(item.storyPoints));
@@ -707,7 +707,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     el("div", { class: "card__top" }, [
       el("div", { class: "card__badges" }, [
         classifyChip,
-        !minimal && showPriority ? el("span", { class: `badge badge--${item.priority}`, title: `Prioridade: ${priorityLabel(item.priority)}` }, [icon({
+        !minimal && showPriority ? el("span", { class: `badge badge--${item.priority}`, title: t("card.prioridade", { label: priorityLabel(item.priority) }) }, [icon({
           low: "arrow_downward",
           medium: "remove",
           high: "arrow_upward",
@@ -740,7 +740,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         cardBody.classList.toggle("card__body--expanded", isExpanded);
         btn.replaceChildren(
           icon(isExpanded ? "expand_less" : "expand_more"),
-          el("span", { class: "card__expand-btn-text" }, [isExpanded ? "Recolher" : "Expandir"])
+        el("span", { class: "card__expand-btn-text" }, [isExpanded ? t("card.recolher") : t("card.expandir")])
         );
       });
       footer.append(btn);
@@ -748,10 +748,10 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
     if (showActions) {
       const actionsFooter = el("div", { class: "card__footer-actions" }, [
-        cardActionBtn("playlist_add", "Adicionar subtarefa", locked ? lockedAlert : addSubtask),
-        cardActionBtn("chat", "Adicionar comentário", locked ? lockedAlert : addComment),
-        cardActionBtn("link", "Adicionar link", locked ? lockedAlert : addLink),
-        cardActionBtn("add_photo_alternate", "Adicionar imagem", locked ? lockedAlert : addImage)
+        cardActionBtn("playlist_add", t("card.adicionarSubtarefa"), locked ? lockedAlert : addSubtask),
+        cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
+        cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
+        cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage)
       ]);
       footer.append(actionsFooter);
     }

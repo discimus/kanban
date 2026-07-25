@@ -3,6 +3,7 @@ import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATE
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
 import { getStorageUsage } from "@shared/storage/storage-usage";
+import { t, loc } from "@shared/i18n";
 
 let archivedOpen = false;
 let filterCategory: ProductCategory | null = null;
@@ -18,11 +19,13 @@ const STATUS_ICONS: Record<ProductStatus, string> = {
 };
 
 function statusLabel(status: ProductStatus): string {
-  return PRODUCT_STATUSES.find((s) => s.value === status)?.label ?? status;
+  const found = PRODUCT_STATUSES.find((s) => s.value === status);
+  return found ? loc(found) : status;
 }
 
 function categoryLabel(cat: ProductCategory): string {
-  return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.label ?? cat;
+  const found = PRODUCT_CATEGORIES.find((c) => c.value === cat);
+  return found ? loc(found) : cat;
 }
 
 function categoryIcon(cat: ProductCategory): string {
@@ -36,6 +39,13 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "created-asc", label: "Mais antigo" }
 ];
 
+const SORT_LABELS: Record<SortOption, string> = {
+  "name-asc": "sidebar.sort.nameAsc",
+  "name-desc": "sidebar.sort.nameDesc",
+  "created-desc": "sidebar.sort.recent",
+  "created-asc": "sidebar.sort.oldest",
+};
+
 function renderFilterBar(onChange?: () => void): HTMLElement {
   const bar = el("div", { class: "filter-bar" }, []);
 
@@ -44,7 +54,7 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
   const allChip = el("button", {
     class: `chip chip--filter${filterCategory === null ? " chip--selected" : ""}`,
     type: "button"
-  }, ["Todas"]);
+  }, [t("sidebar.todas")]);
   allChip.addEventListener("click", () => {
     if (filterCategory !== null) {
       filterCategory = null;
@@ -70,11 +80,10 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
   bar.append(chips);
 
   const wrapper = el("div", { class: "sort-wrapper" }, []);
-  const current = SORT_OPTIONS.find(o => o.value === sortBy)!;
   const sortBtn = el("button", {
     class: "sort-btn sort-btn--compact",
     type: "button",
-    title: `Ordenar: ${current.label}`
+    title: t("sidebar.ordenar") + " " + t(SORT_LABELS[sortBy])
   }, [icon("sort")]);
   const sortMenu = el("div", { class: "sort-menu" }, []);
 
@@ -84,11 +93,11 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
       const item = el("button", {
         class: `sort-menu__item${opt.value === sortBy ? " sort-menu__item--selected" : ""}`,
         type: "button"
-      }, [opt.label]);
+      }, [t(SORT_LABELS[opt.value])]);
       item.addEventListener("click", (e) => {
         e.stopPropagation();
         sortBy = opt.value;
-        sortBtn.title = `Ordenar: ${opt.label}`;
+        sortBtn.title = t("sidebar.ordenar") + " " + t(SORT_LABELS[opt.value]);
         sortMenu.classList.remove("sort-menu--open");
         onChange?.();
       });
@@ -176,7 +185,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   const list = el("div", { class: "product-list" }, []);
 
   if (active.length === 0 && archived.length === 0) {
-    list.append(el("p", { class: "muted" }, ["Nenhum Projeto. Crie o primeiro!"]));
+    list.append(el("p", { class: "muted" }, [t("sidebar.nenhumProjeto")]));
   }
 
   for (const product of active) {
@@ -194,7 +203,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
         ]) : null
       ]),
       el("span", { class: "product-item__desc" }, [
-        product.description || "Sem descrição"
+        product.description || t("sidebar.semDescricao")
       ])
     ]);
     item.addEventListener("click", () => onSelect(product.id));
@@ -224,7 +233,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
 
     const headerBtn = el("button", { class: "sidebar__archived-toggle", type: "button" }, [
       icon(archivedOpen ? "expand_more" : "chevron_right"),
-      `Projetos arquivados (${archived.length})`
+      t("sidebar.projetosArquivados", { n: archived.length })
     ]);
     headerBtn.addEventListener("click", () => {
       archivedOpen = !archivedOpen;
@@ -235,13 +244,13 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     list.append(headerBtn, archivedBody);
   }
 
-  const addBtn = el("button", { class: "btn btn--primary", title: "Criar nova board de projeto" }, [icon("add"), "Novo Projeto"]);
+  const addBtn = el("button", { class: "btn btn--primary", title: t("sidebar.novaBoardProjeto") }, [icon("add"), t("sidebar.novoProjeto")]);
   addBtn.addEventListener("click", () => {
     onNewProject?.();
     openProductForm();
   });
 
-  const notesBtn = el("button", { class: "btn btn--icon btn--notes", type: "button", title: "Criar nova board de notas" }, [icon("note_stack_add")]);
+  const notesBtn = el("button", { class: "btn btn--icon btn--notes", type: "button", title: t("sidebar.novaBoardNotas") }, [icon("note_stack_add")]);
   notesBtn.addEventListener("click", () => {
     onNewProject?.();
     openNotesForm();
@@ -252,7 +261,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   const storage = getStorageUsage();
   const storageBar = el("div", { class: "sidebar__storage" }, [
     el("div", { class: "sidebar__storage-header" }, [
-      el("span", { class: "sidebar__storage-label" }, ["Armazenamento"]),
+      el("span", { class: "sidebar__storage-label" }, [t("sidebar.armazenamento")]),
       el("span", { class: "sidebar__storage-value" }, [storage.label])
     ]),
     el("div", { class: "sidebar__storage-bar" }, [
@@ -264,10 +273,10 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   ]);
 
   return el("aside", { class: "sidebar" }, [
-    el("h1", { class: "sidebar__brand" }, [icon("dashboard"), "Kanban"]),
-    el("p", { class: "sidebar__subtitle" }, ["Dashboard de gestão de projetos"]),
+    el("h1", { class: "sidebar__brand" }, [icon("dashboard"), t("sidebar.brand")]),
+    el("p", { class: "sidebar__subtitle" }, [t("sidebar.subtitle")]),
     actionsBar,
-    el("h2", { class: "sidebar__section" }, ["Projetos"]),
+    el("h2", { class: "sidebar__section" }, [t("sidebar.projetos")]),
     renderFilterBar(onFilterChange),
     list,
     storageBar

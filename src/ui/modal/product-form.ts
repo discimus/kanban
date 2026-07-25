@@ -5,28 +5,29 @@ import { productService } from "@contexts/product/application/product.service";
 import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { openImportPicker, validateAndImport, checkImportConflicts } from "@contexts/product/application/export.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
+import { t, loc } from "@shared/i18n";
 
 export function openProductForm(existing?: Product): void {
-  const name = textInput(existing?.name ?? "", "Nome do Projeto");
-  const description = textArea(existing?.description ?? "", "Descrição");
+  const name = textInput(existing?.name ?? "", t("form.nomeProjeto"));
+  const description = textArea(existing?.description ?? "", t("form.descricao"));
   const statusSel = select(
-    PRODUCT_STATUSES.map((s) => ({ value: s.value, label: s.label })),
+    PRODUCT_STATUSES.map((s) => ({ value: s.value, label: loc(s) })),
     existing?.status ?? "backlog"
   );
   const error = errorText();
 
   const catOptions = PRODUCT_CATEGORIES
     .filter((c) => existing || c.value !== "notes")
-    .map((c) => ({ value: c.value, label: `${c.label}` }));
+    .map((c) => ({ value: c.value, label: loc(c) }));
   const catSel = select(catOptions, existing?.category ?? "development");
 
   const AUTO_ARCHIVE_OPTIONS = [
-    { value: "", label: "Nunca" },
-    { value: "1", label: "1 dia" },
-    { value: "3", label: "3 dias" },
-    { value: "7", label: "7 dias" },
-    { value: "14", label: "14 dias" },
-    { value: "30", label: "30 dias" },
+    { value: "", label: t("form.nunca") },
+    { value: "1", label: t("form.umDia") },
+    { value: "3", label: t("form.tresDias") },
+    { value: "7", label: t("form.seteDias") },
+    { value: "14", label: t("form.catorzeDias") },
+    { value: "30", label: t("form.trintaDias") },
   ];
 
   const autoArchiveSel = select(
@@ -61,33 +62,33 @@ export function openProductForm(existing?: Product): void {
   };
 
   const body = el("div", { class: "form" }, [
-    field("Nome", name),
-    field("Descrição", description),
-    field("Categoria", catSel),
-    existing && existing.category !== "notes" ? field("Status", statusSel) : null,
+    field(t("form.nome"), name),
+    field(t("form.descricao"), description),
+    field(t("form.categoria"), catSel),
+    existing && existing.category !== "notes" ? field(t("form.status"), statusSel) : null,
     existing && existing.category !== "notes" ? el("label", { class: "field" }, [
-      el("span", { class: "field__label" }, ["Arquivar automático"]),
+      el("span", { class: "field__label" }, [t("form.arquivarAuto")]),
       autoArchiveSel,
-      el("span", { class: "field__description" }, ["Arquiva automaticamente cartões na coluna Done após o período selecionado."])
+      el("span", { class: "field__description" }, [t("form.arquivarAutoDesc")])
     ]) : null,
     error
   ]);
 
   if (existing) {
-    body.append(formActions("Salvar", submit));
+    body.append(formActions(t("form.salvar"), submit));
   } else {
-    const createBtn = el("button", { class: "btn btn--primary btn--block", type: "button" }, ["Criar Projeto"]);
+    const createBtn = el("button", { class: "btn btn--primary btn--block", type: "button" }, [t("form.criarProjeto")]);
     createBtn.addEventListener("click", submit);
 
-    const importBtn = el("button", { class: "btn btn--ghost btn--block" }, [icon("upload"), "Importar dados"]);
+    const importBtn = el("button", { class: "btn btn--ghost btn--block" }, [icon("upload"), t("form.importarDados")]);
     importBtn.addEventListener("click", () => {
       openImportPicker((content) => {
         const { hasConflicts, conflicting } = checkImportConflicts(content);
         if (hasConflicts) {
           const names = conflicting.map(c => c.name);
           const msg = names.length === 1
-            ? `O projeto "{{text}}" já existe. Deseja sobrescrevê-lo?`
-            : `Os projetos "{{text}}" já existem. Deseja sobrescrevê-los?`;
+            ? t("form.importarConflitoUnico")
+            : t("form.importarConflitoMultiplo");
           showConfirm(msg, names.join(", ")).then((ok) => {
             if (ok) {
               const result = validateAndImport(content, true);
@@ -103,7 +104,7 @@ export function openProductForm(existing?: Product): void {
       });
     });
 
-    const separator = el("div", { class: "form__separator" }, [el("span", {}, ["ou"])]);
+    const separator = el("div", { class: "form__separator" }, [el("span", {}, [t("form.ou")])]);
     body.append(createBtn, separator, importBtn);
   }
 
@@ -114,5 +115,5 @@ export function openProductForm(existing?: Product): void {
     }
   });
 
-  openModal({ title: existing ? "Editar Projeto" : "Novo Projeto", body, autoFocus: !existing });
+  openModal({ title: existing ? t("form.editarProjeto") : t("form.novoProjeto"), body, autoFocus: !existing });
 }

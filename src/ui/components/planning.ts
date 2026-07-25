@@ -6,6 +6,7 @@ import { openProductSettings } from "@ui/modal/settings-modal";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { downloadExportProduct } from "@contexts/product/application/export.service";
+import { t } from "@shared/i18n";
 
 export function renderProductHeader(
   product: Product,
@@ -18,13 +19,11 @@ export function renderProductHeader(
 ): HTMLElement {
   const isLocked = product.status === "completed" || product.status === "canceled" || !!product.archivedAt;
 
-  const addLabel = product.category === "notes" ? "Adicionar nota" : "Adicionar tarefa";
+  const addLabel = product.category === "notes" ? t("planning.adicionarNota") : t("planning.adicionarTarefa");
   const addItem = el("button", { class: "btn btn--primary btn--sm" }, [icon("add"), addLabel]);
   addItem.addEventListener("click", () => {
     if (isLocked) {
-      showAlert(
-        'Este projeto está concluído, cancelado ou arquivado. Altere o status pelo menu "⋮" → "Editar" para adicionar novos itens.'
-      );
+      showAlert(t("planning.projetoLocked"));
       return;
     }
     openBacklogForm(product.id);
@@ -33,7 +32,7 @@ export function renderProductHeader(
   const statBtn = onToggleStats
     ? el("button", { class: `btn btn--sm${showStats ? " btn--primary" : ""}` }, [
         icon("bar_chart"),
-        "Estatísticas"
+        t("planning.estatisticas")
       ])
     : null;
   if (statBtn) {
@@ -43,30 +42,30 @@ export function renderProductHeader(
   const archBtn = onToggleArchived
     ? el("button", { class: `btn btn--sm${showArchived ? " btn--primary" : ""}` }, [
         icon("archive"),
-        "Arquivadas"
+        t("planning.arquivadas")
       ])
     : null;
   if (archBtn) {
     archBtn.addEventListener("click", onToggleArchived!);
   }
 
-  const settingsBtn = el("button", { class: "btn btn--sm btn--icon", "aria-label": "Configurações" }, [icon("settings")]);
+  const settingsBtn = el("button", { class: "btn btn--sm btn--icon", "aria-label": t("planning.configuracoes") }, [icon("settings")]);
   settingsBtn.addEventListener("click", () => openProductSettings(product));
 
   const menu = actionsMenu([
-    { label: "Editar", icon: "edit", action: () => openProductForm(product) },
-    { label: "Exportar", icon: "download", action: () => downloadExportProduct(product.name, product.id) },
+    { label: t("planning.editar"), icon: "edit", action: () => openProductForm(product) },
+    { label: t("planning.exportar"), icon: "download", action: () => downloadExportProduct(product.name, product.id) },
     {
-      label: product.archivedAt ? "Restaurar projeto" : "Arquivar projeto",
+      label: product.archivedAt ? t("planning.restaurar") : t("planning.arquivar"),
       icon: product.archivedAt ? "unarchive" : "archive",
       action: onArchive ?? (() => {})
     },
     {
-      label: "Excluir",
+      label: t("planning.excluir"),
       icon: "delete",
       danger: true,
       action: () => {
-        showConfirm('Excluir Projeto "{{text}}" e todos os seus dados?', product.name).then((ok) => {
+        showConfirm(t("planning.excluirConfirm"), product.name).then((ok) => {
           if (ok) productService.delete(product.id);
         });
       }
@@ -84,6 +83,6 @@ export function renderProductHeader(
 
   return el("header", { class: "content__header" }, [
     topBar,
-    el("p", { class: "content__subtitle" }, [product.description || "Sem descrição"])
+    el("p", { class: "content__subtitle" }, [product.description || t("planning.semDescricao")])
   ]);
 }

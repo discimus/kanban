@@ -2,6 +2,7 @@ import { Comment } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { createComment, editComment as editCommentFn, CreateCommentProps } from "../domain/comment";
 import { commentRepository } from "../infrastructure/comment.repository";
+import { t } from "@shared/i18n";
 
 export const commentService = {
   byBacklogItem(backlogItemId: string): Comment[] {
@@ -17,7 +18,7 @@ export const commentService = {
 
   edit(id: string, text: string): Comment {
     const existing = commentRepository.findById(id);
-    if (!existing) throw new Error("Comentário não encontrado.");
+    if (!existing) throw new Error(t("comment.naoEncontrado"));
     const updated = editCommentFn(existing, text);
     commentRepository.save(updated);
     eventBus.emit("comment:updated", updated);

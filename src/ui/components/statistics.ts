@@ -3,6 +3,7 @@ import { KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, PRIORITIES } from "@shared/ty
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { taskService } from "@contexts/task/application/task.service";
+import { t, loc } from "@shared/i18n";
 
 export function renderStatistics(productId: string): HTMLElement {
   const product = productService.get(productId);
@@ -24,28 +25,28 @@ export function renderStatistics(productId: string): HTMLElement {
   const section = el("div", { class: "stats" }, []);
 
   // Visão Geral — KPIs
-  section.append(el("h3", { class: "stats__title" }, ["Visão Geral"]));
-  section.append(el("p", { class: "stats__desc" }, ["Métricas principais da board"]));
+  section.append(el("h3", { class: "stats__title" }, [t("stats.visaoGeral")]));
+  section.append(el("p", { class: "stats__desc" }, [t("stats.metricas")]));
   section.append(
     el("div", { class: "stats__badges" }, [
-      el("span", { class: "stats__badge" }, [isNotes ? `${total} notas` : `${total} cards`]),
+      el("span", { class: "stats__badge" }, [isNotes ? `${total} ${t("stats.notas")}` : `${total} ${t("stats.cards")}`]),
       ...(isNotes ? [] : [el("span", { class: "stats__badge" }, [`${totalPoints} pts`])]),
-      el("span", { class: "stats__badge" }, [isNotes ? `${allTasks.length} subtarefas` : `${allTasks.length} tasks`])
+      el("span", { class: "stats__badge" }, [isNotes ? `${allTasks.length} ${t("stats.subtarefas")}` : `${allTasks.length} ${t("stats.tasks")}`])
     ])
   );
 
   // Progresso — completion rates
-  section.append(el("h3", { class: "stats__title" }, ["Progresso"]));
-  section.append(el("p", { class: "stats__desc" }, [isNotes ? "Notas e subtarefas concluídas" : "Cards e tarefas concluídos"]));
+  section.append(el("h3", { class: "stats__title" }, [t("stats.progresso")]));
+  section.append(el("p", { class: "stats__desc" }, [isNotes ? t("stats.notasConcluidas") : t("stats.cardsConcluidos")]));
   if (!isNotes) {
-    section.append(renderProgress("Cards concluídos", doneCards, total, cardsPct));
+    section.append(renderProgress(t("stats.cardsConcluidosLabel"), doneCards, total, cardsPct));
   }
-  section.append(renderProgress("Subtarefas concluídas", doneTasks, allTasks.length, tasksPct));
+  section.append(renderProgress(t("stats.subtarefasConcluidas"), doneTasks, allTasks.length, tasksPct));
 
   // Fluxo de Trabalho — colunas kanban
   if (!isNotes) {
-    section.append(el("h3", { class: "stats__title" }, ["Fluxo de Trabalho"]));
-    section.append(el("p", { class: "stats__desc" }, ["Cards em cada etapa do pipeline"]));
+    section.append(el("h3", { class: "stats__title" }, [t("stats.fluxoTrabalho")]));
+    section.append(el("p", { class: "stats__desc" }, [t("stats.cardsPipeline")]));
 
     for (const column of KANBAN_COLUMNS) {
       if (column.status === "review" && product?.showReview === false) continue;
@@ -77,14 +78,14 @@ export function renderStatistics(productId: string): HTMLElement {
   }
 
   // Classificações — tipos de trabalho
-  section.append(el("h3", { class: "stats__title" }, ["Classificações"]));
-  section.append(el("p", { class: "stats__desc" }, [isNotes ? "Por tipo de anotação" : "Por tipo de trabalho"]));
+  section.append(el("h3", { class: "stats__title" }, [t("stats.classificacoes")]));
+  section.append(el("p", { class: "stats__desc" }, [isNotes ? t("stats.porTipoAnotacao") : t("stats.porTipoTrabalho")]));
   section.append(renderChips(clist, items, "classification"));
 
   // Prioridades — níveis de urgência
   if (!isNotes) {
-    section.append(el("h3", { class: "stats__title" }, ["Prioridades"]));
-    section.append(el("p", { class: "stats__desc" }, ["Por nível de urgência"]));
+    section.append(el("h3", { class: "stats__title" }, [t("stats.prioridades")]));
+    section.append(el("p", { class: "stats__desc" }, [t("stats.porNivelUrgencia")]));
     section.append(renderChips(PRIORITIES, items, "priority"));
   }
 
@@ -115,7 +116,7 @@ function renderChips(
     row.append(
       el("span", { class: `chip chip--${entry.value}` }, [
         entry.icon ? icon(entry.icon) : null,
-        el("span", {}, [`${entry.label}: ${count}`])
+        el("span", {}, [`${loc(entry)}: ${count}`])
       ])
     );
 

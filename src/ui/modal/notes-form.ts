@@ -2,12 +2,13 @@ import { el, icon } from "@ui/components/dom";
 import { field, textInput, textArea, errorText } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
-import { openImportPicker, validateAndImport, checkImportConflicts } from "@contexts/product/application/export.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
+import { openImportPicker, validateAndImport, checkImportConflicts } from "@contexts/product/application/export.service";
+import { t } from "@shared/i18n";
 
 export function openNotesForm(): void {
-  const name = textInput("", "Nome da board");
-  const description = textArea("", "Descrição");
+  const name = textInput("", t("form.nomeBoard"));
+  const description = textArea("", t("form.descricao"));
   const error = errorText();
 
   const submit = () => {
@@ -22,7 +23,7 @@ export function openNotesForm(): void {
     }
   };
 
-  const createBtn = el("button", { class: "btn btn--primary btn--block", type: "button" }, [icon("note_stack_add"), "Criar board"]);
+  const createBtn = el("button", { class: "btn btn--primary btn--block", type: "button" }, [icon("note_stack_add"), t("form.criarBoard")]);
   createBtn.addEventListener("click", submit);
 
   const importBtn = el("button", { class: "btn btn--ghost btn--block" }, [icon("upload"), "Importar dados"]);
@@ -52,8 +53,8 @@ export function openNotesForm(): void {
   const separator = el("div", { class: "form__separator" }, [el("span", {}, ["ou"])]);
 
   const body = el("div", { class: "form" }, [
-    field("Nome", name),
-    field("Descrição", description),
+    field(t("form.nome"), name),
+    field(t("form.descricao"), description),
     error,
     createBtn,
     separator,

@@ -1,4 +1,5 @@
 import { el, clear } from "@ui/components/dom";
+import { t } from "@shared/i18n";
 
 let overlay: HTMLDivElement | null = null;
 let keyHandler: ((ev: KeyboardEvent) => void) | null = null;
@@ -77,22 +78,22 @@ function openDialog(options: DialogOptions): void {
 
 export function showAlert(message: string): Promise<void> {
   return new Promise((resolve) => {
-    openDialog({ message, confirmLabel: "OK", onResolve: () => resolve() });
+    openDialog({ message, confirmLabel: t("dialog.ok"), onResolve: () => resolve() });
   });
 }
 
 export function showConfirm(message: string, highlight?: string): Promise<boolean> {
   return new Promise((resolve) => {
-    openDialog({ message, highlight, confirmLabel: "Confirmar", cancelLabel: "Cancelar", onResolve: resolve });
+    openDialog({ message, highlight, confirmLabel: t("dialog.confirmar"), cancelLabel: t("dialog.cancelar"), onResolve: resolve });
   });
 }
 
 export function showOnboarding(): Promise<boolean> {
   return new Promise((resolve) => {
     openDialog({
-      message: "Bem-vindo! Deseja carregar projetos de exemplo para explorar a aplicação?",
-      confirmLabel: "Carregar projetos exemplo",
-      cancelLabel: "Board em branco",
+      message: t("dialog.boasVindas"),
+      confirmLabel: t("dialog.carregarExemplos"),
+      cancelLabel: t("dialog.boardEmBranco"),
       onResolve: resolve
     });
   });

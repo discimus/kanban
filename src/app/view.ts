@@ -6,6 +6,8 @@ import { renderBoard, renderNotesBoard } from "@ui/board/board";
 import { renderStatistics } from "@ui/components/statistics";
 import { renderThemeMenu } from "@ui/components/theme-menu";
 import { renderHelpMenu } from "@ui/components/help-menu";
+import { renderLocaleMenu } from "@ui/components/locale-menu";
+import { t } from "@shared/i18n";
 
 let selectedProductId: string | null = null;
 let drawerOpen = false;
@@ -92,7 +94,7 @@ export function renderApp(root: HTMLElement): void {
   const scrim = el("div", { class: "drawer-scrim", "aria-hidden": "true" }, []);
   scrim.addEventListener("click", () => setDrawer(false));
 
-  const hamburger = el("button", { class: "hamburger", "aria-label": "Abrir menu de projetos" }, [icon("menu")]);
+  const hamburger = el("button", { class: "hamburger", "aria-label": t("view.abrirMenu") }, [icon("menu")]);
   hamburger.addEventListener("click", () => setDrawer(!drawerOpen));
 
   const content = el("main", { class: "content" }, []);
@@ -106,8 +108,8 @@ export function renderApp(root: HTMLElement): void {
         ])
       ]),
       el("div", { class: "empty-state" }, [
-        el("h2", {}, ["Bem-vindo ao Kanban"]),
-        el("p", { class: "muted" }, ["Crie um Projeto na barra lateral para começar."])
+        el("h2", {}, [t("view.bemVindo")]),
+        el("p", { class: "muted" }, [t("view.crieProjeto")])
       ])
     );
   } else {
@@ -138,7 +140,7 @@ export function renderApp(root: HTMLElement): void {
   }
 
   layout.append(sidebar, scrim, content);
-  root.append(layout, renderThemeMenu(), renderHelpMenu());
+  root.append(layout, renderLocaleMenu(), renderThemeMenu(), renderHelpMenu());
 
   requestAnimationFrame(() => {
     const list = root.querySelector(".product-list");

@@ -3,6 +3,7 @@ import { formActions, errorText } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
 import { Product } from "@shared/types";
+import { t } from "@shared/i18n";
 
 export function openProductSettings(product: Product): void {
   const isNotes = product.category === "notes";
@@ -39,33 +40,33 @@ export function openProductSettings(product: Product): void {
     ...(isNotes ? [] : [el("label", { class: "field field--checkbox" }, [
       showPriority,
       el("span", { class: "field__text-wrapper" }, [
-        el("span", { class: "field__label" }, ["Exibir prioridade das tarefas"]),
-        el("span", { class: "field__description" }, ["Mostra indicadores de prioridade (baixa, média, alta, crítica) nos cards do quadro."])
+        el("span", { class: "field__label" }, [t("settings.exibirPrioridade")]),
+        el("span", { class: "field__description" }, [t("settings.exibirPrioridadeDesc")])
       ])
     ])]),
     el("label", { class: "field field--checkbox" }, [
       autoPasteCb,
       el("span", { class: "field__text-wrapper" }, [
-        el("span", { class: "field__label" }, ["Colar link automaticamente"]),
-        el("span", { class: "field__description" }, ["Ao adicionar um link, preenche automaticamente com o conteúdo da área de transferência."])
+        el("span", { class: "field__label" }, [t("settings.colarLink")]),
+        el("span", { class: "field__description" }, [t("settings.colarLinkDesc")])
       ])
     ]),
     el("label", { class: "field field--checkbox" }, [
       autoPasteImageCb,
       el("span", { class: "field__text-wrapper" }, [
-        el("span", { class: "field__label" }, ["Colar imagem automaticamente"]),
-        el("span", { class: "field__description" }, ["Ao adicionar uma imagem, cola automaticamente o conteúdo da área de transferência."])
+        el("span", { class: "field__label" }, [t("settings.colarImagem")]),
+        el("span", { class: "field__description" }, [t("settings.colarImagemDesc")])
       ])
     ]),
     ...(isNotes ? [] : [el("label", { class: "field field--checkbox" }, [
       showReviewCb,
       el("span", { class: "field__text-wrapper" }, [
-        el("span", { class: "field__label" }, ["Exibir coluna Review"]),
-        el("span", { class: "field__description" }, ["Mostra a coluna Review no quadro Kanban."])
+        el("span", { class: "field__label" }, [t("settings.exibirReview")]),
+        el("span", { class: "field__description" }, [t("settings.exibirReviewDesc")])
       ])
     ])]),
     error,
-    formActions("Salvar", submit)
+    formActions(t("form.salvar"), submit)
   ]);
 
   body.addEventListener("keydown", (e) => {
@@ -75,5 +76,5 @@ export function openProductSettings(product: Product): void {
     }
   });
 
-  openModal({ title: "Configurações do Projeto", body });
+  openModal({ title: t("settings.title"), body });
 }
