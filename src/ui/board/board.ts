@@ -364,9 +364,32 @@ export function renderNotesBoard(productId: string, showArchived = false, onFilt
     kbRegistered = true;
   }
 
-  setupBottomSentinel(board);
+  setupNotesBottomHide(board);
 
   return wrapper;
+}
+
+/**
+ * Passive scroll listener for the notes board (flex layout).
+ * A more reliable alternative to the IntersectionObserver + sentinel
+ * approach used in the grid-based task board, since the 1px sentinel
+ * with grid-column: 1 / -1 is not applicable in a flex context.
+ */
+function setupNotesBottomHide(board: HTMLElement): void {
+  if (!window.matchMedia("(max-width: 720px)").matches) return;
+
+  const getFabs = (): HTMLElement[] =>
+    [".theme-toggle", ".locale-btn", ".help-btn"]
+      .flatMap(s => Array.from(document.querySelectorAll<HTMLElement>(s)));
+
+  const update = (): void => {
+    const { scrollTop, scrollHeight, clientHeight } = board;
+    const atBottom = scrollHeight - scrollTop - clientHeight <= 1;
+    getFabs().forEach(fab => fab.classList.toggle("board-item--hidden", atBottom));
+  };
+
+  board.addEventListener("scroll", update, { passive: true });
+  update();
 }
 
 /**
