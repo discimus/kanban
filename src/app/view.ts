@@ -10,6 +10,23 @@ import { renderLocaleMenu } from "@ui/components/locale-menu";
 import { renderDrawerBtn } from "@ui/components/drawer-btn";
 import { t } from "@shared/i18n";
 
+const SIDEBAR_WIDTH_KEY = "kanban-sidebar-width";
+
+function loadSidebarWidth(): number {
+  try {
+    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
+    if (saved) {
+      const w = parseInt(saved, 10);
+      if (w >= 200 && w <= 500) return w;
+    }
+  } catch { /* ignore */ }
+  return 280;
+}
+
+function saveSidebarWidth(w: number): void {
+  try { localStorage.setItem(SIDEBAR_WIDTH_KEY, String(w)); } catch { /* ignore */ }
+}
+
 let selectedProductId: string | null = null;
 let drawerOpen = false;
 let showStats = false;
@@ -79,11 +96,52 @@ export function renderApp(root: HTMLElement): void {
   clear(root);
 
   const layout = el("div", { class: `layout${drawerOpen ? " layout--drawer-open" : ""}` }, []);
+  const sidebarWidth = loadSidebarWidth();
+  layout.style.setProperty("--sidebar-w", `${sidebarWidth}px`);
 
   const setDrawer = (open: boolean): void => {
     drawerOpen = open;
     layout.classList.toggle("layout--drawer-open", open);
   };
+
+  const resizer = el("div", { class: "sidebar-resizer" }) as HTMLElement;
+  const updateResizerPos = (): void => {
+    const w = parseFloat(layout.style.getPropertyValue("--sidebar-w")) || sidebarWidth;
+    resizer.style.left = `${w}px`;
+  };
+  updateResizerPos();
+
+  let dragging = false;
+
+  const onPointerDown = (e: PointerEvent): void => {
+    if (window.innerWidth <= 720) return;
+    dragging = true;
+    resizer.classList.add("sidebar-resizer--active");
+    resizer.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  };
+
+  const onPointerMove = (e: PointerEvent): void => {
+    if (!dragging) return;
+    const rect = layout.getBoundingClientRect();
+    let w = e.clientX - rect.left;
+    w = Math.max(200, Math.min(500, w));
+    layout.style.setProperty("--sidebar-w", `${w}px`);
+    resizer.style.left = `${w}px`;
+  };
+
+  const onPointerUp = (e: PointerEvent): void => {
+    if (!dragging) return;
+    dragging = false;
+    resizer.classList.remove("sidebar-resizer--active");
+    resizer.releasePointerCapture(e.pointerId);
+    const current = parseFloat(layout.style.getPropertyValue("--sidebar-w"));
+    if (!isNaN(current)) saveSidebarWidth(Math.round(current));
+  };
+
+  resizer.addEventListener("pointerdown", onPointerDown);
+  resizer.addEventListener("pointermove", onPointerMove);
+  resizer.addEventListener("pointerup", onPointerUp);
 
   const products = productService.list();
   const onPinToggle = (id: string, action: "pin" | "unpin") => {
@@ -152,7 +210,7 @@ export function renderApp(root: HTMLElement): void {
     }
   }
 
-  layout.append(sidebar, scrim, content);
+  layout.append(sidebar, scrim, content, resizer);
   root.append(layout, renderLocaleMenu(), renderThemeMenu(), renderHelpMenu(), renderDrawerBtn(() => setDrawer(true)));
 
   requestAnimationFrame(() => {

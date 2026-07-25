@@ -655,9 +655,10 @@ body {
 
 .layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: var(--sidebar-w, 280px) 1fr;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 /* Sidebar */
@@ -669,6 +670,31 @@ body {
   flex-direction: column;
   gap: 12px;
   overflow: hidden;
+  min-width: 200px;
+  max-width: 500px;
+}
+
+/* Resizer handle between sidebar and content */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 10;
+  transition: background 0.15s;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer--active {
+  background: var(--md-primary);
+  opacity: 0.4;
+}
+
+.sidebar-resizer::after {
+  content: "";
+  position: absolute;
+  inset: 0 -4px;
 }
 
 .sidebar__brand {
@@ -3251,7 +3277,7 @@ h4 {
 /* Tablet: board columns wrap into fewer tracks */
 @media (max-width: 1024px) {
   .layout {
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: min(var(--sidebar-w, 280px), 240px) 1fr;
   }
 
   .board {
@@ -3263,6 +3289,10 @@ h4 {
 @media (max-width: 720px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .sidebar-resizer {
+    display: none;
   }
 
   .hamburger {
