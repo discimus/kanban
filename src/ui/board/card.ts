@@ -95,11 +95,11 @@ function cardActionBtn(iconName: string, label: string, action: () => void): HTM
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const seg = Math.floor(diff / 1000);
-  if (seg < 60) return t("utils.visitadoAgora");
+  if (seg < 60) return t("utils.agora");
   const min = Math.floor(seg / 60);
-  if (min < 60) return t("utils.haMinutos", { n: min });
+  if (min < 60) return t("utils.atrasMin", { n: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return t("utils.haHoras", { n: hr });
+  if (hr < 24) return t("utils.atrasHora", { n: hr });
   const dias = Math.floor(hr / 24);
   if (dias < 30) return t("card.haTempo", { n: dias });
   return formatDate(iso);

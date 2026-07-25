@@ -214,6 +214,9 @@ export const en: Record<string, string> = {
   "utils.haMeses": "Visited {n} months ago",
   "utils.haAno": "Visited {n} year ago",
   "utils.haAnos": "Visited {n} years ago",
+  "utils.agora": "now",
+  "utils.atrasMin": "{n}m",
+  "utils.atrasHora": "{n}h",
 
   /* ====== Card short timeAgo ====== */
   "card.haTempo": "{n}d ago",
