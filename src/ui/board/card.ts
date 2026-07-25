@@ -1,5 +1,5 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
-import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory } from "@shared/types";
+import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory, Task } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
@@ -176,10 +176,9 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const readOnly = locked || isArchived;
   const taskList = el("div", { class: "card__tasks" }, []);
 
-  const renderTasks = (): void => {
+  const renderTasks = (taskItems: Task[]): void => {
     clear(taskList);
-    const tasks = taskService.byBacklogItem(item.id);
-    for (const task of tasks) {
+    for (const task of taskItems) {
       const done = task.status === "done";
 
       const checkbox = el("input", { class: "card__task-check", type: "checkbox" }) as HTMLInputElement;
@@ -210,9 +209,10 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       );
     }
   };
-  renderTasks();
 
   const tasks = taskService.byBacklogItem(item.id);
+  renderTasks(tasks);
+
   const doneCount = tasks.filter((t) => t.status === "done").length;
 
   const progressBar = tasks.length > 0

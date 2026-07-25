@@ -9,21 +9,19 @@
   /* Transition declared on the base elements so it applies in both
      directions: fade-out (class added) and fade-in (class removed). */
   .theme-toggle,
-  .locale-btn {
+  .locale-btn,
+  .help-btn {
     transition:
       opacity 0.25s ease,
+      transform 0.25s ease,
       background 0.15s,
       border-color 0.15s;
   }
 
   .board-item--hidden {
     opacity: 0;
+    transform: scale(0.8);
     pointer-events: none;
-  }
-
-  .board-item--visible {
-    opacity: 1;
-    pointer-events: auto;
   }
 
   /* Sentinel: invisible element placed at the end of the board grid.

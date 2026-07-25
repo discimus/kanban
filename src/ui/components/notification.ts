@@ -46,5 +46,5 @@ function dismiss(toast: HTMLElement): void {
   if (toast.classList.contains("toast--dismissing")) return;
   toast.classList.remove("toast--visible");
   toast.classList.add("toast--dismissing");
-  toast.addEventListener("animationend", () => toast.remove());
+  toast.addEventListener("transitionend", () => toast.remove(), { once: true });
 }

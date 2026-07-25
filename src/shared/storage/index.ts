@@ -62,6 +62,11 @@ export function normalizeProduct(product: Product): Product {
  */
 class Store {
   private state: AppState;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Debounce window in ms. Keeps JSON.stringify off the hot path when
+   *  multiple mutations fire in the same JS task (e.g. bulk imports, filters). */
+  private static readonly PERSIST_DEBOUNCE_MS = 300;
 
   constructor() {
     this.state = this.load();
@@ -85,17 +90,26 @@ class Store {
     }
   }
 
+  /** Schedules a persist, coalescing rapid successive mutations into one write. */
+  private schedulePersist(): void {
+    if (this.persistTimer !== null) clearTimeout(this.persistTimer);
+    this.persistTimer = setTimeout(() => {
+      this.persistTimer = null;
+      this.persist();
+    }, Store.PERSIST_DEBOUNCE_MS);
+  }
+
   getState(): AppState {
     return this.state;
   }
 
   /**
-   * Mutates the state via a recipe, then persists automatically and
+   * Mutates the state via a recipe, schedules a debounced persist, and
    * notifies subscribers through the shared event bus.
    */
   update(recipe: (state: AppState) => void): void {
     recipe(this.state);
-    this.persist();
+    this.schedulePersist();
     eventBus.emit("state:changed");
   }
 
@@ -109,6 +123,16 @@ class Store {
     this.state = reviveState(newState);
     this.persist();
     eventBus.emit("state:changed");
+  }
+
+  /** Flushes any pending debounced persist immediately.
+   *  Useful for tests and for beforeunload safety. */
+  flushPersist(): void {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+      this.persist();
+    }
   }
 }
 

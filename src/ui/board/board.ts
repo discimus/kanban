@@ -371,13 +371,13 @@ export function renderNotesBoard(productId: string, showArchived = false, onFilt
 
 /**
  * Appends an invisible sentinel element at the end of the board grid.
- * Uses IntersectionObserver (zero polling) to detect when the user reaches
- * the bottom of the card list.
+ * Uses IntersectionObserver (viewport root, zero polling) to detect when
+ * the user reaches the bottom of the scrollable area.
  *
- * - Sentinel visible on first paint → content fits in viewport → do nothing.
- * - Sentinel hidden on first paint → content overflows → watch for intersection.
- *   · Sentinel enters viewport  → user is at bottom → hide FABs.
- *   · Sentinel leaves viewport  → user scrolled up  → show FABs.
+ * - Board not scrollable                          → do nothing.
+ * - Board scrollable, sentinel hidden (scroll 0)  → watch for intersection.
+ *   · Sentinel enters viewport → user at bottom   → hide FABs.
+ *   · Sentinel leaves viewport → user scrolled up → show FABs.
  */
 
 /** Retains the active observer so it can be disconnected on re-render. */
@@ -399,7 +399,7 @@ function setupBottomSentinel(board: HTMLElement): void {
   // Query FABs at call time inside the callback — they are appended to the DOM
   // after setupBottomSentinel returns, so capturing them here would yield empty results.
   const getFabs = (): HTMLElement[] =>
-    [".theme-toggle", ".locale-btn"]
+    [".theme-toggle", ".locale-btn", ".help-btn"]
       .flatMap(s => Array.from(document.querySelectorAll<HTMLElement>(s)));
 
   let initialCheck = true;
@@ -407,23 +407,29 @@ function setupBottomSentinel(board: HTMLElement): void {
 
   const observer = new IntersectionObserver((entries) => {
     const entry = entries[0];
+    const fabs = getFabs();
 
     if (initialCheck) {
       initialCheck = false;
-      if (entry.isIntersecting) {
-        // Content fits in the viewport — nothing to do.
+      // Check actual scrollability of the board element, not the initial
+      // intersection — scroll restoration (rAF) may have already positioned
+      // the sentinel in-view before the observer's first callback fires,
+      // causing a false "content fits" reading.
+      if (board.scrollHeight <= board.clientHeight) {
         observer.disconnect();
         activeBottomObserver = null;
         return;
       }
-      // Content overflows — start tracking scroll position.
       contentIsScrollable = true;
+      if (entry.isIntersecting) {
+        // User was scrolled to bottom before re-render — hide immediately.
+        fabs.forEach(fab => fab.classList.add("board-item--hidden"));
+      }
       return;
     }
 
     if (!contentIsScrollable) return;
 
-    const fabs = getFabs();
     if (entry.isIntersecting) {
       fabs.forEach(fab => fab.classList.add("board-item--hidden"));
     } else {

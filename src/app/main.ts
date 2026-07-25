@@ -9,6 +9,8 @@ import { showToast } from "@ui/components/notification";
 import { createExampleData } from "@contexts/product/domain/example-data";
 import { t } from "@shared/i18n";
 
+window.addEventListener("beforeunload", () => store.flushPersist());
+
 const root = document.getElementById("app");
 
 if (!root) {
