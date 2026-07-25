@@ -1,5 +1,5 @@
 import { el, icon } from "@ui/components/dom";
-import { field, textInput, textArea, select, formActions, errorText } from "@ui/components/forms";
+import { field, textInput, textArea, select, formActions, errorText, paletteSelector } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
 import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
@@ -35,6 +35,8 @@ export function openProductForm(existing?: Product): void {
     existing?.autoArchiveDays ? String(existing.autoArchiveDays) : ""
   );
 
+  const pal = paletteSelector(existing?.palette);
+
   const submit = () => {
     try {
       if (existing) {
@@ -43,14 +45,15 @@ export function openProductForm(existing?: Product): void {
           name: name.value,
           description: description.value,
           category: catSel.value as ProductCategory,
-          autoArchiveDays: isNotes ? null : (autoArchiveSel.value ? Number(autoArchiveSel.value) : null)
+          autoArchiveDays: isNotes ? null : (autoArchiveSel.value ? Number(autoArchiveSel.value) : null),
+          palette: pal.value
         });
         if (!isNotes && statusSel.value !== existing.status) {
           productService.setStatus(existing.id, statusSel.value as ProductStatus);
         }
         closeModal();
       } else {
-        const created = productService.create(name.value, description.value, catSel.value as ProductCategory);
+        const created = productService.create(name.value, description.value, catSel.value as ProductCategory, pal.value);
         closeModal();
         import("../../app/view").then(({ forceSelectProduct }) => {
           forceSelectProduct(created.id, document.getElementById("app")!);
@@ -61,16 +64,23 @@ export function openProductForm(existing?: Product): void {
     }
   };
 
+  const isNotes = existing?.category === "notes";
+
   const body = el("div", { class: "form" }, [
     field(t("form.nome"), name),
     field(t("form.descricao"), description),
     field(t("form.categoria"), catSel),
-    existing && existing.category !== "notes" ? field(t("form.status"), statusSel) : null,
-    existing && existing.category !== "notes" ? el("label", { class: "field" }, [
+    existing && !isNotes ? field(t("form.status"), statusSel) : null,
+    existing && !isNotes ? el("label", { class: "field" }, [
       el("span", { class: "field__label" }, [t("form.arquivarAuto")]),
       autoArchiveSel,
       el("span", { class: "field__description" }, [t("form.arquivarAutoDesc")])
     ]) : null,
+    el("label", { class: "field" }, [
+      el("span", { class: "field__label" }, [t("palette.label")]),
+      pal.element,
+      el("span", { class: "field__description" }, [t("palette.desc")])
+    ]),
     error
   ]);
 

@@ -134,6 +134,7 @@ export function createExampleData(): AppState {
         autoPasteLinks: true,
         autoPasteImages: true,
         showReview: true,
+        palette: "indigo",
         archivedAt: null,
         pinnedAt: null
       }

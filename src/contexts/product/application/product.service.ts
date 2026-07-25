@@ -1,4 +1,4 @@
-import { Product, ProductStatus, ProductCategory } from "@shared/types";
+import { Product, ProductStatus, ProductCategory, PaletteId } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
 import { createProduct, assertValidProductName, archive as archiveItem, restore as restoreItem, pin as pinItem, unpin as unpinItem } from "../domain/product";
@@ -14,14 +14,14 @@ export const productService = {
     return productRepository.findById(id);
   },
 
-  create(name: string, description = "", category: ProductCategory = "development"): Product {
-    const product = createProduct({ name, description, category });
+  create(name: string, description = "", category: ProductCategory = "development", palette?: PaletteId): Product {
+    const product = createProduct({ name, description, category, palette });
     productRepository.add(product);
     eventBus.emit("product:created", product);
     return product;
   },
 
-  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; autoPasteImages?: boolean; showReview?: boolean }): Product {
+  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; autoPasteImages?: boolean; showReview?: boolean; palette?: PaletteId }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     if (changes.name !== undefined) assertValidProductName(changes.name);
@@ -45,7 +45,8 @@ export const productService = {
       autoArchiveDays: changes.autoArchiveDays !== undefined ? changes.autoArchiveDays : existing.autoArchiveDays,
       autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks,
       autoPasteImages: changes.autoPasteImages ?? existing.autoPasteImages,
-      showReview: changes.showReview ?? existing.showReview
+      showReview: changes.showReview ?? existing.showReview,
+      palette: changes.palette ?? existing.palette
     };
     productRepository.save(updated);
     eventBus.emit("product:updated", updated);

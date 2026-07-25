@@ -23,6 +23,24 @@ export type TaskClassification = "task" | "bug" | "refactor" | "idea" | "pending
 
 export type ProductCategory = "development" | "business" | "study" | "notes";
 
+export type PaletteId = "indigo" | "teal" | "green" | "amber" | "rose" | "blue" | "orange" | "purple";
+
+export interface Palette {
+  id: PaletteId;
+  seed: string;
+}
+
+export const PALETTES: Palette[] = [
+  { id: "indigo", seed: "#4f5bd5" },
+  { id: "teal", seed: "#00897b" },
+  { id: "green", seed: "#2e7d32" },
+  { id: "amber", seed: "#f9a825" },
+  { id: "rose", seed: "#d81b60" },
+  { id: "blue", seed: "#1565c0" },
+  { id: "orange", seed: "#e65100" },
+  { id: "purple", seed: "#6a1b9a" },
+];
+
 export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string; icon: string }[] = [
   { value: "development", label: "Desenvolvimento", icon: "code" },
   { value: "business", label: "Negócios", icon: "business_center" },
@@ -107,6 +125,7 @@ export interface Product {
   autoPasteLinks: boolean;
   autoPasteImages: boolean;
   showReview: boolean;
+  palette: PaletteId;
   archivedAt: ISODate | null;
   pinnedAt: ISODate | null;
 }

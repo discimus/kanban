@@ -39,7 +39,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     autoPasteLinks: true,
     autoPasteImages: true,
     showReview: true,
-
+    palette: "indigo" as const,
     archivedAt: null,
     pinnedAt: null,
     ...overrides

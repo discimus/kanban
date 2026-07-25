@@ -224,6 +224,18 @@ export const pt: Record<string, string> = {
   /* ====== Comment service ====== */
   "comment.naoEncontrado": "Comentário não encontrado.",
 
+  /* ====== Palette ====== */
+  "palette.indigo": "Índigo",
+  "palette.teal": "Verde-azulado",
+  "palette.green": "Verde",
+  "palette.amber": "Âmbar",
+  "palette.rose": "Rosa",
+  "palette.blue": "Azul",
+  "palette.orange": "Laranja",
+  "palette.purple": "Roxo",
+  "palette.label": "Paleta de cores",
+  "palette.desc": "Escolha um tema de cor para este projeto.",
+
   /* ====== English label map for constants ====== */
   "enLabel.development": "Desenvolvimento",
   "enLabel.business": "Negócios",

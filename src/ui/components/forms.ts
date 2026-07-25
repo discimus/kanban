@@ -1,4 +1,6 @@
-import { el } from "./dom";
+import { el, icon } from "./dom";
+import { PALETTES, PaletteId } from "@shared/types";
+import { t } from "@shared/i18n";
 
 export function field(labelText: string, control: HTMLElement): HTMLElement {
   return el("label", { class: "field" }, [el("span", { class: "field__label" }, [labelText]), control]);
@@ -51,4 +53,42 @@ export function formActions(submitLabel: string, onSubmit: () => void): HTMLElem
 
 export function errorText(): HTMLParagraphElement {
   return el("p", { class: "form__error" }, []) as HTMLParagraphElement;
+}
+
+export interface PaletteSelector {
+  element: HTMLElement;
+  value: PaletteId;
+}
+
+export function paletteSelector(selected: PaletteId = "indigo"): PaletteSelector {
+  const grid = el("div", { class: "palette-grid" }, []);
+  const state = { value: selected };
+
+  for (const p of PALETTES) {
+    const isActive = p.id === selected;
+    const btn = el("button", {
+      class: `palette-swatch${isActive ? " palette-swatch--active" : ""}`,
+      type: "button",
+      title: t(`palette.${p.id}`),
+      style: `--swatch: ${p.seed}`
+    }, [
+      isActive ? icon("check") : null
+    ]);
+    btn.addEventListener("click", () => {
+      state.value = p.id;
+      grid.querySelectorAll(".palette-swatch").forEach((b) => {
+        b.classList.remove("palette-swatch--active");
+        const check = b.querySelector(".material-symbols-outlined");
+        if (check) check.remove();
+      });
+      btn.classList.add("palette-swatch--active");
+      btn.append(icon("check"));
+    });
+    grid.append(btn);
+  }
+
+  return {
+    element: grid,
+    get value(): PaletteId { return state.value; }
+  };
 }

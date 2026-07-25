@@ -1,10 +1,11 @@
-import { Product, ProductCategory } from "@shared/types";
+import { Product, ProductCategory, PaletteId } from "@shared/types";
 import { uuid, nowISO } from "@shared/utils";
 
 export interface CreateProductProps {
   name: string;
   description?: string;
   category?: ProductCategory;
+  palette?: PaletteId;
 }
 
 export function createProduct(props: CreateProductProps): Product {
@@ -24,6 +25,7 @@ export function createProduct(props: CreateProductProps): Product {
     autoPasteLinks: true,
     autoPasteImages: true,
     showReview: (props.category ?? "development") === "development",
+    palette: props.palette ?? "indigo",
     archivedAt: null,
     pinnedAt: null
   };

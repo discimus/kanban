@@ -57,8 +57,9 @@ function validProduct(overrides: Record<string, unknown> = {}) {
     autoPasteLinks: true,
     autoPasteImages: true,
     showReview: true,
+    palette: "indigo",
     ...overrides
-  } as { id: string; name: string; description: string; createdAt: string; status: string; showPriority: boolean; category: string; autoArchiveDays: number | null; autoPasteLinks: boolean; autoPasteImages: boolean; showReview: boolean };
+  } as { id: string; name: string; description: string; createdAt: string; status: string; showPriority: boolean; category: string; autoArchiveDays: number | null; autoPasteLinks: boolean; autoPasteImages: boolean; showReview: boolean; palette: string };
 }
 
 describe("validateAndImport", () => {

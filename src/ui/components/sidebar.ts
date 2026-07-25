@@ -1,5 +1,5 @@
 import { el, icon, clear } from "@ui/components/dom";
-import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
+import { Product, ProductStatus, ProductCategory, PALETTES, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { productService } from "@contexts/product/application/product.service";
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
@@ -31,6 +31,10 @@ function categoryLabel(cat: ProductCategory): string {
 
 function categoryIcon(cat: ProductCategory): string {
   return PRODUCT_CATEGORIES.find((c) => c.value === cat)?.icon ?? "help";
+}
+
+function paletteSeed(id: string): string {
+  return PALETTES.find((p) => p.id === id)?.seed ?? "#4f5bd5";
 }
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -222,6 +226,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
           el("span", { class: `product-item__category product-item__category--${product.category}`, title: categoryLabel(product.category) }, [
             icon(categoryIcon(product.category))
           ]),
+          el("span", { class: "product-item__palette", style: `background:${paletteSeed(product.palette)}` }),
           el("span", { class: "product-item__name-text" }, [product.name]),
           product.category !== "notes" ? el("span", { class: `product-item__status product-item__status--${status}` }, [
             icon(STATUS_ICONS[status]),
@@ -250,6 +255,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
             el("span", { class: `product-item__category product-item__category--${product.category}`, title: categoryLabel(product.category) }, [
               icon(categoryIcon(product.category))
             ]),
+            el("span", { class: "product-item__palette", style: `background:${paletteSeed(product.palette)}` }),
             el("span", { class: "product-item__name-text" }, [product.name])
           ])
         ]);

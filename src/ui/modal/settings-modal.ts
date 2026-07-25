@@ -1,5 +1,5 @@
 import { el } from "@ui/components/dom";
-import { formActions, errorText } from "@ui/components/forms";
+import { formActions, errorText, paletteSelector } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
 import { Product } from "@shared/types";
@@ -21,6 +21,7 @@ export function openProductSettings(product: Product): void {
   showReviewCb.checked = product.showReview !== false;
 
   const error = errorText();
+  const pal = paletteSelector(product.palette);
 
   const submit = () => {
     try {
@@ -29,6 +30,7 @@ export function openProductSettings(product: Product): void {
         ...(!isNotes && { showReview: showReviewCb.checked }),
         autoPasteLinks: autoPasteCb.checked,
         autoPasteImages: autoPasteImageCb.checked,
+        palette: pal.value
       });
       closeModal();
     } catch (e) {
@@ -65,6 +67,11 @@ export function openProductSettings(product: Product): void {
         el("span", { class: "field__description" }, [t("settings.exibirReviewDesc")])
       ])
     ])]),
+    el("label", { class: "field" }, [
+      el("span", { class: "field__label" }, [t("palette.label")]),
+      pal.element,
+      el("span", { class: "field__description" }, [t("palette.desc")])
+    ]),
     error,
     formActions(t("form.salvar"), submit)
   ]);

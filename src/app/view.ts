@@ -107,6 +107,11 @@ export function renderApp(root: HTMLElement): void {
 
   const content = el("main", { class: "content" }, []);
 
+  if (selectedProductId) {
+    const p = productService.get(selectedProductId);
+    if (p) content.dataset.palette = p.palette;
+  }
+
   if (!selectedProductId) {
     content.append(
       el("header", { class: "content__header" }, [

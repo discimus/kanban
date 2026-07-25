@@ -1,5 +1,5 @@
 import { el, icon } from "@ui/components/dom";
-import { field, textInput, textArea, errorText } from "@ui/components/forms";
+import { field, textInput, textArea, errorText, paletteSelector } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
@@ -10,10 +10,11 @@ export function openNotesForm(): void {
   const name = textInput("", t("form.nomeBoard"));
   const description = textArea("", t("form.descricao"));
   const error = errorText();
+  const pal = paletteSelector("indigo");
 
   const submit = () => {
     try {
-      const created = productService.create(name.value, description.value, "notes");
+      const created = productService.create(name.value, description.value, "notes", pal.value);
       closeModal();
       import("../../app/view").then(({ forceSelectProduct }) => {
         forceSelectProduct(created.id, document.getElementById("app")!);
@@ -55,6 +56,11 @@ export function openNotesForm(): void {
   const body = el("div", { class: "form" }, [
     field(t("form.nome"), name),
     field(t("form.descricao"), description),
+    el("label", { class: "field" }, [
+      el("span", { class: "field__label" }, [t("palette.label")]),
+      pal.element,
+      el("span", { class: "field__description" }, [t("palette.desc")])
+    ]),
     error,
     createBtn,
     separator,

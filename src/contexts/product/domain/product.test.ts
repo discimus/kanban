@@ -99,6 +99,16 @@ describe("createProduct", () => {
     const product = createProduct({ name: "P", category: "study" });
     expect(product.category).toBe("study");
   });
+
+  it("defaults palette to 'indigo'", () => {
+    const product = createProduct({ name: "P" });
+    expect(product.palette).toBe("indigo");
+  });
+
+  it("preserves custom palette 'teal'", () => {
+    const product = createProduct({ name: "P", palette: "teal" });
+    expect(product.palette).toBe("teal");
+  });
 });
 
 describe("assertValidProductName", () => {

@@ -15,7 +15,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     autoPasteLinks: true,
     autoPasteImages: true,
     showReview: true,
-
+    palette: "indigo" as const,
     archivedAt: null,
     pinnedAt: null,
     ...overrides,
@@ -291,6 +291,38 @@ describe("normalizeProduct", () => {
     const product = makeProduct({ pinnedAt: "2026-07-14T00:00:00.000Z" });
     const result = normalizeProduct(product);
     expect(result.pinnedAt).toBe("2026-07-14T00:00:00.000Z");
+  });
+
+  it("defaults palette to 'indigo' for legacy product without it", () => {
+    const legacy = {
+      id: "p1",
+      name: "Old",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+      category: "development",
+      autoArchiveDays: null,
+      autoPasteLinks: true,
+      autoPasteImages: true,
+      showReview: true,
+      archivedAt: null,
+      pinnedAt: null,
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.palette).toBe("indigo");
+  });
+
+  it("preserves palette when set to a valid value", () => {
+    const product = makeProduct({ palette: "teal" });
+    const result = normalizeProduct(product);
+    expect(result.palette).toBe("teal");
+  });
+
+  it("fixes invalid palette to 'indigo'", () => {
+    const product = makeProduct({ palette: "invalid" as never });
+    const result = normalizeProduct(product);
+    expect(result.palette).toBe("indigo");
   });
 });
 

@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, Link, Image, TaskClassification, ProductCategory, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, Image, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
@@ -40,6 +40,8 @@ export function normalizeImage(image: Image): Image {
 }
 
 export function normalizeProduct(product: Product): Product {
+  const validPaletteIds = PALETTES.map(p => p.id);
+  const palette = (product as any).palette;
   const normalized: Product = {
     ...product,
     showPriority: product.showPriority !== false,
@@ -48,6 +50,7 @@ export function normalizeProduct(product: Product): Product {
     autoPasteLinks: (product as any).autoPasteLinks !== false,
     autoPasteImages: (product as any).autoPasteImages !== false,
     showReview: (product as any).showReview !== false,
+    palette: palette && validPaletteIds.includes(palette) ? (palette as PaletteId) : "indigo",
     archivedAt: (product as any).archivedAt ?? null,
     pinnedAt: (product as any).pinnedAt ?? null
   };
