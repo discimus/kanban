@@ -2696,6 +2696,33 @@ h4 {
   color: var(--text);
 }
 
+.shortcuts-credits {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.shortcuts-credits a {
+  color: var(--md-primary);
+  text-decoration: none;
+}
+
+.shortcuts-credits a:hover {
+  text-decoration: underline;
+}
+
+.shortcuts-credits__icon {
+  font-size: 1rem;
+  color: var(--md-error);
+  vertical-align: middle;
+}
+
 /* ============================================================
    Responsive — tablet and mobile
    ============================================================ */

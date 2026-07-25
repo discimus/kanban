@@ -22,9 +22,23 @@ export function openShortcutsHelp(): void {
     ])
   );
 
+  const body = el("div", { class: "shortcuts-list" }, items);
+
+  const credits = el("div", { class: "shortcuts-credits" }, [
+    el("span", {}, ["Made with "]),
+    icon("favorite", "shortcuts-credits__icon"),
+    el("span", {}, [" by "]),
+    el("a", {
+      href: "https://discimus.github.io/",
+      target: "_blank",
+      rel: "noopener"
+    }, ["discimus"])
+  ]);
+  body.append(credits);
+
   openModal({
     title: "Atalhos do teclado",
-    body: el("div", { class: "shortcuts-list" }, items),
+    body,
   });
 }
 
