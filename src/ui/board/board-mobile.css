@@ -1,0 +1,37 @@
+/* ============================================================
+   board-mobile.css
+   Utility class for fade show/hide — mobile viewport only.
+   Restricted to max-width: 720px to match the project breakpoint.
+   Apply .board-item--hidden to hide, remove it to show.
+   ============================================================ */
+
+@media (max-width: 720px) {
+  /* Transition declared on the base elements so it applies in both
+     directions: fade-out (class added) and fade-in (class removed). */
+  .theme-toggle,
+  .locale-btn {
+    transition:
+      opacity 0.25s ease,
+      background 0.15s,
+      border-color 0.15s;
+  }
+
+  .board-item--hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .board-item--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Sentinel: invisible element placed at the end of the board grid.
+     grid-column spans all columns so it always sits below the last row. */
+  .board__scroll-sentinel {
+    grid-column: 1 / -1;
+    height: 1px;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

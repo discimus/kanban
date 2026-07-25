@@ -1,4 +1,4 @@
-import { el, icon } from "@ui/components/dom";
+﻿import { el, icon } from "@ui/components/dom";
 import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory, TaskClassification, CATEGORY_CLASSIFICATIONS } from "@shared/types";
 
 import { backlogService } from "@contexts/product/application/backlog.service";
@@ -8,6 +8,7 @@ import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
 import { t } from "@shared/i18n";
+import "./board-mobile.css";
 
 let kbRegistered = false;
 let classificationFilter: Set<TaskClassification> | null = null;
@@ -77,6 +78,8 @@ export function renderBoard(productId: string, showArchived = false, onFilterCha
     document.addEventListener("keydown", onGlobalKeydown);
     kbRegistered = true;
   }
+
+  setupBottomSentinel(board);
 
   return wrapper;
 }
@@ -361,5 +364,61 @@ export function renderNotesBoard(productId: string, showArchived = false, onFilt
     kbRegistered = true;
   }
 
+  setupBottomSentinel(board);
+
   return wrapper;
+}
+
+/**
+ * Appends an invisible sentinel element at the end of the board grid.
+ * Uses IntersectionObserver (zero polling) to detect when the user reaches
+ * the bottom of the card list.
+ *
+ * - Sentinel visible on first paint → content fits in viewport → do nothing.
+ * - Sentinel hidden on first paint → content overflows → watch for intersection.
+ *   · Sentinel enters viewport  → user is at bottom → hide FABs.
+ *   · Sentinel leaves viewport  → user scrolled up  → show FABs.
+ */
+function setupBottomSentinel(board: HTMLElement): void {
+  if (!window.matchMedia("(max-width: 720px)").matches) return;
+
+  const sentinel = el("div", {
+    class: "board__scroll-sentinel",
+    "aria-hidden": "true"
+  }, []);
+  board.append(sentinel);
+
+  const getFabs = (): HTMLElement[] =>
+    [".theme-toggle", ".locale-btn"]
+      .flatMap(s => Array.from(document.querySelectorAll<HTMLElement>(s)));
+
+  let initialCheck = true;
+  let contentIsScrollable = false;
+
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+
+    if (initialCheck) {
+      initialCheck = false;
+      if (entry.isIntersecting) {
+        // Content fits in the viewport — nothing to do.
+        observer.disconnect();
+        return;
+      }
+      // Content overflows — start tracking scroll position.
+      contentIsScrollable = true;
+      return;
+    }
+
+    if (!contentIsScrollable) return;
+
+    const fabs = getFabs();
+    if (entry.isIntersecting) {
+      fabs.forEach(fab => fab.classList.add("board-item--hidden"));
+    } else {
+      fabs.forEach(fab => fab.classList.remove("board-item--hidden"));
+    }
+  }, { threshold: 0 });
+
+  observer.observe(sentinel);
 }
