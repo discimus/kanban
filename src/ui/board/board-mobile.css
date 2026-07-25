@@ -10,7 +10,8 @@
      directions: fade-out (class added) and fade-in (class removed). */
   .theme-toggle,
   .locale-btn,
-  .help-btn {
+  .help-btn,
+  .drawer-btn {
     transition:
       opacity 0.25s ease,
       transform 0.25s ease,

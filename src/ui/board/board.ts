@@ -388,7 +388,7 @@ function setupNotesBottomHide(board: HTMLElement): void {
   if (!window.matchMedia("(max-width: 720px)").matches) return;
 
   const getFabs = (): HTMLElement[] =>
-    [".theme-toggle", ".locale-btn", ".help-btn"]
+    [".theme-toggle", ".locale-btn", ".help-btn", ".drawer-btn"]
       .flatMap(s => Array.from(document.querySelectorAll<HTMLElement>(s)));
 
   const update = (): void => {
@@ -431,7 +431,7 @@ function setupBottomSentinel(board: HTMLElement): void {
   // Query FABs at call time inside the callback — they are appended to the DOM
   // after setupBottomSentinel returns, so capturing them here would yield empty results.
   const getFabs = (): HTMLElement[] =>
-    [".theme-toggle", ".locale-btn", ".help-btn"]
+    [".theme-toggle", ".locale-btn", ".help-btn", ".drawer-btn"]
       .flatMap(s => Array.from(document.querySelectorAll<HTMLElement>(s)));
 
   let initialCheck = true;

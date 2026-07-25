@@ -7,6 +7,7 @@ import { renderStatistics } from "@ui/components/statistics";
 import { renderThemeMenu } from "@ui/components/theme-menu";
 import { renderHelpMenu } from "@ui/components/help-menu";
 import { renderLocaleMenu } from "@ui/components/locale-menu";
+import { renderDrawerBtn } from "@ui/components/drawer-btn";
 import { t } from "@shared/i18n";
 
 let selectedProductId: string | null = null;
@@ -147,7 +148,7 @@ export function renderApp(root: HTMLElement): void {
   }
 
   layout.append(sidebar, scrim, content);
-  root.append(layout, renderLocaleMenu(), renderThemeMenu(), renderHelpMenu());
+  root.append(layout, renderLocaleMenu(), renderThemeMenu(), renderHelpMenu(), renderDrawerBtn(() => setDrawer(true)));
 
   requestAnimationFrame(() => {
     const list = root.querySelector(".product-list");
