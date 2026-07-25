@@ -379,8 +379,16 @@ export function renderNotesBoard(productId: string, showArchived = false, onFilt
  *   · Sentinel enters viewport  → user is at bottom → hide FABs.
  *   · Sentinel leaves viewport  → user scrolled up  → show FABs.
  */
+
+/** Retains the active observer so it can be disconnected on re-render. */
+let activeBottomObserver: IntersectionObserver | null = null;
+
 function setupBottomSentinel(board: HTMLElement): void {
   if (!window.matchMedia("(max-width: 720px)").matches) return;
+
+  // Disconnect the observer from the previous render cycle before creating a new one.
+  activeBottomObserver?.disconnect();
+  activeBottomObserver = null;
 
   const sentinel = el("div", {
     class: "board__scroll-sentinel",
@@ -388,6 +396,8 @@ function setupBottomSentinel(board: HTMLElement): void {
   }, []);
   board.append(sentinel);
 
+  // Query FABs at call time inside the callback — they are appended to the DOM
+  // after setupBottomSentinel returns, so capturing them here would yield empty results.
   const getFabs = (): HTMLElement[] =>
     [".theme-toggle", ".locale-btn"]
       .flatMap(s => Array.from(document.querySelectorAll<HTMLElement>(s)));
@@ -403,6 +413,7 @@ function setupBottomSentinel(board: HTMLElement): void {
       if (entry.isIntersecting) {
         // Content fits in the viewport — nothing to do.
         observer.disconnect();
+        activeBottomObserver = null;
         return;
       }
       // Content overflows — start tracking scroll position.
@@ -421,4 +432,5 @@ function setupBottomSentinel(board: HTMLElement): void {
   }, { threshold: 0 });
 
   observer.observe(sentinel);
+  activeBottomObserver = observer;
 }
