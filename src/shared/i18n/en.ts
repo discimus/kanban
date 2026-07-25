@@ -82,6 +82,7 @@ export const en: Record<string, string> = {
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Keyboard Shortcuts",
+  "help.adicaoRapida": "Quick add",
   "help.novaTarefa": "New task",
   "help.novaAnotacao": "New note",
   "help.salvarFormulario": "Save form",

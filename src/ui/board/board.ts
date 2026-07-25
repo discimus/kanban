@@ -7,6 +7,7 @@ import { showAlert } from "@ui/components/dialog";
 import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
+import { openBacklogForm } from "@ui/modal/backlog-form";
 import { t } from "@shared/i18n";
 import "./board-mobile.css";
 
@@ -17,6 +18,14 @@ function onGlobalKeydown(e: KeyboardEvent): void {
   const tag = (e.target as HTMLElement)?.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
   if (document.querySelector(".modal-overlay")) return;
+  // Shift+N → full modal form (not inline quick-add)
+  if (e.shiftKey && e.key.toLowerCase() === "n") {
+    e.preventDefault();
+    const productId = new URLSearchParams(window.location.search).get("project");
+    if (productId) openBacklogForm(productId);
+    return;
+  }
+
   if (e.ctrlKey || e.metaKey || e.altKey) return;
 
   if (e.key === "?") {

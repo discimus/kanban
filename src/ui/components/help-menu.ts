@@ -4,7 +4,8 @@ import { t } from "@shared/i18n";
 
 function getTaskShortcuts(): [string, string][] {
   return [
-    ["N", t("help.novaTarefa")],
+    ["N", t("help.adicaoRapida")],
+    ["Shift + N", t("help.novaTarefa")],
     ["Ctrl + Enter", t("help.salvarFormulario")],
     ["Esc", t("help.fechar")],
   ];
@@ -12,7 +13,8 @@ function getTaskShortcuts(): [string, string][] {
 
 function getNotesShortcuts(): [string, string][] {
   return [
-    ["N", t("help.novaAnotacao")],
+    ["N", t("help.adicaoRapida")],
+    ["Shift + N", t("help.novaAnotacao")],
     ["Ctrl + Enter", t("help.salvarFormulario")],
     ["Esc", t("help.fechar")],
   ];
