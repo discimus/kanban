@@ -41,6 +41,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     showReview: true,
 
     archivedAt: null,
+    pinnedAt: null,
     ...overrides
   };
 }
@@ -186,6 +187,34 @@ describe("productService", () => {
 
     it("throws when product not found", () => {
       expect(() => productService.restore("ghost")).toThrow("Projeto não encontrado.");
+    });
+  });
+
+  describe("pin", () => {
+    it("sets pinnedAt and emits product:updated", () => {
+      state.products = [makeProduct()];
+      const result = productService.pin("p1");
+      expect(result.pinnedAt).toBeTruthy();
+      expect(mockStore.update).toHaveBeenCalled();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("product:updated", result);
+    });
+
+    it("throws when product not found", () => {
+      expect(() => productService.pin("ghost")).toThrow("Projeto não encontrado.");
+    });
+  });
+
+  describe("unpin", () => {
+    it("clears pinnedAt and emits product:updated", () => {
+      state.products = [makeProduct({ pinnedAt: "2026-07-14T00:00:00.000Z" })];
+      const result = productService.unpin("p1");
+      expect(result.pinnedAt).toBeNull();
+      expect(mockStore.update).toHaveBeenCalled();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("product:updated", result);
+    });
+
+    it("throws when product not found", () => {
+      expect(() => productService.unpin("ghost")).toThrow("Projeto não encontrado.");
     });
   });
 

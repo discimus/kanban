@@ -108,6 +108,7 @@ export interface Product {
   autoPasteImages: boolean;
   showReview: boolean;
   archivedAt: ISODate | null;
+  pinnedAt: ISODate | null;
 }
 
 export interface BacklogItem {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createProduct, assertValidProductName, archive, restore } from "@contexts/product/domain/product";
+import { createProduct, assertValidProductName, archive, restore, pin, unpin } from "@contexts/product/domain/product";
 
 describe("createProduct", () => {
   it("returns a Product with a generated non-empty id", () => {
@@ -39,6 +39,11 @@ describe("createProduct", () => {
   it("returns autoPasteImages as true", () => {
     const product = createProduct({ name: "My Project" });
     expect(product.autoPasteImages).toBe(true);
+  });
+
+  it("returns pinnedAt as null", () => {
+    const product = createProduct({ name: "My Project" });
+    expect(product.pinnedAt).toBeNull();
   });
 
   it("returns showReview as true for development", () => {
@@ -136,6 +141,38 @@ describe("restore", () => {
 
   it("preserves other fields", () => {
     const result = restore(product);
+    expect(result.id).toBe(product.id);
+    expect(result.name).toBe("P");
+    expect(result.status).toBe("backlog");
+  });
+});
+
+describe("pin", () => {
+  const product = createProduct({ name: "P" });
+
+  it("returns product with pinnedAt set", () => {
+    const result = pin(product, "2026-07-14T00:00:00.000Z");
+    expect(result.pinnedAt).toBe("2026-07-14T00:00:00.000Z");
+  });
+
+  it("preserves other fields", () => {
+    const result = pin(product, "2026-07-14T00:00:00.000Z");
+    expect(result.id).toBe(product.id);
+    expect(result.name).toBe("P");
+    expect(result.status).toBe("backlog");
+  });
+});
+
+describe("unpin", () => {
+  const product = { ...createProduct({ name: "P" }), pinnedAt: "2026-07-14T00:00:00.000Z" };
+
+  it("clears pinnedAt", () => {
+    const result = unpin(product);
+    expect(result.pinnedAt).toBeNull();
+  });
+
+  it("preserves other fields", () => {
+    const result = unpin(product);
     expect(result.id).toBe(product.id);
     expect(result.name).toBe("P");
     expect(result.status).toBe("backlog");

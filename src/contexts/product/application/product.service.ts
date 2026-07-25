@@ -1,7 +1,7 @@
 import { Product, ProductStatus, ProductCategory } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
-import { createProduct, assertValidProductName, archive as archiveItem, restore as restoreItem } from "../domain/product";
+import { createProduct, assertValidProductName, archive as archiveItem, restore as restoreItem, pin as pinItem, unpin as unpinItem } from "../domain/product";
 import { productRepository } from "../infrastructure/product.repository";
 import { backlogRepository } from "../infrastructure/backlog.repository";
 
@@ -107,6 +107,24 @@ export const productService = {
     const updated = restoreItem(existing);
     productRepository.save(updated);
     eventBus.emit("product:restored", updated);
+    return updated;
+  },
+
+  pin(id: string): Product {
+    const existing = productRepository.findById(id);
+    if (!existing) throw new Error("Projeto não encontrado.");
+    const updated = pinItem(existing, nowISO());
+    productRepository.save(updated);
+    eventBus.emit("product:updated", updated);
+    return updated;
+  },
+
+  unpin(id: string): Product {
+    const existing = productRepository.findById(id);
+    if (!existing) throw new Error("Projeto não encontrado.");
+    const updated = unpinItem(existing);
+    productRepository.save(updated);
+    eventBus.emit("product:updated", updated);
     return updated;
   }
 };

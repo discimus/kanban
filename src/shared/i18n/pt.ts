@@ -11,6 +11,8 @@ export const pt: Record<string, string> = {
   "sidebar.armazenamento": "Armazenamento",
   "sidebar.todas": "Todas",
   "sidebar.projetosArquivados": "Projetos arquivados ({n})",
+  "sidebar.pin": "Fixar",
+  "sidebar.despin": "Desafixar",
   "sidebar.ordenar": "Ordenar:",
   "sidebar.sort.nameAsc": "Nome A-Z",
   "sidebar.sort.nameDesc": "Nome Z-A",

@@ -17,6 +17,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     showReview: true,
 
     archivedAt: null,
+    pinnedAt: null,
     ...overrides,
   };
 }
@@ -265,6 +266,31 @@ describe("normalizeProduct", () => {
     const product = makeProduct({ autoPasteImages: false });
     const result = normalizeProduct(product);
     expect(result.autoPasteImages).toBe(false);
+  });
+
+  it("sets pinnedAt to null for legacy product without it", () => {
+    const legacy = {
+      id: "p1",
+      name: "Old",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+      category: "development",
+      autoArchiveDays: null,
+      autoPasteLinks: true,
+      autoPasteImages: true,
+      showReview: true,
+      archivedAt: null,
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.pinnedAt).toBeNull();
+  });
+
+  it("preserves pinnedAt when set", () => {
+    const product = makeProduct({ pinnedAt: "2026-07-14T00:00:00.000Z" });
+    const result = normalizeProduct(product);
+    expect(result.pinnedAt).toBe("2026-07-14T00:00:00.000Z");
   });
 });
 

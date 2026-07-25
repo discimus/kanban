@@ -48,7 +48,8 @@ export function normalizeProduct(product: Product): Product {
     autoPasteLinks: (product as any).autoPasteLinks !== false,
     autoPasteImages: (product as any).autoPasteImages !== false,
     showReview: (product as any).showReview !== false,
-    archivedAt: (product as any).archivedAt ?? null
+    archivedAt: (product as any).archivedAt ?? null,
+    pinnedAt: (product as any).pinnedAt ?? null
   };
   if (!VALID_STATUSES.includes(normalized.status)) {
     return { ...normalized, status: normalized.status === "completed" ? "completed" : "backlog" };

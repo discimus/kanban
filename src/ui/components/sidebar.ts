@@ -1,5 +1,6 @@
 import { el, icon, clear } from "@ui/components/dom";
 import { Product, ProductStatus, ProductCategory, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
+import { productService } from "@contexts/product/application/product.service";
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
 import { getStorageUsage } from "@shared/storage/storage-usage";
@@ -164,7 +165,7 @@ export function setupScrollFade(el: HTMLElement): void {
   requestAnimationFrame(() => handler());
 }
 
-export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void): HTMLElement {
+export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void, onPinToggle?: (id: string, action: "pin" | "unpin") => void, highlightedId?: string): HTMLElement {
   let active = products.filter(p => !p.archivedAt);
 
   if (filterCategory !== null) {
@@ -180,6 +181,11 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     }
   });
 
+  // Pinned projects first, preserving sort within each group
+  const pinned = active.filter(p => p.pinnedAt);
+  const unpinned = active.filter(p => !p.pinnedAt);
+  active = [...pinned, ...unpinned];
+
   const archived = products.filter(p => p.archivedAt);
 
   const list = el("div", { class: "product-list" }, []);
@@ -191,20 +197,42 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   for (const product of active) {
     const isActive = product.id === selectedId;
     const status = product.status ?? "backlog";
-    const item = el("button", { class: `product-item ${isActive ? "product-item--active" : ""}` }, [
-      el("span", { class: "product-item__name" }, [
-        el("span", { class: `product-item__category product-item__category--${product.category}`, title: categoryLabel(product.category) }, [
-          icon(categoryIcon(product.category))
+    const isPinned = !!product.pinnedAt;
+
+    const pinBtn = el("button", {
+      class: `product-item__pin${isPinned ? " product-item__pin--pinned" : ""}`,
+      type: "button",
+      "aria-label": isPinned ? t("sidebar.despin") : t("sidebar.pin"),
+      title: isPinned ? t("sidebar.despin") : t("sidebar.pin")
+    }, [icon("push_pin")]);
+    pinBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (onPinToggle) {
+        onPinToggle(product.id, product.pinnedAt ? "unpin" : "pin");
+      } else if (product.pinnedAt) {
+        productService.unpin(product.id);
+      } else {
+        productService.pin(product.id);
+      }
+    });
+
+    const item = el("button", { class: `product-item ${isActive ? "product-item--active" : ""}${product.id === highlightedId ? " product-item--highlight" : ""}` }, [
+      el("span", { class: "product-item__content" }, [
+        el("span", { class: "product-item__name" }, [
+          el("span", { class: `product-item__category product-item__category--${product.category}`, title: categoryLabel(product.category) }, [
+            icon(categoryIcon(product.category))
+          ]),
+          el("span", { class: "product-item__name-text" }, [product.name]),
+          product.category !== "notes" ? el("span", { class: `product-item__status product-item__status--${status}` }, [
+            icon(STATUS_ICONS[status]),
+            statusLabel(status)
+          ]) : null
         ]),
-        el("span", { class: "product-item__name-text" }, [product.name]),
-        product.category !== "notes" ? el("span", { class: `product-item__status product-item__status--${status}` }, [
-          icon(STATUS_ICONS[status]),
-          statusLabel(status)
-        ]) : null
+        el("span", { class: "product-item__desc" }, [
+          product.description || t("sidebar.semDescricao")
+        ])
       ]),
-      el("span", { class: "product-item__desc" }, [
-        product.description || t("sidebar.semDescricao")
-      ])
+      pinBtn
     ]);
     item.addEventListener("click", () => onSelect(product.id));
     list.append(item);

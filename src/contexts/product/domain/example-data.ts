@@ -134,7 +134,8 @@ export function createExampleData(): AppState {
         autoPasteLinks: true,
         autoPasteImages: true,
         showReview: true,
-        archivedAt: null
+        archivedAt: null,
+        pinnedAt: null
       }
     ],
     backlogItems: items,

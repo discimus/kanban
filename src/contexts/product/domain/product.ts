@@ -24,7 +24,8 @@ export function createProduct(props: CreateProductProps): Product {
     autoPasteLinks: true,
     autoPasteImages: true,
     showReview: (props.category ?? "development") === "development",
-    archivedAt: null
+    archivedAt: null,
+    pinnedAt: null
   };
 }
 
@@ -40,4 +41,12 @@ export function archive(product: Product, now: string): Product {
 
 export function restore(product: Product): Product {
   return { ...product, archivedAt: null };
+}
+
+export function pin(product: Product, now: string): Product {
+  return { ...product, pinnedAt: now };
+}
+
+export function unpin(product: Product): Product {
+  return { ...product, pinnedAt: null };
 }

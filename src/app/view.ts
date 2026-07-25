@@ -17,6 +17,7 @@ let savedBoardScrollLeft = 0;
 let savedBoardScrollTop = 0;
 let savedSidebarScrollTop = 0;
 let lastRenderedProductId: string | null = null;
+let highlightedProductId: string | null = null;
 
 const LAST_PROJECT_KEY = "kanban-last-project";
 
@@ -84,12 +85,18 @@ export function renderApp(root: HTMLElement): void {
   };
 
   const products = productService.list();
+  const onPinToggle = (id: string, action: "pin" | "unpin") => {
+    highlightedProductId = id;
+    if (action === "pin") productService.pin(id);
+    else productService.unpin(id);
+  };
   const sidebar = renderSidebar(products, selectedProductId, (id) => {
     selectedProductId = id;
     persistSelection(id);
     setDrawer(false);
     renderApp(root);
-  }, () => setDrawer(false), () => renderApp(root));
+  }, () => setDrawer(false), () => renderApp(root), onPinToggle, highlightedProductId ?? undefined);
+  highlightedProductId = null;
 
   const scrim = el("div", { class: "drawer-scrim", "aria-hidden": "true" }, []);
   scrim.addEventListener("click", () => setDrawer(false));
