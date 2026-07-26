@@ -105,6 +105,8 @@ export const en: Record<string, string> = {
   "planning.arquivadas": "Archived",
   "planning.editar": "Edit",
   "planning.exportar": "Export",
+  "planning.copiarUrl": "Copy link",
+  "planning.urlCopiada": "Link copied!",
   "planning.restaurar": "Restore project",
   "planning.arquivar": "Archive project",
   "planning.excluir": "Delete",

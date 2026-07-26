@@ -5,6 +5,7 @@ import { openProductForm } from "@ui/modal/product-form";
 import { openProductSettings } from "@ui/modal/settings-modal";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert, showConfirm } from "@ui/components/dialog";
+import { showToast } from "@ui/components/notification";
 import { downloadExportProduct } from "@contexts/product/application/export.service";
 import { t } from "@shared/i18n";
 
@@ -55,6 +56,16 @@ export function renderProductHeader(
   const menu = actionsMenu([
     { label: t("planning.editar"), icon: "edit", action: () => openProductForm(product) },
     { label: t("planning.exportar"), icon: "download", action: () => downloadExportProduct(product.name, product.id) },
+    {
+      label: t("planning.copiarUrl"),
+      icon: "link",
+      action: () => {
+        const url = `${window.location.origin}${window.location.pathname}?project=${product.id}`;
+        navigator.clipboard.writeText(url).then(() => {
+          showToast(t("planning.urlCopiada"), "link");
+        });
+      }
+    },
     {
       label: product.archivedAt ? t("planning.restaurar") : t("planning.arquivar"),
       icon: product.archivedAt ? "unarchive" : "archive",

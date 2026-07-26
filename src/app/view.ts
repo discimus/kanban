@@ -41,8 +41,12 @@ const LAST_PROJECT_KEY = "kanban-last-project";
 
 function persistSelection(id: string | null): void {
   try { localStorage.setItem(LAST_PROJECT_KEY, id ?? ""); } catch { /* ignore */ }
-  const url = id ? `?project=${id}` : window.location.pathname;
-  history.replaceState(null, "", url);
+}
+
+function clearUrlParam(): void {
+  if (window.location.search) {
+    history.replaceState(null, "", window.location.pathname);
+  }
 }
 
 function ensureSelection(): void {
@@ -74,6 +78,7 @@ function ensureSelection(): void {
 export function forceSelectProduct(id: string, root: HTMLElement): void {
   selectedProductId = id;
   persistSelection(id);
+  clearUrlParam();
   renderApp(root);
 }
 
@@ -152,6 +157,7 @@ export function renderApp(root: HTMLElement): void {
   const sidebar = renderSidebar(products, selectedProductId, (id) => {
     selectedProductId = id;
     persistSelection(id);
+    clearUrlParam();
     setDrawer(false);
     renderApp(root);
   }, () => setDrawer(false), () => renderApp(root), onPinToggle, highlightedProductId ?? undefined);
@@ -168,6 +174,7 @@ export function renderApp(root: HTMLElement): void {
   if (selectedProductId) {
     const p = productService.get(selectedProductId);
     if (p) content.dataset.palette = p.palette;
+    content.dataset.productId = selectedProductId;
   }
 
   if (!selectedProductId) {

@@ -21,7 +21,7 @@ function onGlobalKeydown(e: KeyboardEvent): void {
   // Shift+N → full modal form (not inline quick-add)
   if (e.shiftKey && e.key.toLowerCase() === "n") {
     e.preventDefault();
-    const productId = new URLSearchParams(window.location.search).get("project");
+    const productId = document.querySelector<HTMLElement>(".content")?.dataset.productId;
     if (productId) openBacklogForm(productId);
     return;
   }
