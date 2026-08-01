@@ -1985,6 +1985,21 @@ button.chip--todo:hover {
   flex-shrink: 0;
 }
 
+.card__link-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card__link-count .material-symbols-outlined {
+  font-size: 0.8rem;
+}
+
 .card__time {
   font-size: 0.75rem;
   color: var(--text-muted);

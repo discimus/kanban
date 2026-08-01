@@ -103,6 +103,9 @@ export const en: Record<string, string> = {
   "card.classificacao": "Classification: {label}",
   "card.criadoEditado": "Created {created} · Edited {edited}",
   "card.abrirLink": "Open {url}",
+  "card.nAcesso": "{n} access",
+  "card.nAcessos": "{n} accesses",
+  "card.acessosInfo": "{n} accesses · {last}",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Keyboard Shortcuts",

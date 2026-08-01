@@ -105,6 +105,15 @@ describe("linkService", () => {
       expect(mockEventBus.emit).toHaveBeenCalledWith("link:visited", result);
     });
 
+    it("increments visitCount", () => {
+      state.links = [makeLink()];
+      const first = linkService.markAsVisited("l1");
+      state.links[0] = first;
+      const second = linkService.markAsVisited("l1");
+      expect(first.visitCount).toBe(1);
+      expect(second.visitCount).toBe(2);
+    });
+
     it("throws when link not found", () => {
       expect(() => linkService.markAsVisited("ghost")).toThrow("Link não encontrado.");
     });

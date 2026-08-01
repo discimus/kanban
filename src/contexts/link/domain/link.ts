@@ -14,7 +14,8 @@ export function createLink(props: CreateLinkProps): Link {
     id: uuid(),
     backlogItemId: props.backlogItemId,
     url,
-    visitedAt: null
+    visitedAt: null,
+    visitCount: 0
   };
 }
 
@@ -25,5 +26,5 @@ export function changeUrl(link: Link, url: string): Link {
 }
 
 export function markAsVisited(link: Link, now: string): Link {
-  return { ...link, visitedAt: now };
+  return { ...link, visitedAt: now, visitCount: (link.visitCount ?? 0) + 1 };
 }

@@ -146,6 +146,11 @@ describe("stickyLinkFromLink", () => {
     expect(mapped.visitedAt).toBe("2024-01-02T00:00:00.000Z");
     expect(mapped.id).toBeTypeOf("string");
   });
+
+  it("preserves visitCount", () => {
+    const mapped = stickyLinkFromLink({ id: "l1", backlogItemId: "bi1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z", visitCount: 4 });
+    expect(mapped.visitCount).toBe(4);
+  });
 });
 
 describe("stickyCommentFromComment", () => {
@@ -201,6 +206,12 @@ describe("addStickyLink", () => {
     const sticky = createSticky({ productId: "p1" });
     expect(() => addStickyLink(sticky, { url: "   " })).toThrow(Error);
   });
+
+  it("starts the link with visitCount 0", () => {
+    const sticky = createSticky({ productId: "p1" });
+    const updated = addStickyLink(sticky, { url: "https://example.com" });
+    expect(updated.links[0].visitCount).toBe(0);
+  });
 });
 
 describe("markStickyLinkVisited", () => {
@@ -209,6 +220,15 @@ describe("markStickyLinkVisited", () => {
     const linkId = sticky.links[0].id;
     const updated = markStickyLinkVisited(sticky, linkId, "2026-07-12T14:30:00.000Z");
     expect(updated.links[0].visitedAt).toBe("2026-07-12T14:30:00.000Z");
+  });
+
+  it("increments visitCount on the matching link", () => {
+    const sticky = addStickyLink(createSticky({ productId: "p1" }), { url: "https://example.com" });
+    const linkId = sticky.links[0].id;
+    const first = markStickyLinkVisited(sticky, linkId, "2026-07-12T14:30:00.000Z");
+    const second = markStickyLinkVisited(first, linkId, "2026-07-12T15:00:00.000Z");
+    expect(first.links[0].visitCount).toBe(1);
+    expect(second.links[0].visitCount).toBe(2);
   });
 
   it("does not touch other links", () => {

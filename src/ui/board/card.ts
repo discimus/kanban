@@ -243,7 +243,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
       if (link.visitedAt) {
         linkBtn.classList.add("card__link-btn--visited");
-        linkBtn.title = timeAgo(link.visitedAt);
+        linkBtn.title = t("card.acessosInfo", { n: link.visitCount ?? 0, last: timeAgo(link.visitedAt) });
       }
 
       linkBtn.addEventListener("click", () => {
@@ -260,10 +260,22 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         });
       }
 
+      const count = (link.visitCount ?? 0) > 0
+        ? el("span", {
+          class: "card__link-count",
+          "aria-label": t((link.visitCount ?? 0) === 1 ? "card.nAcesso" : "card.nAcessos", { n: link.visitCount ?? 0 }),
+          title: t("card.acessosInfo", { n: link.visitCount ?? 0, last: timeAgo(link.visitedAt) })
+        }, [
+          icon("ads_click"),
+          String(link.visitCount ?? 0)
+        ])
+        : null;
+
       linkList.append(
         el("div", { class: "card__task" }, [
           linkBtn,
           el("span", { class: "card__task-text" }, [displayUrl]),
+          count,
           del
         ])
       );

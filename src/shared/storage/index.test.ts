@@ -347,6 +347,40 @@ describe("normalizeLink", () => {
     const result = normalizeLink(link);
     expect(result.visitedAt).toBe("2026-07-12T14:30:00.000Z");
   });
+
+  it("sets visitCount to 0 for legacy unvisited link without it", () => {
+    const legacy = {
+      id: "l1",
+      backlogItemId: "b1",
+      url: "https://example.com",
+      visitedAt: null,
+    } as unknown as Link;
+    const result = normalizeLink(legacy);
+    expect(result.visitCount).toBe(0);
+  });
+
+  it("sets visitCount to 1 for legacy visited link without it", () => {
+    const legacy = {
+      id: "l1",
+      backlogItemId: "b1",
+      url: "https://example.com",
+      visitedAt: "2026-07-12T14:30:00.000Z",
+    } as unknown as Link;
+    const result = normalizeLink(legacy);
+    expect(result.visitCount).toBe(1);
+  });
+
+  it("preserves existing visitCount", () => {
+    const link = {
+      id: "l1",
+      backlogItemId: "b1",
+      url: "https://example.com",
+      visitedAt: "2026-07-12T14:30:00.000Z",
+      visitCount: 7,
+    } as Link;
+    const result = normalizeLink(link);
+    expect(result.visitCount).toBe(7);
+  });
 });
 
 describe("normalizeBacklogItem", () => {
@@ -448,6 +482,32 @@ describe("normalizeSticky", () => {
     expect(result.links[0].visitedAt).toBeNull();
   });
 
+  it("sets visitCount to 0 for legacy unvisited sticky link without it", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [{ id: "l1", url: "https://example.com", visitedAt: null }],
+      comments: [],
+      images: [],
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.links[0].visitCount).toBe(0);
+  });
+
+  it("sets visitCount to 1 for legacy visited sticky link without it", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [{ id: "l1", url: "https://example.com", visitedAt: "2026-07-12T14:30:00.000Z" }],
+      comments: [],
+      images: [],
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.links[0].visitCount).toBe(1);
+  });
+
   it("sets fileSize to 0 for legacy sticky images without it", () => {
     const legacy = {
       id: "s1",
@@ -516,6 +576,19 @@ describe("normalizeSticky", () => {
     const result = normalizeSticky(sticky);
     expect(result.links[0].visitedAt).toBe("2026-07-12T14:30:00.000Z");
     expect(result.images[0].fileSize).toBe(2048);
+  });
+
+  it("preserves existing visitCount on sticky link", () => {
+    const sticky = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [{ id: "l1", url: "https://example.com", visitedAt: "2026-07-12T14:30:00.000Z", visitCount: 5 }],
+      comments: [],
+      images: [],
+    } as unknown as Sticky;
+    const result = normalizeSticky(sticky);
+    expect(result.links[0].visitCount).toBe(5);
   });
 });
 

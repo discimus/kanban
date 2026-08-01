@@ -192,6 +192,11 @@ describe("linkFromStickyLink", () => {
     expect(mapped.visitedAt).toBe("2024-01-02T00:00:00.000Z");
     expect(mapped.id).toBeTypeOf("string");
   });
+
+  it("maps a sticky link preserving visitCount", () => {
+    const mapped = linkFromStickyLink({ id: "sl1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z", visitCount: 3 }, "bi1");
+    expect(mapped.visitCount).toBe(3);
+  });
 });
 
 describe("commentFromStickyComment", () => {

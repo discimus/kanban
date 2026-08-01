@@ -157,6 +157,7 @@ export interface Link {
   backlogItemId: ID;
   url: string;
   visitedAt: ISODate | null;
+  visitCount?: number;
 }
 
 export interface Comment {
@@ -189,6 +190,7 @@ export interface StickyLink {
   id: ID;
   url: string;
   visitedAt: ISODate | null;
+  visitCount?: number;
 }
 
 export interface StickyComment {

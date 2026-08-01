@@ -351,6 +351,17 @@ describe("backlogService", () => {
       expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:deleted", "s1");
     });
 
+    it("converts a sticky into a backlog item preserving link visitCount", () => {
+      state.stickies = [{ ...makeSticky(), links: [{ id: "sl1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z", visitCount: 4 }] }];
+      const result = backlogService.convertFromSticky("s1");
+
+      expect(state.links).toHaveLength(1);
+      expect(state.links[0].url).toBe("https://x.com");
+      expect(state.links[0].visitedAt).toBe("2024-01-02T00:00:00.000Z");
+      expect(state.links[0].visitCount).toBe(4);
+      expect(state.links[0].backlogItemId).toBe(result.id);
+    });
+
     it("throws when sticky not found", () => {
       expect(() => backlogService.convertFromSticky("ghost")).toThrow("Card não encontrado.");
     });

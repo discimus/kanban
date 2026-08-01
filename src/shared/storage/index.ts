@@ -34,7 +34,7 @@ export function normalizeSticky(sticky: Sticky): Sticky {
     ...sticky,
     title: (sticky as any).title ?? "",
     description: (sticky as any).description ?? "",
-    links: Array.isArray((sticky as any).links) ? (sticky as any).links.map((l: Sticky["links"][number]) => ({ ...l, visitedAt: (l as any).visitedAt ?? null })) : [],
+    links: Array.isArray((sticky as any).links) ? (sticky as any).links.map((l: Sticky["links"][number]) => ({ ...l, visitedAt: (l as any).visitedAt ?? null, visitCount: (l as any).visitCount ?? ((l as any).visitedAt ? 1 : 0) })) : [],
     comments: Array.isArray((sticky as any).comments) ? (sticky as any).comments : [],
     images: Array.isArray((sticky as any).images) ? (sticky as any).images.map((img: Sticky["images"][number]) => ({ ...img, fileSize: (img as any).fileSize ?? 0 })) : []
   };
@@ -44,7 +44,7 @@ const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_CATEGORIES: ProductCategory[] = ["development", "business", "study", "notes"];
 
 export function normalizeLink(link: Link): Link {
-  return { ...link, visitedAt: (link as any).visitedAt ?? null };
+  return { ...link, visitedAt: (link as any).visitedAt ?? null, visitCount: (link as any).visitCount ?? ((link as any).visitedAt ? 1 : 0) };
 }
 
 export function normalizeImage(image: Image): Image {

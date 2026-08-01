@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createLink, changeUrl, markAsVisited } from "@contexts/link/domain/link";
+import type { Link } from "@shared/types";
 
 describe("createLink", () => {
   it("returns a Link with generated id", () => {
@@ -29,6 +30,11 @@ describe("createLink", () => {
   it("throws Error when URL is only whitespace", () => {
     expect(() => createLink({ backlogItemId: "bi-1", url: "   " })).toThrow(Error);
   });
+
+  it("starts with visitCount 0", () => {
+    const link = createLink({ backlogItemId: "bi-1", url: "https://example.com" });
+    expect(link.visitCount).toBe(0);
+  });
 });
 
 describe("markAsVisited", () => {
@@ -57,6 +63,20 @@ describe("markAsVisited", () => {
     const t1 = markAsVisited(link, "2026-07-12T10:00:00.000Z");
     const t2 = markAsVisited(t1, "2026-07-12T15:00:00.000Z");
     expect(t2.visitedAt).toBe("2026-07-12T15:00:00.000Z");
+  });
+
+  it("increments visitCount on each visit", () => {
+    const link = createLink({ backlogItemId: "bi-1", url: "https://example.com" });
+    const t1 = markAsVisited(link, "2026-07-12T10:00:00.000Z");
+    const t2 = markAsVisited(t1, "2026-07-12T15:00:00.000Z");
+    expect(t1.visitCount).toBe(1);
+    expect(t2.visitCount).toBe(2);
+  });
+
+  it("defaults visitCount to 0 when absent and increments", () => {
+    const link = { id: "l1", backlogItemId: "bi-1", url: "https://example.com", visitedAt: null } as Link;
+    const visited = markAsVisited(link, "2026-07-12T14:30:00.000Z");
+    expect(visited.visitCount).toBe(1);
   });
 });
 

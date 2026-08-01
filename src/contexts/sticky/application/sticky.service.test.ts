@@ -185,6 +185,15 @@ describe("stickyService", () => {
       expect(result.links[0].visitedAt).toBeTypeOf("string");
       expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:link-visited", result);
     });
+
+    it("increments visitCount", () => {
+      state.stickies = [makeSticky({ links: [{ id: "l1", url: "https://x.com", visitedAt: null }] })];
+      const first = stickyService.markLinkVisited("s1", "l1");
+      state.stickies[0] = first;
+      const second = stickyService.markLinkVisited("s1", "l1");
+      expect(first.links[0].visitCount).toBe(1);
+      expect(second.links[0].visitCount).toBe(2);
+    });
   });
 
   describe("removeLink", () => {

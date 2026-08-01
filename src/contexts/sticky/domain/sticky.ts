@@ -50,14 +50,14 @@ export function setStickyDescription(sticky: Sticky, description: string): Stick
 export function addStickyLink(sticky: Sticky, props: AddStickyLinkProps): Sticky {
   const url = props.url?.trim();
   if (!url) throw new Error("A URL do link é obrigatória.");
-  const link: StickyLink = { id: uuid(), url, visitedAt: null };
+  const link: StickyLink = { id: uuid(), url, visitedAt: null, visitCount: 0 };
   return { ...sticky, links: [...sticky.links, link] };
 }
 
 export function markStickyLinkVisited(sticky: Sticky, linkId: string, now: string): Sticky {
   return {
     ...sticky,
-    links: sticky.links.map((l) => (l.id === linkId ? { ...l, visitedAt: now } : l))
+    links: sticky.links.map((l) => (l.id === linkId ? { ...l, visitedAt: now, visitCount: (l.visitCount ?? 0) + 1 } : l))
   };
 }
 
@@ -97,7 +97,7 @@ export function removeStickyImage(sticky: Sticky, imageId: string): Sticky {
 }
 
 export function stickyLinkFromLink(link: Link): StickyLink {
-  return { id: uuid(), url: link.url, visitedAt: link.visitedAt };
+  return { id: uuid(), url: link.url, visitedAt: link.visitedAt, visitCount: link.visitCount };
 }
 
 export function stickyCommentFromComment(comment: Comment): StickyComment {

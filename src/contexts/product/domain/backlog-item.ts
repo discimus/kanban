@@ -59,7 +59,7 @@ export function changeProduct(item: BacklogItem, newProductId: string, classific
 }
 
 export function linkFromStickyLink(link: StickyLink, backlogItemId: string): Link {
-  return { id: uuid(), backlogItemId, url: link.url, visitedAt: link.visitedAt };
+  return { id: uuid(), backlogItemId, url: link.url, visitedAt: link.visitedAt, visitCount: link.visitCount };
 }
 
 export function commentFromStickyComment(comment: StickyComment, backlogItemId: string): Comment {
