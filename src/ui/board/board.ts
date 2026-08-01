@@ -8,7 +8,7 @@ import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
 import { openBacklogForm } from "@ui/modal/backlog-form";
-import { renderStickyRow } from "./sticky-row";
+import { renderStickyRow, renderStickyToggle } from "./sticky-row";
 import { t } from "@shared/i18n";
 import "./board-mobile.css";
 
@@ -70,14 +70,19 @@ export function renderBoard(productId: string, showArchived = false, onFilterCha
   const wrapper = el("div", { class: "board-wrapper" }, []);
   const uniqueClassifications = new Set(allItems.map(i => i.classification));
   const activeFilter = classificationFilter !== null && classificationFilter.size > 0;
-  if (uniqueClassifications.size > 1 || activeFilter) {
-    wrapper.append(renderClassificationFilter(allItems, category, onFilterChange));
-  }
+  const filterBar = uniqueClassifications.size > 1 || activeFilter
+    ? renderClassificationFilter(allItems, category, onFilterChange)
+    : null;
 
   const board = el("div", { class: "board" }, []);
 
-  const stickyRow = renderStickyRow(productId, locked);
-  if (stickyRow) wrapper.append(stickyRow);
+  const stickyBlock = renderStickyRow(productId, locked);
+  const stickyToggle = stickyBlock ? renderStickyToggle() : null;
+
+  if (filterBar || stickyToggle) {
+    wrapper.append(el("div", { class: "board-toolbar" }, [filterBar, stickyToggle]));
+  }
+  if (stickyBlock) wrapper.append(stickyBlock);
 
   for (const column of KANBAN_COLUMNS) {
     if (column.status === "review" && product?.showReview === false) continue;
