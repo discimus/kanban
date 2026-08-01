@@ -460,9 +460,6 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
 
   const titleEl = el("h3", { class: "sticky-card__title" }, [sticky.title || t("sticky.semTitulo")]);
   if (!sticky.title) titleEl.classList.add("sticky-card__title--empty");
-  if (!readOnly) {
-    titleEl.addEventListener("click", () => openStickyForm({ productId: sticky.productId, sticky }));
-  }
 
   const card = el("article", {
     class: `card sticky-card${readOnly ? " card--locked" : ""}`,
@@ -475,7 +472,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   ]);
 
   card.addEventListener("dblclick", (ev) => {
-    if ((ev.target as HTMLElement).closest("button, a, input, select, textarea, .sticky-card__title")) return;
+    if ((ev.target as HTMLElement).closest("button, a, input, select, textarea")) return;
     if (!hasContent) return;
     const isExpanded = !expandedStickies.get(sticky.id);
     setExpanded(isExpanded);
