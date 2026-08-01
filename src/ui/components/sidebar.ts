@@ -293,18 +293,36 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   const actionsBar = el("div", { class: "sidebar__actions" }, [addBtn, notesBtn]);
 
   const storage = getStorageUsage();
-  const storageBar = el("div", { class: "sidebar__storage" }, [
-    el("div", { class: "sidebar__storage-header" }, [
-      el("span", { class: "sidebar__storage-label" }, [t("sidebar.armazenamento")]),
-      el("span", { class: "sidebar__storage-value" }, [storage.label])
+  const storageLabel = t("sidebar.armazenamento");
+  const storageBar = el("button", {
+    class: "sidebar__storage sidebar__storage--clickable",
+    type: "button",
+    title: t("sidebar.verCardsComImagens"),
+    "aria-label": t("sidebar.verCardsComImagens")
+  }, [
+    el("span", { class: "sidebar__storage-header" }, [
+      el("span", { class: "sidebar__storage-label" }, [storageLabel]),
+      el("span", { class: "sidebar__storage-value" }, [
+        storage.label,
+        icon("chevron_right", "sidebar__storage-chevron")
+      ])
     ]),
-    el("div", { class: "sidebar__storage-bar" }, [
-      el("div", {
+    el("span", { class: "sidebar__storage-bar" }, [
+      el("span", {
         class: `sidebar__storage-fill${storage.percentage >= 90 ? " sidebar__storage-fill--warn" : ""}`,
         style: `width:${storage.percentage}%`
       })
     ])
   ]);
+  storageBar.addEventListener("click", () => {
+    import("@ui/modal/storage-cards").then(({ openStorageCardsModal }) => openStorageCardsModal());
+  });
+  storageBar.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      storageBar.click();
+    }
+  });
 
   return el("aside", { class: "sidebar" }, [
     el("h1", { class: "sidebar__brand" }, [icon("dashboard"), t("sidebar.brand")]),

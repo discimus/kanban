@@ -36,6 +36,7 @@ let savedBoardScrollTop = 0;
 let savedSidebarScrollTop = 0;
 let lastRenderedProductId: string | null = null;
 let highlightedProductId: string | null = null;
+let pendingCardFocus: string | null = null;
 
 const LAST_PROJECT_KEY = "kanban-last-project";
 
@@ -79,6 +80,18 @@ export function forceSelectProduct(id: string, root: HTMLElement): void {
   selectedProductId = id;
   persistSelection(id);
   clearUrlParam();
+  renderApp(root);
+}
+
+/**
+ * Renders the board of `productId` and, right after the next render, scrolls
+ * to, highlights and focuses the card identified by `cardId`.
+ */
+export function focusProductCard(productId: string, cardId: string, root: HTMLElement): void {
+  selectedProductId = productId;
+  persistSelection(productId);
+  clearUrlParam();
+  pendingCardFocus = cardId;
   renderApp(root);
 }
 
@@ -232,6 +245,18 @@ export function renderApp(root: HTMLElement): void {
       if (board) {
         board.scrollLeft = savedBoardScrollLeft;
         board.scrollTop = savedBoardScrollTop;
+      }
+    }
+
+    if (pendingCardFocus) {
+      const id = pendingCardFocus;
+      pendingCardFocus = null;
+      const card = root.querySelector<HTMLElement>(`[data-id="${id}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (!card.hasAttribute("tabindex")) card.tabIndex = -1;
+        card.focus({ preventScroll: true });
+        card.classList.add("card--focused");
       }
     }
   });

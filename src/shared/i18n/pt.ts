@@ -9,6 +9,7 @@ export const pt: Record<string, string> = {
   "sidebar.semDescricao": "Sem descrição",
   "sidebar.nenhumProjeto": "Nenhum Projeto. Crie o primeiro!",
   "sidebar.armazenamento": "Armazenamento",
+  "sidebar.verCardsComImagens": "Ver cards com imagens",
   "sidebar.todas": "Todas",
   "sidebar.projetosArquivados": "Projetos arquivados ({n})",
   "sidebar.pin": "Fixar",
@@ -227,6 +228,11 @@ export const pt: Record<string, string> = {
 
   /* ====== Modal ====== */
   "modal.fechar": "Fechar",
+
+  /* ====== Storage ====== */
+  "storage.cardsComImagens": "Cards com imagens",
+  "storage.semCards": "Nenhum card com imagens ainda.",
+  "storage.semTitulo": "Sem título",
 
   /* ====== Utils ====== */
   "utils.naoDisponivel": "—",
