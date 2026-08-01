@@ -3642,24 +3642,17 @@ h4 {
   100% { background-color: var(--elevation-3); }
 }
 
-/* New item highlight: ring only on images; text rows blink icon + text color */
-.item--flash {
-  animation: item-ring 1s ease-out;
-}
-
-/* Text rows (subtask, comment, link): blink icon/text color, no ring */
-.card__task.item--flash {
-  animation: none;
-}
+/* Text rows (subtask, comment, link): blink icon and label color */
 .card__task.item--flash .card__task-text,
 .card__task.item--flash .material-symbols-outlined {
   animation: item-text-blink 1s ease-out;
 }
 
-@keyframes item-ring {
-  0%   { box-shadow: 0 0 0 2px var(--primary); }
-  35%  { box-shadow: 0 0 0 2px var(--primary); }
-  100% { box-shadow: 0 0 0 2px transparent; }
+/* Image: ring on the image edge (painted on top, never clipped or covered) */
+.card__image-wrap.item--flash {
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  animation: item-ring-outline 1s ease-out;
 }
 
 @keyframes item-text-blink {
@@ -3668,10 +3661,16 @@ h4 {
   100% { color: inherit; }
 }
 
+@keyframes item-ring-outline {
+  0%   { outline-color: var(--primary); }
+  35%  { outline-color: var(--primary); }
+  100% { outline-color: transparent; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .item--flash,
   .card__task.item--flash .card__task-text,
-  .card__task.item--flash .material-symbols-outlined {
+  .card__task.item--flash .material-symbols-outlined,
+  .card__image-wrap.item--flash {
     animation: none;
   }
 }
