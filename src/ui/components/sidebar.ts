@@ -1,4 +1,6 @@
 import { el, icon, clear } from "@ui/components/dom";
+import { spinner } from "@ui/components/spinner";
+import { openModal, closeModal } from "../modal";
 import { Product, ProductStatus, ProductCategory, PALETTES, PRODUCT_STATUSES, PRODUCT_CATEGORIES } from "@shared/types";
 import { productService } from "@contexts/product/application/product.service";
 import { openProductForm } from "@ui/modal/product-form";
@@ -141,32 +143,6 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
   bar.append(wrapper);
 
   return bar;
-}
-
-const FADE_SIZE = 36;
-
-function updateScrollFade(el: HTMLElement): void {
-  const { scrollTop, scrollHeight, clientHeight } = el;
-
-  if (scrollHeight <= clientHeight) {
-    el.style.removeProperty("mask-image");
-    el.style.removeProperty("-webkit-mask-image");
-    return;
-  }
-
-  const topFade = scrollTop > 0 ? Math.min(scrollTop, FADE_SIZE) : 0;
-  const bottomRemaining = scrollHeight - scrollTop - clientHeight;
-  const bottomFade = bottomRemaining > 0 ? Math.min(bottomRemaining, FADE_SIZE) : 0;
-
-  const mask = `linear-gradient(to bottom, transparent 0%, black ${topFade}px, black calc(100% - ${bottomFade}px), transparent 100%)`;
-  el.style.maskImage = mask;
-  el.style.webkitMaskImage = mask;
-}
-
-export function setupScrollFade(el: HTMLElement): void {
-  const handler = (): void => updateScrollFade(el);
-  el.addEventListener("scroll", handler, { passive: true });
-  requestAnimationFrame(() => handler());
 }
 
 export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void, onPinToggle?: (id: string, action: "pin" | "unpin") => void, highlightedId?: string): HTMLElement {
@@ -323,8 +299,35 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
       storageFill.classList.toggle("sidebar__storage-fill--warn", q.percentage >= 90);
     });
   }
+  let storageLoading = false;
+  const resetStorageLoading = (): void => {
+    storageLoading = false;
+    storageBar.disabled = false;
+    storageBar.removeAttribute("aria-busy");
+    storageBar.classList.remove("sidebar__storage--loading");
+    const cur = storageBar.querySelector<HTMLElement>(".sidebar__storage-spinner");
+    if (cur) cur.replaceWith(icon("chevron_right", "sidebar__storage-chevron"));
+  };
+
   storageBar.addEventListener("click", () => {
-    import("@ui/modal/storage-cards").then(({ openStorageCardsModal }) => openStorageCardsModal());
+    if (storageLoading) return;
+    storageLoading = true;
+    storageBar.disabled = true;
+    storageBar.setAttribute("aria-busy", "true");
+    storageBar.classList.add("sidebar__storage--loading");
+    const chevron = storageBar.querySelector<HTMLElement>(".sidebar__storage-chevron");
+    if (chevron) chevron.replaceWith(spinner("sidebar__storage-spinner", t("storage.carregando")));
+
+    const loadingBody = el("div", { class: "storage-cards__loading" }, [
+      spinner("storage-cards__loading-spinner", t("storage.carregando")),
+      el("p", { class: "storage-cards__loading-label" }, [t("storage.carregando")])
+    ]);
+    openModal({ title: t("storage.cardsComMidia"), body: loadingBody, onClose: resetStorageLoading });
+
+    import("@ui/modal/storage-cards")
+      .then(({ fillStorageCardsModal }) => fillStorageCardsModal(loadingBody))
+      .catch(() => closeModal())
+      .finally(resetStorageLoading);
   });
   storageBar.addEventListener("keydown", (ev) => {
     if (ev.key === "Enter" || ev.key === " ") {

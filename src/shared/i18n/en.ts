@@ -249,6 +249,7 @@ export const en: Record<string, string> = {
 
   /* ====== Storage ====== */
   "storage.cardsComMidia": "Cards with media",
+  "storage.carregando": "Loading…",
   "storage.filtroPorTipo": "Filter by type",
   "storage.filtroTodos": "All",
   "storage.filtroImagens": "Images",

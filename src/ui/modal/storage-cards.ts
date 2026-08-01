@@ -1,7 +1,8 @@
 import { el, icon, clear } from "@ui/components/dom";
-import { openModal, closeModal } from "../modal";
+import { closeModal } from "../modal";
 import { store } from "@shared/storage";
 import { getCardsWithMedia, type CardsWithMediaEntry, type StorageMediaType } from "@shared/storage/storage-usage";
+import { setupScrollFade, updateScrollFade } from "@ui/components/scroll-fade";
 import { t } from "@shared/i18n";
 
 const FILTERS: { value: StorageMediaType; labelKey: string; icon: string }[] = [
@@ -22,7 +23,7 @@ function renderRow({ product, item, images, audios }: CardsWithMediaEntry): HTML
 
   const thumbWrap = hasImages
     ? el("span", { class: "storage-card__thumb-wrap" }, [
-        el("img", { class: "storage-card__thumb", src: images[0].dataUrl, alt: images[0].filename })
+        el("img", { class: "storage-card__thumb", src: images[0].dataUrl, alt: images[0].filename, decoding: "async" })
       ])
     : el("span", { class: "storage-card__thumb-wrap storage-card__thumb-wrap--audio", "aria-hidden": "true" }, [
         el("span", { class: "storage-card__thumb-icon" }, [
@@ -67,23 +68,34 @@ function renderEmpty(filter: StorageMediaType): HTMLElement {
   ]);
 }
 
-export function openStorageCardsModal(): void {
+/**
+ * Fills the storage media modal body (already open with a loading state) with
+ * the type filters and the list of cards holding media. Called after the lazy
+ * chunk resolves so the user sees feedback the moment they click STORAGE.
+ */
+export function fillStorageCardsModal(body: HTMLElement): void {
   const state = store.getState();
   let filter: StorageMediaType = "all";
 
   const filters = el("div", { class: "storage-cards__filters", role: "group", "aria-label": t("storage.filtroPorTipo") }, []);
   const list = el("div", { class: "storage-cards" }, []);
 
+  const allEntries = getCardsWithMedia(state, "all");
+  const counts: Record<StorageMediaType, number> = { all: allEntries.length, images: 0, audio: 0 };
+  for (const e of allEntries) {
+    if (e.images.length > 0) counts.images += 1;
+    if (e.audios.length > 0) counts.audio += 1;
+  }
+
   const render = (): void => {
     clear(filters);
     for (const f of FILTERS) {
-      const count = getCardsWithMedia(state, f.value).length;
       const chip = el("button", {
         class: `chip chip--filter${filter === f.value ? " chip--selected" : ""}`,
         type: "button",
         "aria-pressed": String(filter === f.value),
         "data-type": f.value
-      }, [icon(f.icon), `${t(f.labelKey)} (${count})`]);
+      }, [icon(f.icon), `${t(f.labelKey)} (${counts[f.value]})`]);
       chip.addEventListener("click", () => {
         if (filter === f.value) return;
         filter = f.value;
@@ -93,16 +105,18 @@ export function openStorageCardsModal(): void {
     }
 
     clear(list);
-    const entries = getCardsWithMedia(state, filter);
+    const entries = filter === "all" ? allEntries : getCardsWithMedia(state, filter);
     if (entries.length === 0) {
       list.append(renderEmpty(filter));
     } else {
       for (const entry of entries) list.append(renderRow(entry));
     }
+    updateScrollFade(list);
   };
 
   render();
+  setupScrollFade(list);
 
-  const body = el("div", { class: "storage-cards__modal" }, [filters, list]);
-  openModal({ title: t("storage.cardsComMidia"), body });
+  clear(body);
+  body.append(el("div", { class: "storage-cards__modal" }, [filters, list]));
 }

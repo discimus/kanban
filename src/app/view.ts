@@ -1,6 +1,7 @@
 import { el, clear, icon } from "@ui/components/dom";
 import { productService } from "@contexts/product/application/product.service";
-import { renderSidebar, setupScrollFade } from "@ui/components/sidebar";
+import { renderSidebar } from "@ui/components/sidebar";
+import { setupScrollFade } from "@ui/components/scroll-fade";
 import { renderProductHeader } from "@ui/components/planning";
 import { renderBoard, renderNotesBoard } from "@ui/board/board";
 import { renderStatistics } from "@ui/components/statistics";
