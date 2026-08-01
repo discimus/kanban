@@ -3,7 +3,7 @@ import type { AppState, BacklogItem, Image, Product } from "@shared/types";
 
 const ESTIMATED_TOTAL_BYTES = 5 * 1024 * 1024;
 
-function formatBytes(bytes: number): string {
+export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -22,11 +22,15 @@ export function getStorageUsage(): StorageUsage {
   for (const img of state.images) {
     imageBytes += img.fileSize;
   }
+  let audioBytes = 0;
+  for (const a of state.audios) {
+    audioBytes += a.fileSize;
+  }
 
-  const stateWithoutImages = { ...state, images: [] };
-  const stateJson = JSON.stringify(stateWithoutImages);
+  const stateWithoutBlobs = { ...state, images: [], audios: [] };
+  const stateJson = JSON.stringify(stateWithoutBlobs);
   const stateBytes = new Blob([stateJson]).size;
-  const usedBytes = stateBytes + imageBytes;
+  const usedBytes = stateBytes + imageBytes + audioBytes;
   const percentage = Math.min(100, (usedBytes / ESTIMATED_TOTAL_BYTES) * 100);
 
   return {
@@ -35,6 +39,36 @@ export function getStorageUsage(): StorageUsage {
     percentage,
     label: `${formatBytes(usedBytes)} / ${formatBytes(ESTIMATED_TOTAL_BYTES)}`
   };
+}
+
+export interface StorageQuota {
+  usedBytes: number;
+  totalBytes: number;
+  percentage: number;
+  label: string;
+}
+
+/**
+ * Real origin quota via the Storage API (covers localStorage + IndexedDB).
+ * Falls back to the sync estimate when the API is unavailable.
+ */
+export async function getStorageQuota(): Promise<StorageQuota> {
+  try {
+    if (typeof navigator !== "undefined" && navigator.storage?.estimate) {
+      const est = await navigator.storage.estimate();
+      const usedBytes = est.usage ?? 0;
+      const totalBytes = est.quota ?? ESTIMATED_TOTAL_BYTES;
+      const percentage = Math.min(100, (usedBytes / totalBytes) * 100);
+      return {
+        usedBytes,
+        totalBytes,
+        percentage,
+        label: `${formatBytes(usedBytes)} / ${formatBytes(totalBytes)}`
+      };
+    }
+  } catch { /* ignore */ }
+  const fallback = getStorageUsage();
+  return { ...fallback };
 }
 
 export interface CardsWithImagesEntry {

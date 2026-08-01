@@ -144,6 +144,7 @@ export function createExampleData(): AppState {
     links,
     comments: [],
     images: [],
+    audios: [],
     estimations: []
   };
 }

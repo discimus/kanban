@@ -33,6 +33,7 @@ export const productRepository = {
       s.links = s.links.filter((l) => !removedItems.includes(l.backlogItemId));
       s.comments = s.comments.filter((c) => !removedItems.includes(c.backlogItemId));
       s.images = s.images.filter((img) => !removedItems.includes(img.backlogItemId));
+      s.audios = s.audios.filter((a) => !removedItems.includes(a.backlogItemId));
       s.estimations = s.estimations.filter((e) => !removedTasks.includes(e.taskId));
       s.stickies = (s.stickies ?? []).filter((st) => st.productId !== id);
     });

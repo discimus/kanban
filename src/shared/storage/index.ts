@@ -1,5 +1,6 @@
-import { AppState, Product, BacklogItem, Link, Image, Sticky, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, Image, AudioRecording, Sticky, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
+import { putBlob, getBlob, deleteBlob, clearBlobs, getAllBlobKeys, dataUrlToBlob, blobToDataUrl } from "./blob-store";
 
 const STORAGE_KEY = "kanban-ddd-state";
 
@@ -24,6 +25,7 @@ export function reviveState(raw: unknown): AppState {
     links: Array.isArray(data.links) ? data.links.map(normalizeLink) : base.links,
     comments: Array.isArray(data.comments) ? data.comments : base.comments,
     images: Array.isArray(data.images) ? data.images.map(normalizeImage) : base.images,
+    audios: Array.isArray(data.audios) ? data.audios.map(normalizeAudioRecording) : base.audios,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations,
     stickies: Array.isArray(data.stickies) ? data.stickies.map(normalizeSticky) : base.stickies
   };
@@ -49,6 +51,10 @@ export function normalizeLink(link: Link): Link {
 
 export function normalizeImage(image: Image): Image {
   return { ...image, fileSize: (image as any).fileSize ?? 0 };
+}
+
+export function normalizeAudioRecording(audio: AudioRecording): AudioRecording {
+  return { ...audio, fileSize: (audio as any).fileSize ?? 0, duration: (audio as any).duration ?? 0 };
 }
 
 export function normalizeProduct(product: Product): Product {
@@ -100,9 +106,59 @@ class Store {
 
   private persist(): void {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.toLeanState(this.state)));
     } catch {
       /* storage full or unavailable — ignore */
+    }
+  }
+
+  /** Strips heavy base64 payloads out of the persisted JSON. Blobs live in IndexedDB. */
+  private toLeanState(state: AppState): AppState {
+    return {
+      ...state,
+      images: state.images.map((img) => ({ ...img, dataUrl: "" })),
+      audios: state.audios.map((a) => ({ ...a, dataUrl: "" }))
+    };
+  }
+
+  /** Idempotently moves inline blobs into IndexedDB and deletes orphaned ones. */
+  private async reconcileBlobs(): Promise<void> {
+    const keep = new Set<string>([
+      ...this.state.images.map((i) => i.id),
+      ...this.state.audios.map((a) => a.id)
+    ]);
+    for (const img of this.state.images) {
+      if (img.dataUrl.startsWith("data:")) await putBlob(img.id, dataUrlToBlob(img.dataUrl));
+    }
+    for (const a of this.state.audios) {
+      if (a.dataUrl.startsWith("data:")) await putBlob(a.id, dataUrlToBlob(a.dataUrl));
+    }
+    const keys = await getAllBlobKeys();
+    for (const k of keys) {
+      if (!keep.has(k)) await deleteBlob(k);
+    }
+  }
+
+  /**
+   * Called once at boot: migrates any inline blobs left by older versions,
+   * then restores the in-memory `dataUrl` payloads from IndexedDB. No-op when
+   * IndexedDB is unavailable (blobs stay in memory only).
+   */
+  async hydrate(): Promise<void> {
+    await this.reconcileBlobs();
+    const ids = [...this.state.images.map((i) => i.id), ...this.state.audios.map((a) => a.id)];
+    const restored = await Promise.all(ids.map(async (id) => {
+      const blob = await getBlob(id);
+      return blob ? { id, dataUrl: await blobToDataUrl(blob) } : null;
+    }));
+    const byId = new Map(restored.filter((r): r is { id: string; dataUrl: string } => r !== null).map((r) => [r.id, r.dataUrl]));
+    for (const img of this.state.images) {
+      const url = byId.get(img.id);
+      if (url) img.dataUrl = url;
+    }
+    for (const a of this.state.audios) {
+      const url = byId.get(a.id);
+      if (url) a.dataUrl = url;
     }
   }
 
@@ -132,12 +188,14 @@ class Store {
   reset(): void {
     this.state = emptyState();
     this.persist();
+    void clearBlobs();
     eventBus.emit("state:changed");
   }
 
   replaceState(newState: AppState): void {
     this.state = reviveState(newState);
     this.persist();
+    void this.reconcileBlobs();
     eventBus.emit("state:changed");
   }
 

@@ -4,6 +4,8 @@ import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
 import { imageService } from "@contexts/image/application/image.service";
+import { audioService } from "@contexts/audio/application/audio.service";
+import { openAudioRecorderForm } from "@ui/modal/audio-recorder-form";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
@@ -108,6 +110,13 @@ function relativeTime(iso: string): string {
 
 function fullDateTime(iso: string): string {
   return localeDateTimeString(new Date(iso));
+}
+
+function formatDuration(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  const mm = String(Math.floor(s / 60)).padStart(2, "0");
+  const ss = String(s % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
 }
 
 const expandedCards = new Map<string, boolean>();
@@ -418,6 +427,52 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   };
   renderImages();
 
+  const audioList = el("div", { class: "card__audios" }, []);
+
+  const renderAudios = (): void => {
+    clear(audioList);
+    const audios = audioService.byBacklogItem(item.id);
+    for (const a of audios) {
+      const player = el("audio", { class: "card__audio-player", src: a.dataUrl, preload: "metadata" }) as HTMLAudioElement;
+
+      const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]);
+      const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;
+      let playing = false;
+      playBtn.addEventListener("click", () => {
+        if (playing) player.pause();
+        else void player.play();
+      });
+      player.addEventListener("play", () => { playing = true; playIcon().textContent = "pause"; });
+      player.addEventListener("pause", () => { playing = false; playIcon().textContent = "play_arrow"; });
+      player.addEventListener("ended", () => { playing = false; playIcon().textContent = "play_arrow"; });
+
+      const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
+      downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));
+
+      const delBtn = el("button", { class: "card__audio-action card__audio-action--delete", "aria-label": t("card.excluirAudio"), type: "button" }, [icon("delete")]);
+      delBtn.disabled = readOnly;
+      if (!readOnly) {
+        delBtn.addEventListener("click", () => {
+          showConfirm(t("card.excluirAudio"), a.filename).then((ok) => {
+            if (ok) audioService.delete(a.id);
+          });
+        });
+      }
+
+      audioList.append(
+        el("div", { class: "card__audio", "data-id": a.id }, [
+          playBtn,
+          el("span", { class: "card__audio-name" }, [a.filename]),
+          el("span", { class: "card__audio-duration" }, [formatDuration(a.duration)]),
+          player,
+          downloadBtn,
+          delBtn
+        ])
+      );
+    }
+  };
+  renderAudios();
+
   const renderComments = (): void => {
     clear(commentList);
     const comments = commentService.byBacklogItem(item.id);
@@ -625,7 +680,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: t("card.subtarefa"), icon: "playlist_add", action: locked ? lockedAlert : addSubtask },
             { label: t("card.comentario"), icon: "chat", action: locked ? lockedAlert : addComment },
             { label: t("card.link"), icon: "link", action: locked ? lockedAlert : addLink },
-            { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage }
+            { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage },
+            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => openAudioRecorderForm(item.id) }
           ]},
           {
             label: t("card.copiarTitulo"),
@@ -728,7 +784,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const linkCount = linkService.byBacklogItem(item.id).length;
   const commentCount = commentService.byBacklogItem(item.id).length;
   const imageCount = imageService.byBacklogItem(item.id).length;
-  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0;
+  const audioCount = audioService.byBacklogItem(item.id).length;
+  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0 || audioCount > 0;
 
   const bodyExpanded = expandedCards.get(item.id) === true;
   const cardBody = el("div", {
@@ -739,7 +796,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
 
-  cardBody.append(taskList, linkList, imageList, commentList);
+  cardBody.append(taskList, linkList, imageList, audioList, commentList);
 
   const cardChildren: (Node | null)[] = [
     menu,
@@ -790,7 +847,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         cardActionBtn("playlist_add", t("card.adicionarSubtarefa"), locked ? lockedAlert : addSubtask),
         cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
         cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
-        cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage)
+        cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
+        cardActionBtn("mic", t("card.adicionarAudio"), locked ? lockedAlert : () => openAudioRecorderForm(item.id))
       ]);
       footer.append(actionsFooter);
     }

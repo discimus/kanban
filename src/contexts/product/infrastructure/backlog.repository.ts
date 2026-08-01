@@ -35,6 +35,7 @@ export const backlogRepository = {
       s.links = s.links.filter((l) => l.backlogItemId !== id);
       s.comments = s.comments.filter((c) => c.backlogItemId !== id);
       s.images = s.images.filter((img) => img.backlogItemId !== id);
+      s.audios = s.audios.filter((a) => a.backlogItemId !== id);
       s.estimations = s.estimations.filter((e) => !removedTasks.includes(e.taskId));
     });
   }

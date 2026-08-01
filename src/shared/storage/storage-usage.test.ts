@@ -1,6 +1,8 @@
-import { describe, it, expect } from "vitest";
-import type { AppState, BacklogItem, Image, Product } from "@shared/types";
-import { getCardsWithImages } from "./storage-usage";
+import { describe, it, expect, beforeEach } from "vitest";
+import type { AppState, BacklogItem, Image, Product, AudioRecording } from "@shared/types";
+import { emptyState } from "@shared/types";
+import { store } from "@shared/storage";
+import { getCardsWithImages, getStorageUsage } from "./storage-usage";
 
 function makeProduct(id: string, name: string, overrides: Record<string, unknown> = {}): Product {
   return {
@@ -60,10 +62,29 @@ function makeState(partial: Partial<AppState> = {}): AppState {
     links: [],
     comments: [],
     images: [],
+    audios: [],
     estimations: [],
     ...partial
   };
 }
+
+function makeAudio(id: string, backlogItemId: string, overrides: Record<string, unknown> = {}): AudioRecording {
+  return {
+    id,
+    backlogItemId,
+    dataUrl: "data:audio/webm;base64,GkXfo0",
+    filename: `${id}.webm`,
+    mimeType: "audio/webm",
+    fileSize: 2048,
+    duration: 10,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    ...overrides
+  };
+}
+
+beforeEach(() => {
+  store.replaceState(emptyState());
+});
 
 describe("getCardsWithImages", () => {
   it("returns cards that have at least one image", () => {
@@ -155,5 +176,19 @@ describe("getCardsWithImages", () => {
     const result = getCardsWithImages(state);
 
     expect(result[0].images.map((i) => i.id)).toEqual(["img1", "img2"]);
+  });
+});
+
+describe("getStorageUsage", () => {
+  it("counts audio bytes into usedBytes", () => {
+    const base = getStorageUsage();
+    store.replaceState(makeState({ audios: [makeAudio("a1", "b1")] }));
+    const usage = getStorageUsage();
+    expect(usage.usedBytes - base.usedBytes).toBeGreaterThanOrEqual(2048);
+  });
+
+  it("counts no audio bytes when there are no audios", () => {
+    const usage = getStorageUsage();
+    expect(usage.usedBytes).toBeGreaterThan(0);
   });
 });

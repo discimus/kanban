@@ -24,16 +24,17 @@ vi.mock("@shared/storage", () => ({
 }));
 vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
 
-import { imageService } from "@contexts/image/application/image.service";
+import { audioService } from "@contexts/audio/application/audio.service";
 
-function makeImage(overrides: Record<string, unknown> = {}) {
+function makeAudio(overrides: Record<string, unknown> = {}) {
   return {
-    id: "img1",
+    id: "a1",
     backlogItemId: "b1",
-    dataUrl: "data:image/png;base64,iVBORw0KGgo=",
-    filename: "foto.png",
-    mimeType: "image/png",
+    dataUrl: "data:audio/webm;base64,GkXfo0",
+    filename: "audio.webm",
+    mimeType: "audio/webm",
     fileSize: 1024,
+    duration: 10,
     createdAt: "2026-07-13T00:00:00.000Z",
     ...overrides
   };
@@ -46,42 +47,44 @@ beforeEach(() => {
   state.links.length = 0;
   state.comments.length = 0;
   state.images.length = 0;
+  state.audios.length = 0;
   state.estimations.length = 0;
   mockStore.update.mockClear();
   mockEventBus.emit.mockClear();
 });
 
-describe("imageService", () => {
+describe("audioService", () => {
   describe("byBacklogItem", () => {
-    it("filters images by backlogItemId", () => {
-      const img1 = makeImage({ id: "img1", backlogItemId: "b1" });
-      const img2 = makeImage({ id: "img2", backlogItemId: "b2" });
-      state.images = [img1, img2];
-      expect(imageService.byBacklogItem("b1")).toEqual([img1]);
+    it("filters audios by backlogItemId", () => {
+      const a1 = makeAudio({ id: "a1", backlogItemId: "b1" });
+      const a2 = makeAudio({ id: "a2", backlogItemId: "b2" });
+      state.audios = [a1, a2];
+      expect(audioService.byBacklogItem("b1")).toEqual([a1]);
     });
   });
 
   describe("create", () => {
-    it("adds image and emits image:created", () => {
-      const result = imageService.create({
+    it("adds audio and emits audio:created", () => {
+      const result = audioService.create({
         backlogItemId: "b1",
-        dataUrl: "data:image/png;base64,iVBORw0KGgo=",
-        filename: "foto.png",
-        mimeType: "image/png",
-        fileSize: 1024
+        dataUrl: "data:audio/webm;base64,GkXfo0",
+        filename: "audio.webm",
+        mimeType: "audio/webm",
+        fileSize: 1024,
+        duration: 8
       });
       expect(mockStore.update).toHaveBeenCalled();
-      expect(mockEventBus.emit).toHaveBeenCalledWith("image:created", result);
-      expect(state.images).toHaveLength(1);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("audio:created", result);
+      expect(state.audios).toHaveLength(1);
     });
   });
 
   describe("delete", () => {
-    it("removes image and emits image:deleted", () => {
-      state.images = [makeImage()];
-      imageService.delete("img1");
-      expect(state.images).toHaveLength(0);
-      expect(mockEventBus.emit).toHaveBeenCalledWith("image:deleted", "img1");
+    it("removes audio and emits audio:deleted", () => {
+      state.audios = [makeAudio()];
+      audioService.delete("a1");
+      expect(state.audios).toHaveLength(0);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("audio:deleted", "a1");
     });
   });
 });

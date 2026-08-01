@@ -17,50 +17,57 @@ if (!root) {
   throw new Error("Elemento #app não encontrado.");
 }
 
-applyTheme(getTheme());
-runAutoArchive();
-renderApp(root);
+const appRoot: HTMLElement = root;
 
-eventBus.on("state:changed", () => {
-  renderApp(root);
-});
+async function boot(): Promise<void> {
+  applyTheme(getTheme());
+  await store.hydrate();
+  runAutoArchive();
+  renderApp(appRoot);
 
-eventBus.on("backlog:archived", () => {
-  showToast(t("main.cardArquivado"), "archive");
-});
+  eventBus.on("state:changed", () => {
+    renderApp(appRoot);
+  });
 
-eventBus.on("backlog:auto-archived", (count) => {
-  const label = Number(count) === 1 ? t("main.cardArquivadoSingle") : t("main.cardsArquivados");
-  showToast(`${count} ${label} automaticamente`, "archive");
-});
+  eventBus.on("backlog:archived", () => {
+    showToast(t("main.cardArquivado"), "archive");
+  });
 
-eventBus.on("product:pending-completion", (productId) => {
-  const product = productService.get(productId as string);
-  if (!product) return;
-  setTimeout(async () => {
-    const ok = await showConfirm(t("main.concluirProjeto"), product.name);
-    if (ok) {
-      productService.setStatus(productId as string, "completed");
-    }
-  }, 0);
-});
+  eventBus.on("backlog:auto-archived", (count) => {
+    const label = Number(count) === 1 ? t("main.cardArquivadoSingle") : t("main.cardsArquivados");
+    showToast(`${count} ${label} automaticamente`, "archive");
+  });
 
-const state = store.getState();
-const isEmpty = state.products.length === 0 && state.backlogItems.length === 0 && state.tasks.length === 0 && state.links.length === 0 && state.estimations.length === 0;
+  eventBus.on("product:pending-completion", (productId) => {
+    const product = productService.get(productId as string);
+    if (!product) return;
+    setTimeout(async () => {
+      const ok = await showConfirm(t("main.concluirProjeto"), product.name);
+      if (ok) {
+        productService.setStatus(productId as string, "completed");
+      }
+    }, 0);
+  });
 
-if (isEmpty && localStorage.getItem("kanban-onboarding-done") !== "true") {
-  setTimeout(async () => {
-    const loadExamples = await showOnboarding();
-    localStorage.setItem("kanban-onboarding-done", "true");
-    if (loadExamples) {
-      const data = createExampleData();
-      store.update((s) => {
-        s.products.push(...data.products);
-        s.backlogItems.push(...data.backlogItems);
-        s.tasks.push(...data.tasks);
-        s.links.push(...data.links);
-        s.estimations.push(...data.estimations);
-      });
-    }
-  }, 200);
+  const state = store.getState();
+  const isEmpty = state.products.length === 0 && state.backlogItems.length === 0 && state.tasks.length === 0 && state.links.length === 0 && state.estimations.length === 0;
+
+  if (isEmpty && localStorage.getItem("kanban-onboarding-done") !== "true") {
+    setTimeout(async () => {
+      const loadExamples = await showOnboarding();
+      localStorage.setItem("kanban-onboarding-done", "true");
+      if (loadExamples) {
+        const data = createExampleData();
+        store.update((s) => {
+          s.products.push(...data.products);
+          s.backlogItems.push(...data.backlogItems);
+          s.tasks.push(...data.tasks);
+          s.links.push(...data.links);
+          s.estimations.push(...data.estimations);
+        });
+      }
+    }, 200);
+  }
 }
+
+void boot();

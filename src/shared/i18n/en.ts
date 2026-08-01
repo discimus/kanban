@@ -94,6 +94,11 @@ export const en: Record<string, string> = {
   "card.excluir": "Delete",
   "card.subtarefa": "Subtask",
   "card.imagem": "Image",
+  "card.audio": "Audio",
+  "card.adicionarAudio": "Add audio",
+  "card.reproduzirAudio": "Play audio",
+  "card.downloadAudio": "Download audio",
+  "card.excluirAudio": "Delete audio \"{{text}}\"?",
   "card.urlLink": "URL…",
   "card.novaSubtarefa": "New subtask…",
   "card.copiarImagem": "Copy image",
@@ -107,6 +112,19 @@ export const en: Record<string, string> = {
   "card.nAcesso": "{n} access",
   "card.nAcessos": "{n} accesses",
   "card.acessosInfo": "{n} accesses · {last}",
+
+  /* ====== Audio ====== */
+  "audio.titulo": "Record audio",
+  "audio.gravar": "Record",
+  "audio.parar": "Stop",
+  "audio.salvar": "Save",
+  "audio.descartar": "Discard",
+  "audio.pronto": "Ready to record",
+  "audio.gravando": "Recording…",
+  "audio.prontoParaSalvar": "Recording complete",
+  "audio.permissaoNegada": "Microphone permission denied. Enable mic access in your browser settings.",
+  "audio.erroGravar": "Error recording audio.",
+  "audio.limiteAudio": "{n}s max per recording.",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Keyboard Shortcuts",

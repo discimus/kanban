@@ -9,6 +9,7 @@ const { state, mockStore, mockEventBus } = vi.hoisted(() => {
     links: [],
     comments: [],
     images: [],
+    audios: [],
     estimations: [],
     stickies: []
   };

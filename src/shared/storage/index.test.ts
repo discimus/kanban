@@ -1,6 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage, normalizeSticky } from "@shared/storage";
-import { emptyState, type Link, type Image, type Product, type BacklogItem, type Sticky } from "@shared/types";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import "fake-indexeddb/auto";
+import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage, normalizeAudioRecording, normalizeSticky, store } from "@shared/storage";
+import { emptyState, type Link, type Image, type AudioRecording, type Product, type BacklogItem, type Sticky } from "@shared/types";
+import { getBlob, putBlob, clearBlobs } from "./blob-store";
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
@@ -48,6 +50,7 @@ describe("emptyState", () => {
     expect(state.links).toEqual([]);
     expect(state.comments).toEqual([]);
     expect(state.images).toEqual([]);
+    expect(state.audios).toEqual([]);
     expect(state.estimations).toEqual([]);
   });
 });
@@ -76,7 +79,24 @@ describe("reviveState", () => {
     expect(result.links).toEqual([]);
     expect(result.comments).toEqual([]);
     expect(result.images).toEqual([]);
+    expect(result.audios).toEqual([]);
     expect(result.estimations).toEqual([]);
+  });
+
+  it("preserves audios through revive", () => {
+    const audio = {
+      id: "a1",
+      backlogItemId: "b1",
+      dataUrl: "data:audio/webm;base64,GkXfo0",
+      filename: "audio.webm",
+      mimeType: "audio/webm",
+      fileSize: 2048,
+      duration: 12,
+      createdAt: "2026-07-13T00:00:00.000Z",
+    } as AudioRecording;
+    const state = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], audios: [audio], estimations: [] };
+    const result = reviveState(state);
+    expect(result.audios).toEqual([audio]);
   });
 
   it("passes through valid state correctly", () => {
@@ -456,6 +476,38 @@ describe("normalizeImage", () => {
   });
 });
 
+describe("normalizeAudioRecording", () => {
+  it("sets fileSize and duration to 0 for legacy audio without them", () => {
+    const legacy = {
+      id: "a1",
+      backlogItemId: "b1",
+      dataUrl: "data:audio/webm;base64,GkXfo0",
+      filename: "audio.webm",
+      mimeType: "audio/webm",
+      createdAt: "2026-07-13T00:00:00.000Z",
+    } as unknown as AudioRecording;
+    const result = normalizeAudioRecording(legacy);
+    expect(result.fileSize).toBe(0);
+    expect(result.duration).toBe(0);
+  });
+
+  it("preserves existing fileSize and duration", () => {
+    const audio = {
+      id: "a1",
+      backlogItemId: "b1",
+      dataUrl: "data:audio/webm;base64,GkXfo0",
+      filename: "audio.webm",
+      mimeType: "audio/webm",
+      fileSize: 2048,
+      duration: 12,
+      createdAt: "2026-07-13T00:00:00.000Z",
+    } as AudioRecording;
+    const result = normalizeAudioRecording(audio);
+    expect(result.fileSize).toBe(2048);
+    expect(result.duration).toBe(12);
+  });
+});
+
 describe("normalizeSticky", () => {
   it("defaults missing links/comments/images to empty arrays", () => {
     const legacy = {
@@ -613,5 +665,64 @@ describe("reviveState with stickies", () => {
     const state = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], estimations: [] };
     const result = reviveState(state);
     expect(result.stickies).toEqual([]);
+  });
+});
+
+describe("Store blob hydration and persistence", () => {
+  function makeImage(overrides: Partial<Image> = {}): Image {
+    return {
+      id: "img1",
+      backlogItemId: "b1",
+      dataUrl: "data:image/png;base64,aGVsbG8=",
+      filename: "f.png",
+      mimeType: "image/png",
+      fileSize: 5,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      ...overrides,
+    };
+  }
+
+  beforeEach(async () => {
+    await clearBlobs();
+    store.replaceState(emptyState());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("migrates inline dataUrls into the blob store", async () => {
+    store.replaceState({ ...emptyState(), images: [makeImage()] });
+    const blob = await getBlob("img1");
+    expect(blob).not.toBeNull();
+    expect(await blob!.text()).toBe("hello");
+  });
+
+  it("hydrate restores the in-memory dataUrl from IndexedDB", async () => {
+    await putBlob("img1", new Blob(["hello"], { type: "image/png" }));
+    store.replaceState({ ...emptyState(), images: [makeImage({ dataUrl: "" })] });
+    await store.hydrate();
+    expect(store.getState().images[0].dataUrl).toBe("data:image/png;base64,aGVsbG8=");
+  });
+
+  it("persists a lean state without inline dataUrls", async () => {
+    const values = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => values.get(k) ?? null,
+      setItem: (k: string, v: string) => void values.set(k, v),
+      removeItem: (k: string) => void values.delete(k),
+      clear: () => values.clear(),
+    });
+
+    store.replaceState({ ...emptyState(), images: [makeImage()] });
+    const raw = JSON.parse(values.get("kanban-ddd-state")!);
+    expect(raw.images).toHaveLength(1);
+    expect(raw.images[0].dataUrl).toBe("");
+  });
+
+  it("hydrate keeps the in-memory dataUrl when the blob is missing", async () => {
+    store.replaceState({ ...emptyState(), images: [makeImage({ dataUrl: "" })] });
+    await store.hydrate();
+    expect(store.getState().images[0].dataUrl).toBe("");
   });
 });

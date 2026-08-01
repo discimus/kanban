@@ -45,6 +45,7 @@ export function exportProductState(productId: string): AppState | null {
     links,
     comments,
     images: [],
+    audios: [],
     estimations,
     stickies: (state.stickies ?? []).filter((s) => s.productId === productId)
   };

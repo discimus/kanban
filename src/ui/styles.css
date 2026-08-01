@@ -2164,6 +2164,101 @@ button.chip--todo:hover {
   background: #c62828;
 }
 
+.card__audios {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.card__audio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--md-surface-container-low);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  min-width: 0;
+}
+
+.card__audio-play {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.card__audio-play:hover {
+  background: var(--md-surface-container-highest);
+}
+
+.card__audio-play:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
+}
+
+.card__audio-play .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.card__audio-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.card__audio-duration {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.card__audio-player {
+  display: none;
+}
+
+.card__audio-action {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.card__audio-action:hover {
+  color: var(--md-primary);
+  background: var(--md-surface-container-high);
+}
+
+.card__audio-action .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.card__audio-action--delete:hover {
+  color: var(--md-error);
+}
+
 .card__footer {
   display: flex;
   align-items: center;
@@ -2897,6 +2992,80 @@ button.chip--todo:hover {
 
 .storage-cards__empty .material-symbols-outlined {
   font-size: 2.5rem;
+}
+
+/* Audio recorder modal */
+.recorder {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 280px;
+}
+
+.recorder__display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.recorder__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--md-surface-container-highest);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.recorder__dot--recording {
+  background: var(--md-error);
+  animation: recorder-pulse 1s ease-in-out infinite;
+}
+
+@keyframes recorder-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.recorder__time {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.recorder__status {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.recorder__preview {
+  width: 100%;
+}
+
+.recorder__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.recorder__record-btn {
+  min-width: 112px;
+}
+
+.recorder__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recorder__dot--recording {
+    animation: none;
+  }
 }
 
 .modal--image {

@@ -22,6 +22,8 @@ export type DomainEvent =
   | "comment:deleted"
   | "image:created"
   | "image:deleted"
+  | "audio:created"
+  | "audio:deleted"
   | "sticky:created"
   | "sticky:content-updated"
   | "sticky:deleted"

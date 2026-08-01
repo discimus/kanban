@@ -178,6 +178,17 @@ export interface Image {
   createdAt: ISODate;
 }
 
+export interface AudioRecording {
+  id: ID;
+  backlogItemId: ID;
+  dataUrl: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  duration: number;
+  createdAt: ISODate;
+}
+
 export interface EstimationLog {
   id: ID;
   taskId: ID;
@@ -227,6 +238,7 @@ export interface AppState {
   links: Link[];
   comments: Comment[];
   images: Image[];
+  audios: AudioRecording[];
   estimations: EstimationLog[];
   /** Presente em `emptyState()`/`reviveState()`; opcional para compatibilidade com dados legados e mocks. */
   stickies?: Sticky[];
@@ -240,6 +252,7 @@ export function emptyState(): AppState {
     links: [],
     comments: [],
     images: [],
+    audios: [],
     estimations: [],
     stickies: []
   };

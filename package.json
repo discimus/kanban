@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.10",
+    "fake-indexeddb": "^6.2.5",
     "typescript": "^5.5.4",
     "vite": "^5.4.8",
     "vitest": "^4.1.10"

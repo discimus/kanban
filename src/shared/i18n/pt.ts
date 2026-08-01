@@ -94,6 +94,11 @@ export const pt: Record<string, string> = {
   "card.excluir": "Excluir",
   "card.subtarefa": "Subtarefa",
   "card.imagem": "Imagem",
+  "card.audio": "Áudio",
+  "card.adicionarAudio": "Adicionar áudio",
+  "card.reproduzirAudio": "Reproduzir áudio",
+  "card.downloadAudio": "Download áudio",
+  "card.excluirAudio": "Excluir áudio \"{{text}}\"?",
   "card.urlLink": "URL do link…",
   "card.novaSubtarefa": "Nova subtarefa…",
   "card.copiarImagem": "Copiar imagem",
@@ -107,6 +112,19 @@ export const pt: Record<string, string> = {
   "card.nAcesso": "{n} acesso",
   "card.nAcessos": "{n} acessos",
   "card.acessosInfo": "{n} acessos · {last}",
+
+  /* ====== Audio ====== */
+  "audio.titulo": "Gravar áudio",
+  "audio.gravar": "Gravar",
+  "audio.parar": "Parar",
+  "audio.salvar": "Salvar",
+  "audio.descartar": "Descartar",
+  "audio.pronto": "Pronto para gravar",
+  "audio.gravando": "Gravando…",
+  "audio.prontoParaSalvar": "Gravação concluída",
+  "audio.permissaoNegada": "Permissão de microfone negada. Habilite o acesso ao microfone nas configurações do navegador.",
+  "audio.erroGravar": "Erro ao gravar o áudio.",
+  "audio.limiteAudio": "Limite de {n}s por gravação.",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Atalhos do teclado",

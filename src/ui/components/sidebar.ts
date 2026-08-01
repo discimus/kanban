@@ -3,7 +3,7 @@ import { Product, ProductStatus, ProductCategory, PALETTES, PRODUCT_STATUSES, PR
 import { productService } from "@contexts/product/application/product.service";
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
-import { getStorageUsage } from "@shared/storage/storage-usage";
+import { getStorageUsage, getStorageQuota } from "@shared/storage/storage-usage";
 import { t, loc } from "@shared/i18n";
 
 let archivedOpen = false;
@@ -294,6 +294,11 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
 
   const storage = getStorageUsage();
   const storageLabel = t("sidebar.armazenamento");
+  const storageValueText = el("span", { class: "sidebar__storage-value-text" }, [storage.label]);
+  const storageFill = el("span", {
+    class: `sidebar__storage-fill${storage.percentage >= 90 ? " sidebar__storage-fill--warn" : ""}`,
+    style: `width:${storage.percentage}%`
+  });
   const storageBar = el("button", {
     class: "sidebar__storage sidebar__storage--clickable",
     type: "button",
@@ -303,17 +308,17 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     el("span", { class: "sidebar__storage-header" }, [
       el("span", { class: "sidebar__storage-label" }, [storageLabel]),
       el("span", { class: "sidebar__storage-value" }, [
-        storage.label,
+        storageValueText,
         icon("chevron_right", "sidebar__storage-chevron")
       ])
     ]),
-    el("span", { class: "sidebar__storage-bar" }, [
-      el("span", {
-        class: `sidebar__storage-fill${storage.percentage >= 90 ? " sidebar__storage-fill--warn" : ""}`,
-        style: `width:${storage.percentage}%`
-      })
-    ])
+    el("span", { class: "sidebar__storage-bar" }, [storageFill])
   ]);
+  void getStorageQuota().then((q) => {
+    storageValueText.textContent = q.label;
+    storageFill.style.width = `${q.percentage}%`;
+    storageFill.classList.toggle("sidebar__storage-fill--warn", q.percentage >= 90);
+  });
   storageBar.addEventListener("click", () => {
     import("@ui/modal/storage-cards").then(({ openStorageCardsModal }) => openStorageCardsModal());
   });
