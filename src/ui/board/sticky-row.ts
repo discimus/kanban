@@ -5,7 +5,7 @@ import { getStickyRowMode, toggleStickyRowMode } from "./sticky-row-mode";
 import { eventBus } from "@shared/events";
 import { t } from "@shared/i18n";
 
-export function renderStickyToggle(): HTMLElement {
+function renderStickyToggle(): HTMLElement {
   const mode = getStickyRowMode();
 
   const toggleBtn = el("button", {
@@ -28,6 +28,9 @@ export function renderStickyRow(productId: string, readOnly: boolean): HTMLEleme
 
   const mode = getStickyRowMode();
 
+  const withToggle = stickies.length > 0;
+  const block = el("div", { class: "sticky-block" }, withToggle ? [renderStickyToggle()] : []);
+
   const row = el("div", { class: `sticky-row sticky-row--${mode}` }, []);
 
   for (const sticky of stickies) {
@@ -49,5 +52,7 @@ export function renderStickyRow(productId: string, readOnly: boolean): HTMLEleme
     row.append(addBtn);
   }
 
-  return el("div", { class: "sticky-block" }, [row]);
+  block.append(row);
+
+  return block;
 }

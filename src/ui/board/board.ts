@@ -8,7 +8,7 @@ import { showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
 import { openBacklogForm } from "@ui/modal/backlog-form";
-import { renderStickyRow, renderStickyToggle } from "./sticky-row";
+import { renderStickyRow } from "./sticky-row";
 import { t } from "@shared/i18n";
 import "./board-mobile.css";
 
@@ -77,12 +77,11 @@ export function renderBoard(productId: string, showArchived = false, onFilterCha
   const board = el("div", { class: "board" }, []);
 
   const stickyBlock = renderStickyRow(productId, locked);
-  const stickyToggle = stickyBlock ? renderStickyToggle() : null;
 
-  if (filterBar || stickyToggle) {
-    wrapper.append(el("div", { class: "board-toolbar" }, [filterBar, stickyToggle]));
+  if (filterBar) {
+    wrapper.append(el("div", { class: "board-toolbar" }, [filterBar]));
   }
-  if (stickyBlock) wrapper.append(stickyBlock);
+  if (stickyBlock) board.prepend(stickyBlock);
 
   for (const column of KANBAN_COLUMNS) {
     if (column.status === "review" && product?.showReview === false) continue;

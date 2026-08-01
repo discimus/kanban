@@ -1726,6 +1726,10 @@ button.chip--todo:hover {
   min-height: 0;
 }
 
+.board .sticky-block {
+  grid-column: 1 / -1;
+}
+
 .board__filters {
   flex-shrink: 0;
 }
@@ -3802,6 +3806,7 @@ h4 {
   flex-direction: column;
   gap: 8px;
   flex-shrink: 0;
+  position: relative;
   background: var(--md-surface-container-high);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -3809,9 +3814,14 @@ h4 {
 }
 
 .sticky-toggle {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 2;
   flex-shrink: 0;
   background: var(--md-secondary-container);
   color: var(--md-on-secondary-container);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .sticky-toggle:hover {
