@@ -23,6 +23,7 @@ export type DomainEvent =
   | "image:created"
   | "image:deleted"
   | "sticky:created"
+  | "sticky:content-updated"
   | "sticky:deleted"
   | "sticky:link-added"
   | "sticky:link-removed"

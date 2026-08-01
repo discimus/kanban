@@ -33,6 +33,10 @@ export const en: Record<string, string> = {
 
   /* ====== Sticky ====== */
   "sticky.adicionarTitle": "Add card to the row",
+  "sticky.editarNota": "Edit card",
+  "sticky.novoCard": "New card",
+  "sticky.tituloObrigatorio": "Please provide a title for the card.",
+  "sticky.semTitulo": "Untitled",
   "sticky.excluir": "Delete card",
   "sticky.excluirConfirm": "Delete this card?",
   "sticky.semConteudo": "No content yet",

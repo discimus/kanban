@@ -32,6 +32,8 @@ export function reviveState(raw: unknown): AppState {
 export function normalizeSticky(sticky: Sticky): Sticky {
   return {
     ...sticky,
+    title: (sticky as any).title ?? "",
+    description: (sticky as any).description ?? "",
     links: Array.isArray((sticky as any).links) ? (sticky as any).links.map((l: Sticky["links"][number]) => ({ ...l, visitedAt: (l as any).visitedAt ?? null })) : [],
     comments: Array.isArray((sticky as any).comments) ? (sticky as any).comments : [],
     images: Array.isArray((sticky as any).images) ? (sticky as any).images.map((img: Sticky["images"][number]) => ({ ...img, fileSize: (img as any).fileSize ?? 0 })) : []

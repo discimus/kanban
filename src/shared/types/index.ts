@@ -211,6 +211,8 @@ export interface Sticky {
   id: ID;
   productId: ID;
   createdAt: ISODate;
+  title: string;
+  description: string;
   links: StickyLink[];
   comments: StickyComment[];
   images: StickyImage[];

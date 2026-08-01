@@ -1,4 +1,4 @@
-import { el, icon, clear, actionsMenu } from "@ui/components/dom";
+import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
 import { Sticky } from "@shared/types";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
 import { productService } from "@contexts/product/application/product.service";
@@ -7,6 +7,7 @@ import { showToast } from "@ui/components/notification";
 import { timeAgo, formatDate } from "@shared/utils";
 import { t, localeDateTimeString } from "@shared/i18n";
 import { openModal } from "@ui/modal";
+import { openStickyForm } from "@ui/modal/sticky-form";
 
 const expandedStickies = new Map<string, boolean>();
 
@@ -190,8 +191,11 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   };
   renderImages();
 
-  const hasContent = sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0;
+  const hasText = Boolean((sticky.title ?? "").trim()) || Boolean((sticky.description ?? "").trim());
+  const hasBodyContent = Boolean((sticky.description ?? "").trim()) || sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0;
+  const hasContent = hasText || sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0;
 
+  if (sticky.description) body.append(el("p", { class: "sticky-card__desc" }, [sticky.description]));
   body.append(linkList, commentList, imageList);
   if (!hasContent) {
     body.append(el("p", { class: "sticky-card__empty" }, [t("sticky.semConteudo")]));
@@ -350,18 +354,26 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
     tryClipboard();
   };
 
-  const menu = actionsMenu([
-    {
-      label: t("sticky.excluir"),
-      icon: "delete",
-      danger: true,
-      action: () => {
-        showConfirm(t("sticky.excluirConfirm")).then((ok) => {
-          if (ok) stickyService.delete(sticky.id);
-        });
-      }
+  const menuItems: MenuItem[] = [];
+  if (!readOnly) {
+    menuItems.push({
+      label: t("sticky.editarNota"),
+      icon: "edit",
+      action: () => openStickyForm({ productId: sticky.productId, sticky })
+    });
+  }
+  menuItems.push({
+    label: t("sticky.excluir"),
+    icon: "delete",
+    danger: true,
+    action: () => {
+      showConfirm(t("sticky.excluirConfirm")).then((ok) => {
+        if (ok) stickyService.delete(sticky.id);
+      });
     }
-  ]);
+  });
+
+  const menu = actionsMenu(menuItems);
 
   const badges = el("div", { class: "sticky-card__badges" }, [
     badge("link", sticky.links.length, t("sticky.nLinks", { n: sticky.links.length })),
@@ -388,7 +400,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
 
   const footer = el("div", { class: "card__footer sticky-card__footer" }, []);
 
-  if (hasContent) {
+  if (hasBodyContent) {
     const btn = el("button", { class: "card__expand-btn", type: "button" }, [
       icon(bodyExpanded ? "expand_less" : "expand_more"),
       el("span", { class: "card__expand-btn-text" }, [bodyExpanded ? t("card.recolher") : t("card.expandir")])
@@ -424,17 +436,24 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
     return btn;
   }
 
+  const titleEl = el("h3", { class: "sticky-card__title" }, [sticky.title || t("sticky.semTitulo")]);
+  if (!sticky.title) titleEl.classList.add("sticky-card__title--empty");
+  if (!readOnly) {
+    titleEl.addEventListener("click", () => openStickyForm({ productId: sticky.productId, sticky }));
+  }
+
   const card = el("article", {
     class: `card sticky-card${readOnly ? " card--locked" : ""}`,
     "data-id": sticky.id
   }, [
     el("div", { class: "sticky-card__top" }, [badges, menu]),
+    titleEl,
     body,
     footer
   ]);
 
   card.addEventListener("dblclick", (ev) => {
-    if ((ev.target as HTMLElement).closest("button, a, input, select, textarea")) return;
+    if ((ev.target as HTMLElement).closest("button, a, input, select, textarea, .sticky-card__title")) return;
     if (!hasContent) return;
     const isExpanded = !expandedStickies.get(sticky.id);
     setExpanded(isExpanded);

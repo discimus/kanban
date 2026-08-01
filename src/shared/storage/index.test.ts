@@ -467,6 +467,36 @@ describe("normalizeSticky", () => {
     expect(result.images[0].fileSize).toBe(0);
   });
 
+  it("defaults missing title and description to empty strings", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [],
+      comments: [],
+      images: [],
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.title).toBe("");
+    expect(result.description).toBe("");
+  });
+
+  it("preserves existing title and description", () => {
+    const sticky = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      title: "Pendências",
+      description: "Revisar",
+      links: [],
+      comments: [],
+      images: [],
+    } as Sticky;
+    const result = normalizeSticky(sticky);
+    expect(result.title).toBe("Pendências");
+    expect(result.description).toBe("Revisar");
+  });
+
   it("preserves existing visitedAt and fileSize", () => {
     const sticky = {
       id: "s1",
@@ -482,7 +512,7 @@ describe("normalizeSticky", () => {
         fileSize: 2048,
         createdAt: "2026-07-13T00:00:00.000Z",
       }],
-    } as Sticky;
+    } as unknown as Sticky;
     const result = normalizeSticky(sticky);
     expect(result.links[0].visitedAt).toBe("2026-07-12T14:30:00.000Z");
     expect(result.images[0].fileSize).toBe(2048);
@@ -495,10 +525,12 @@ describe("reviveState with stickies", () => {
       id: "s1",
       productId: "p1",
       createdAt: "2024-01-01T00:00:00.000Z",
+      title: "",
+      description: "",
       links: [],
       comments: [],
       images: [],
-    } as Sticky;
+    } as unknown as Sticky;
     const state = { stickies: [sticky] };
     const result = reviveState(state);
     expect(result.stickies).toEqual([sticky]);

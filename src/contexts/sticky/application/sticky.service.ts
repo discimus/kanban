@@ -4,6 +4,8 @@ import { nowISO } from "@shared/utils";
 import {
   createSticky,
   CreateStickyProps,
+  setStickyTitle,
+  setStickyDescription,
   addStickyLink,
   AddStickyLinkProps,
   markStickyLinkVisited,
@@ -32,6 +34,15 @@ export const stickyService = {
   delete(id: string): void {
     stickyRepository.remove(id);
     eventBus.emit("sticky:deleted", id);
+  },
+
+  updateContent(id: string, props: { title: string; description: string }): Sticky {
+    const existing = stickyRepository.findById(id);
+    if (!existing) throw new Error("Card não encontrado.");
+    const updated = setStickyDescription(setStickyTitle(existing, props.title), props.description);
+    stickyRepository.save(updated);
+    eventBus.emit("sticky:content-updated", updated);
+    return updated;
   },
 
   addLink(id: string, props: AddStickyLinkProps): Sticky {

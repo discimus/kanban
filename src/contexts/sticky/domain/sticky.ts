@@ -3,6 +3,8 @@ import { uuid, nowISO } from "@shared/utils";
 
 export interface CreateStickyProps {
   productId: string;
+  title?: string;
+  description?: string;
 }
 
 export interface AddStickyLinkProps {
@@ -29,10 +31,20 @@ export function createSticky(props: CreateStickyProps): Sticky {
     id: uuid(),
     productId: props.productId,
     createdAt: nowISO(),
+    title: (props.title ?? "").trim(),
+    description: (props.description ?? "").trim(),
     links: [],
     comments: [],
     images: []
   };
+}
+
+export function setStickyTitle(sticky: Sticky, title: string): Sticky {
+  return { ...sticky, title: title.trim() };
+}
+
+export function setStickyDescription(sticky: Sticky, description: string): Sticky {
+  return { ...sticky, description: description.trim() };
 }
 
 export function addStickyLink(sticky: Sticky, props: AddStickyLinkProps): Sticky {

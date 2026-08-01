@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   createSticky,
+  setStickyTitle,
+  setStickyDescription,
   addStickyLink,
   markStickyLinkVisited,
   removeStickyLink,
@@ -17,6 +19,8 @@ describe("createSticky", () => {
     expect(sticky.id.length).toBeGreaterThan(0);
     expect(sticky.productId).toBe("p1");
     expect(sticky.createdAt).toBeTypeOf("string");
+    expect(sticky.title).toBe("");
+    expect(sticky.description).toBe("");
     expect(sticky.links).toEqual([]);
     expect(sticky.comments).toEqual([]);
     expect(sticky.images).toEqual([]);
@@ -24,6 +28,50 @@ describe("createSticky", () => {
 
   it("throws Error when productId is empty", () => {
     expect(() => createSticky({ productId: "" })).toThrow(Error);
+  });
+
+  it("sets title and description when provided", () => {
+    const sticky = createSticky({ productId: "p1", title: "  Pendências  ", description: " Revisar " });
+    expect(sticky.title).toBe("Pendências");
+    expect(sticky.description).toBe("Revisar");
+  });
+});
+
+describe("setStickyTitle", () => {
+  it("sets the title", () => {
+    const sticky = createSticky({ productId: "p1" });
+    const updated = setStickyTitle(sticky, "Pendências");
+    expect(updated).not.toBe(sticky);
+    expect(updated.title).toBe("Pendências");
+  });
+
+  it("trims the title", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(setStickyTitle(sticky, "  Pendências  ").title).toBe("Pendências");
+  });
+
+  it("allows clearing the title", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(setStickyTitle(sticky, "").title).toBe("");
+  });
+});
+
+describe("setStickyDescription", () => {
+  it("sets the description", () => {
+    const sticky = createSticky({ productId: "p1" });
+    const updated = setStickyDescription(sticky, "Lembrar de revisar");
+    expect(updated).not.toBe(sticky);
+    expect(updated.description).toBe("Lembrar de revisar");
+  });
+
+  it("trims the description", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(setStickyDescription(sticky, "  Revisar  ").description).toBe("Revisar");
+  });
+
+  it("allows clearing the description", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(setStickyDescription(sticky, "").description).toBe("");
   });
 });
 

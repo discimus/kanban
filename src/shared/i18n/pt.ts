@@ -33,6 +33,10 @@ export const pt: Record<string, string> = {
 
   /* ====== Sticky ====== */
   "sticky.adicionarTitle": "Adicionar card na faixa",
+  "sticky.editarNota": "Editar card",
+  "sticky.novoCard": "Novo card",
+  "sticky.tituloObrigatorio": "Informe um título para o card.",
+  "sticky.semTitulo": "Sem título",
   "sticky.excluir": "Excluir card",
   "sticky.excluirConfirm": "Excluir este card?",
   "sticky.semConteudo": "Sem conteúdo ainda",

@@ -2,6 +2,7 @@ import { el, icon } from "@ui/components/dom";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
 import { stickyCard } from "./sticky-card";
 import { isStickyCollapsed, setStickyCollapsed } from "./sticky-collapse";
+import { openStickyForm } from "@ui/modal/sticky-form";
 import { t } from "@shared/i18n";
 
 export function renderStickyRow(productId: string, readOnly: boolean): HTMLElement | null {
@@ -54,16 +55,7 @@ export function renderStickyRow(productId: string, readOnly: boolean): HTMLEleme
     }, [icon("add")]);
     addBtn.addEventListener("click", () => {
       setStickyCollapsed(productId, false);
-      const before = stickyService.byProduct(productId);
-      stickyService.create({ productId });
-      const created = stickyService.byProduct(productId).find((s) => !before.some((b) => b.id === s.id));
-      if (created) {
-        const cardEl = document.querySelector<HTMLElement>(`.sticky-card[data-id="${created.id}"]`);
-        if (cardEl) {
-          cardEl.classList.add("card--just-moved");
-          setTimeout(() => cardEl.classList.remove("card--just-moved"), 500);
-        }
-      }
+      openStickyForm({ productId });
     });
     headerChildren.push(addBtn);
   }

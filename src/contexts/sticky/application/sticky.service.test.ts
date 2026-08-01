@@ -40,6 +40,8 @@ function makeSticky(overrides: Partial<Sticky> = {}): Sticky {
     id: "s1",
     productId: "p1",
     createdAt: "2024-01-01T00:00:00.000Z",
+    title: "",
+    description: "",
     links: [],
     comments: [],
     images: [],
@@ -71,6 +73,14 @@ describe("stickyService", () => {
       expect(state.stickies).toHaveLength(1);
       expect(state.stickies![0].links).toEqual([]);
     });
+
+    it("creates a sticky with title and description", () => {
+      const result = stickyService.create({ productId: "p1", title: "Pendências", description: "Revisar" });
+      expect(result.title).toBe("Pendências");
+      expect(result.description).toBe("Revisar");
+      expect(state.stickies![0].title).toBe("Pendências");
+      expect(state.stickies![0].description).toBe("Revisar");
+    });
   });
 
   describe("delete", () => {
@@ -79,6 +89,29 @@ describe("stickyService", () => {
       stickyService.delete("s1");
       expect(state.stickies).toHaveLength(0);
       expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:deleted", "s1");
+    });
+  });
+
+  describe("updateContent", () => {
+    it("updates title and description, saves and emits sticky:content-updated", () => {
+      state.stickies = [makeSticky()];
+      const result = stickyService.updateContent("s1", { title: "  Pendências  ", description: " Revisar " });
+      expect(result.title).toBe("Pendências");
+      expect(result.description).toBe("Revisar");
+      expect(state.stickies![0].title).toBe("Pendências");
+      expect(state.stickies![0].description).toBe("Revisar");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:content-updated", result);
+    });
+
+    it("allows clearing title and description", () => {
+      state.stickies = [makeSticky({ title: "Título", description: "Descrição" })];
+      const result = stickyService.updateContent("s1", { title: "", description: "" });
+      expect(result.title).toBe("");
+      expect(result.description).toBe("");
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => stickyService.updateContent("ghost", { title: "a", description: "b" })).toThrow("Card não encontrado.");
     });
   });
 
