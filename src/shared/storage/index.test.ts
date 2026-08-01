@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage } from "@shared/storage";
-import { emptyState, type Link, type Image, type Product, type BacklogItem } from "@shared/types";
+import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage, normalizeSticky } from "@shared/storage";
+import { emptyState, type Link, type Image, type Product, type BacklogItem, type Sticky } from "@shared/types";
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   return {
@@ -419,5 +419,94 @@ describe("normalizeImage", () => {
     } as Image;
     const result = normalizeImage(img);
     expect(result.fileSize).toBe(2048);
+  });
+});
+
+describe("normalizeSticky", () => {
+  it("defaults missing links/comments/images to empty arrays", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.links).toEqual([]);
+    expect(result.comments).toEqual([]);
+    expect(result.images).toEqual([]);
+  });
+
+  it("sets visitedAt to null for legacy sticky links without it", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [{ id: "l1", url: "https://example.com" }],
+      comments: [],
+      images: [],
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.links[0].visitedAt).toBeNull();
+  });
+
+  it("sets fileSize to 0 for legacy sticky images without it", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [],
+      comments: [],
+      images: [{
+        id: "i1",
+        dataUrl: "data:image/png;base64,abc=",
+        filename: "foto.png",
+        mimeType: "image/png",
+        createdAt: "2026-07-13T00:00:00.000Z",
+      }],
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.images[0].fileSize).toBe(0);
+  });
+
+  it("preserves existing visitedAt and fileSize", () => {
+    const sticky = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [{ id: "l1", url: "https://example.com", visitedAt: "2026-07-12T14:30:00.000Z" }],
+      comments: [],
+      images: [{
+        id: "i1",
+        dataUrl: "data:image/png;base64,abc=",
+        filename: "foto.png",
+        mimeType: "image/png",
+        fileSize: 2048,
+        createdAt: "2026-07-13T00:00:00.000Z",
+      }],
+    } as Sticky;
+    const result = normalizeSticky(sticky);
+    expect(result.links[0].visitedAt).toBe("2026-07-12T14:30:00.000Z");
+    expect(result.images[0].fileSize).toBe(2048);
+  });
+});
+
+describe("reviveState with stickies", () => {
+  it("restores stickies when present in raw state", () => {
+    const sticky = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [],
+      comments: [],
+      images: [],
+    } as Sticky;
+    const state = { stickies: [sticky] };
+    const result = reviveState(state);
+    expect(result.stickies).toEqual([sticky]);
+  });
+
+  it("defaults stickies to empty array when missing", () => {
+    const state = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], estimations: [] };
+    const result = reviveState(state);
+    expect(result.stickies).toEqual([]);
   });
 });

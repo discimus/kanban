@@ -31,6 +31,16 @@ export const en: Record<string, string> = {
   "board.mostrarTodas": "Show all classifications",
   "board.todas": "All",
 
+  /* ====== Sticky ====== */
+  "sticky.adicionar": "Add card",
+  "sticky.adicionarTitle": "Add card to the strip",
+  "sticky.excluir": "Delete card",
+  "sticky.excluirConfirm": "Delete this card?",
+  "sticky.semConteudo": "No content yet",
+  "sticky.nLinks": "{n} links",
+  "sticky.nComentarios": "{n} comments",
+  "sticky.nImagens": "{n} images",
+
   /* ====== Card ====== */
   "card.editar": "Edit",
   "card.adicionar": "Add...",

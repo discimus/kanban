@@ -1,0 +1,157 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import type { AppState, Sticky } from "@shared/types";
+
+const { state, mockStore, mockEventBus } = vi.hoisted(() => {
+  const state: AppState = {
+    products: [],
+    backlogItems: [],
+    tasks: [],
+    links: [],
+    comments: [],
+    images: [],
+    estimations: [],
+    stickies: []
+  };
+  return {
+    state,
+    mockStore: {
+      getState: () => state,
+      update: vi.fn((recipe: (s: AppState) => void) => { recipe(state); })
+    },
+    mockEventBus: {
+      emit: vi.fn(),
+      on: vi.fn()
+    }
+  };
+});
+
+vi.mock("@shared/storage", () => ({
+  store: mockStore,
+  reviveState: (r: unknown) => r,
+  normalizeProduct: (p: unknown) => p,
+  normalizeBacklogItem: (b: unknown) => b
+}));
+vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
+
+import { stickyService } from "@contexts/sticky/application/sticky.service";
+
+function makeSticky(overrides: Partial<Sticky> = {}): Sticky {
+  return {
+    id: "s1",
+    productId: "p1",
+    createdAt: "2024-01-01T00:00:00.000Z",
+    links: [],
+    comments: [],
+    images: [],
+    ...overrides
+  };
+}
+
+beforeEach(() => {
+  state.stickies = [];
+  mockStore.update.mockClear();
+  mockEventBus.emit.mockClear();
+});
+
+describe("stickyService", () => {
+  describe("byProduct", () => {
+    it("returns stickies filtered by product", () => {
+      const s1 = makeSticky({ id: "s1", productId: "p1" });
+      const s2 = makeSticky({ id: "s2", productId: "p2" });
+      state.stickies = [s1, s2];
+      expect(stickyService.byProduct("p1")).toEqual([s1]);
+    });
+  });
+
+  describe("create", () => {
+    it("adds a sticky and emits sticky:created", () => {
+      const result = stickyService.create({ productId: "p1" });
+      expect(mockStore.update).toHaveBeenCalled();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:created", result);
+      expect(state.stickies).toHaveLength(1);
+      expect(state.stickies![0].links).toEqual([]);
+    });
+  });
+
+  describe("delete", () => {
+    it("removes the sticky and emits sticky:deleted", () => {
+      state.stickies = [makeSticky()];
+      stickyService.delete("s1");
+      expect(state.stickies).toHaveLength(0);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:deleted", "s1");
+    });
+  });
+
+  describe("addLink", () => {
+    it("adds a link, saves and emits sticky:link-added", () => {
+      state.stickies = [makeSticky()];
+      const result = stickyService.addLink("s1", { url: "https://example.com" });
+      expect(result.links).toHaveLength(1);
+      expect(state.stickies![0].links).toHaveLength(1);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:link-added", result);
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => stickyService.addLink("ghost", { url: "https://x.com" })).toThrow("Card não encontrado.");
+    });
+  });
+
+  describe("markLinkVisited", () => {
+    it("sets visitedAt and emits sticky:link-visited", () => {
+      state.stickies = [makeSticky({ links: [{ id: "l1", url: "https://x.com", visitedAt: null }] })];
+      const result = stickyService.markLinkVisited("s1", "l1");
+      expect(result.links[0].visitedAt).toBeTypeOf("string");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:link-visited", result);
+    });
+  });
+
+  describe("removeLink", () => {
+    it("removes the link and emits sticky:link-removed", () => {
+      state.stickies = [makeSticky({ links: [{ id: "l1", url: "https://x.com", visitedAt: null }] })];
+      const result = stickyService.removeLink("s1", "l1");
+      expect(result.links).toHaveLength(0);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:link-removed", result);
+    });
+  });
+
+  describe("addComment", () => {
+    it("adds a comment and emits sticky:comment-added", () => {
+      state.stickies = [makeSticky()];
+      const result = stickyService.addComment("s1", { text: "Olá" });
+      expect(result.comments).toHaveLength(1);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:comment-added", result);
+    });
+  });
+
+  describe("removeComment", () => {
+    it("removes the comment and emits sticky:comment-removed", () => {
+      state.stickies = [makeSticky({ comments: [{ id: "c1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" }] })];
+      const result = stickyService.removeComment("s1", "c1");
+      expect(result.comments).toHaveLength(0);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:comment-removed", result);
+    });
+  });
+
+  describe("addImage", () => {
+    it("adds an image and emits sticky:image-added", () => {
+      state.stickies = [makeSticky()];
+      const result = stickyService.addImage("s1", {
+        dataUrl: "data:image/png;base64,iVBORw0KGgo=",
+        filename: "foto.png",
+        mimeType: "image/png",
+        fileSize: 1024
+      });
+      expect(result.images).toHaveLength(1);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:image-added", result);
+    });
+  });
+
+  describe("removeImage", () => {
+    it("removes the image and emits sticky:image-removed", () => {
+      state.stickies = [makeSticky({ images: [{ id: "i1", dataUrl: "a", filename: "a.png", mimeType: "image/png", fileSize: 1, createdAt: "2024-01-01T00:00:00.000Z" }] })];
+      const result = stickyService.removeImage("s1", "i1");
+      expect(result.images).toHaveLength(0);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:image-removed", result);
+    });
+  });
+});

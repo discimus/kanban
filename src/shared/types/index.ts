@@ -185,6 +185,37 @@ export interface EstimationLog {
   comment: string;
 }
 
+export interface StickyLink {
+  id: ID;
+  url: string;
+  visitedAt: ISODate | null;
+}
+
+export interface StickyComment {
+  id: ID;
+  text: string;
+  createdAt: ISODate;
+  updatedAt?: ISODate;
+}
+
+export interface StickyImage {
+  id: ID;
+  dataUrl: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  createdAt: ISODate;
+}
+
+export interface Sticky {
+  id: ID;
+  productId: ID;
+  createdAt: ISODate;
+  links: StickyLink[];
+  comments: StickyComment[];
+  images: StickyImage[];
+}
+
 export interface AppState {
   products: Product[];
   backlogItems: BacklogItem[];
@@ -193,6 +224,8 @@ export interface AppState {
   comments: Comment[];
   images: Image[];
   estimations: EstimationLog[];
+  /** Presente em `emptyState()`/`reviveState()`; opcional para compatibilidade com dados legados e mocks. */
+  stickies?: Sticky[];
 }
 
 export function emptyState(): AppState {
@@ -203,6 +236,7 @@ export function emptyState(): AppState {
     links: [],
     comments: [],
     images: [],
-    estimations: []
+    estimations: [],
+    stickies: []
   };
 }

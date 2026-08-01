@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, Link, Image, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, Image, Sticky, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 
 const STORAGE_KEY = "kanban-ddd-state";
@@ -24,7 +24,17 @@ export function reviveState(raw: unknown): AppState {
     links: Array.isArray(data.links) ? data.links.map(normalizeLink) : base.links,
     comments: Array.isArray(data.comments) ? data.comments : base.comments,
     images: Array.isArray(data.images) ? data.images.map(normalizeImage) : base.images,
-    estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations
+    estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations,
+    stickies: Array.isArray(data.stickies) ? data.stickies.map(normalizeSticky) : base.stickies
+  };
+}
+
+export function normalizeSticky(sticky: Sticky): Sticky {
+  return {
+    ...sticky,
+    links: Array.isArray((sticky as any).links) ? (sticky as any).links.map((l: Sticky["links"][number]) => ({ ...l, visitedAt: (l as any).visitedAt ?? null })) : [],
+    comments: Array.isArray((sticky as any).comments) ? (sticky as any).comments : [],
+    images: Array.isArray((sticky as any).images) ? (sticky as any).images.map((img: Sticky["images"][number]) => ({ ...img, fileSize: (img as any).fileSize ?? 0 })) : []
   };
 }
 

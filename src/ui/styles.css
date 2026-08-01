@@ -3770,3 +3770,124 @@ h4 {
   gap: 2px;
 }
 
+/* ── Sticky Row ── */
+
+.sticky-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+}
+
+.sticky-row__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 120px;
+  height: auto;
+  align-self: stretch;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.sticky-row__add:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--md-primary-container);
+}
+
+/* ── Sticky Card ── */
+
+.sticky-card {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  min-width: 260px;
+  cursor: default;
+  background: var(--md-surface-container-low);
+}
+
+.sticky-card.card--locked {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+
+.sticky-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sticky-card__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sticky-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.sticky-badge .material-symbols-outlined {
+  font-size: 15px;
+}
+
+.sticky-badge--empty {
+  background: var(--md-surface-container-high);
+  color: var(--text-muted);
+}
+
+.sticky-badge:hover {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.sticky-card__body {
+  display: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.sticky-card__body--expanded {
+  display: block;
+}
+
+.sticky-card__empty {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.sticky-card .card__footer {
+  margin-top: auto;
+}
+
+.sticky-card .card__links {
+  padding: 4px 0;
+}
+
+.sticky-card .card__images {
+  padding: 4px 0;
+}
+
+

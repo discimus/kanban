@@ -1,5 +1,5 @@
 import { store, normalizeLink, normalizeBacklogItem } from "@shared/storage";
-import { AppState, Product, BacklogItem, Task, Link, Comment, EstimationLog, TaskClassification, ProductCategory } from "@shared/types";
+import { AppState, Product, BacklogItem, Task, Link, Comment, EstimationLog, Sticky, TaskClassification, ProductCategory } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
@@ -45,7 +45,8 @@ export function exportProductState(productId: string): AppState | null {
     links,
     comments,
     images: [],
-    estimations
+    estimations,
+    stickies: (state.stickies ?? []).filter((s) => s.productId === productId)
   };
 }
 
@@ -194,6 +195,18 @@ export function validateAndImport(jsonString: string, overwrite = false): Export
     }
   }
 
+  if (obj.stickies !== undefined && !Array.isArray(obj.stickies)) {
+    return { success: false, error: '"stickies" deve ser um array.' };
+  }
+  if (Array.isArray(obj.stickies)) {
+    for (const s of obj.stickies as Sticky[]) {
+      if (!s.id || !s.productId) return { success: false, error: "Cada sticky precisa de id e productId." };
+      if (s.links !== undefined && !Array.isArray(s.links)) return { success: false, error: "Cada sticky precisa de links como array." };
+      if (s.comments !== undefined && !Array.isArray(s.comments)) return { success: false, error: "Cada sticky precisa de comments como array." };
+      if (s.images !== undefined && !Array.isArray(s.images)) return { success: false, error: "Cada sticky precisa de images como array." };
+    }
+  }
+
   doImport(data as AppState, overwrite);
   return { success: true };
 }
@@ -210,6 +223,7 @@ function doImport(data: AppState, overwrite = false): void {
           state.links = state.links.filter((l) => !removedItems.includes(l.backlogItemId));
           state.comments = state.comments.filter((c) => !removedItems.includes(c.backlogItemId));
           state.estimations = state.estimations.filter((e) => !removedTasks.includes(e.taskId));
+          state.stickies = (state.stickies ?? []).filter((s) => s.productId !== product.id);
           state.products = state.products.filter((p) => p.id !== product.id);
         }
       }
@@ -244,6 +258,14 @@ function doImport(data: AppState, overwrite = false): void {
     for (const est of data.estimations) {
       if (!state.estimations.some((e) => e.id === est.id)) {
         state.estimations.push(est);
+      }
+    }
+    if (Array.isArray(data.stickies)) {
+      state.stickies = state.stickies ?? [];
+      for (const sticky of data.stickies) {
+        if (!state.stickies.some((s) => s.id === sticky.id)) {
+          state.stickies.push(sticky);
+        }
       }
     }
   });
