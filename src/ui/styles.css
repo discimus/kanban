@@ -2980,6 +2980,52 @@ button.chip--todo:hover {
   font-size: 1.05rem;
 }
 
+.storage-card__count-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Storage modal: filter chips above the scrollable list */
+.storage-cards__modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 100%;
+}
+
+.storage-cards__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Audio entries: icon tile instead of an image thumbnail */
+.storage-card__thumb-wrap--audio {
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+}
+
+.storage-card__thumb-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.storage-card__thumb-icon .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+.storage-card__thumb-duration {
+  font-size: 0.62rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
 .storage-cards__empty {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,5 @@
 import { store } from "./index";
-import type { AppState, BacklogItem, Image, Product } from "@shared/types";
+import type { AppState, AudioRecording, BacklogItem, Image, Product } from "@shared/types";
 
 const ESTIMATED_TOTAL_BYTES = 5 * 1024 * 1024;
 
@@ -100,6 +100,50 @@ export function getCardsWithImages(state: AppState): CardsWithImagesEntry[] {
     const images = state.images.filter((img) => img.backlogItemId === item.id);
     if (images.length === 0) continue;
     entries.push({ product, item, images });
+  }
+
+  entries.sort((a, b) => {
+    const byName = a.product.name.localeCompare(b.product.name);
+    if (byName !== 0) return byName;
+    return b.item.createdAt.localeCompare(a.item.createdAt);
+  });
+
+  return entries;
+}
+
+export type StorageMediaType = "all" | "images" | "audio";
+
+export interface CardsWithMediaEntry {
+  product: Product;
+  item: BacklogItem;
+  images: Image[];
+  audios: AudioRecording[];
+}
+
+/**
+ * Collects non-archived board cards that hold at least one media item
+ * (image and/or audio) of the requested type, grouped with their owning
+ * product. `"all"` includes cards with either kind. Excludes archived products
+ * so the target card is always visible after navigation.
+ */
+export function getCardsWithMedia(state: AppState, type: StorageMediaType = "all"): CardsWithMediaEntry[] {
+  const productById = new Map(state.products.map((p) => [p.id, p] as const));
+  const entries: CardsWithMediaEntry[] = [];
+
+  for (const item of state.backlogItems) {
+    if (item.archivedAt) continue;
+    const product = productById.get(item.productId);
+    if (!product || product.archivedAt) continue;
+    const images = state.images.filter((img) => img.backlogItemId === item.id);
+    const audios = state.audios.filter((a) => a.backlogItemId === item.id);
+    const hasImages = images.length > 0;
+    const hasAudios = audios.length > 0;
+    const include =
+      type === "all" ? hasImages || hasAudios
+      : type === "images" ? hasImages
+      : hasAudios;
+    if (!include) continue;
+    entries.push({ product, item, images, audios });
   }
 
   entries.sort((a, b) => {

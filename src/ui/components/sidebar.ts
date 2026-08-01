@@ -302,8 +302,8 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
   const storageBar = el("button", {
     class: "sidebar__storage sidebar__storage--clickable",
     type: "button",
-    title: t("sidebar.verCardsComImagens"),
-    "aria-label": t("sidebar.verCardsComImagens")
+    title: t("sidebar.verCardsComMidia"),
+    "aria-label": t("sidebar.verCardsComMidia")
   }, [
     el("span", { class: "sidebar__storage-header" }, [
       el("span", { class: "sidebar__storage-label" }, [storageLabel]),
