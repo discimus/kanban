@@ -3,7 +3,7 @@ import { Product, ProductStatus, ProductCategory, PALETTES, PRODUCT_STATUSES, PR
 import { productService } from "@contexts/product/application/product.service";
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
-import { getStorageUsage, getStorageQuota } from "@shared/storage/storage-usage";
+import { getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded } from "@shared/storage/storage-usage";
 import { t, loc } from "@shared/i18n";
 
 let archivedOpen = false;
@@ -314,11 +314,15 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     ]),
     el("span", { class: "sidebar__storage-bar" }, [storageFill])
   ]);
-  void getStorageQuota().then((q) => {
-    storageValueText.textContent = q.label;
-    storageFill.style.width = `${q.percentage}%`;
-    storageFill.classList.toggle("sidebar__storage-fill--warn", q.percentage >= 90);
-  });
+  if (!isStorageQuotaLoaded()) {
+    void ensureStorageQuotaLoaded().then((loaded) => {
+      if (!loaded || !storageValueText.isConnected) return;
+      const q = getStorageUsage();
+      storageValueText.textContent = q.label;
+      storageFill.style.width = `${q.percentage}%`;
+      storageFill.classList.toggle("sidebar__storage-fill--warn", q.percentage >= 90);
+    });
+  }
   storageBar.addEventListener("click", () => {
     import("@ui/modal/storage-cards").then(({ openStorageCardsModal }) => openStorageCardsModal());
   });

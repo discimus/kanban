@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type { AppState, BacklogItem, Image, Product, AudioRecording } from "@shared/types";
 import { emptyState } from "@shared/types";
 import { store } from "@shared/storage";
-import { getCardsWithImages, getStorageUsage } from "./storage-usage";
+import { getCardsWithImages, getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded } from "./storage-usage";
 
 function makeProduct(id: string, name: string, overrides: Record<string, unknown> = {}): Product {
   return {
@@ -190,5 +190,16 @@ describe("getStorageUsage", () => {
   it("counts no audio bytes when there are no audios", () => {
     const usage = getStorageUsage();
     expect(usage.usedBytes).toBeGreaterThan(0);
+  });
+});
+
+describe("storage quota caching", () => {
+  it("reports quota not loaded initially", () => {
+    expect(isStorageQuotaLoaded()).toBe(false);
+  });
+
+  it("resolves false when the Storage API is unavailable", async () => {
+    await expect(ensureStorageQuotaLoaded()).resolves.toBe(false);
+    expect(isStorageQuotaLoaded()).toBe(false);
   });
 });

@@ -3,6 +3,42 @@ import type { AppState, BacklogItem, Image, Product } from "@shared/types";
 
 const ESTIMATED_TOTAL_BYTES = 5 * 1024 * 1024;
 
+let cachedQuotaTotal: number | null = null;
+let quotaPromise: Promise<number | null> | null = null;
+
+function fetchQuotaTotal(): Promise<number | null> {
+  try {
+    if (typeof navigator !== "undefined" && navigator.storage?.estimate) {
+      return navigator.storage
+        .estimate()
+        .then((est) => est.quota ?? null)
+        .catch(() => null);
+    }
+  } catch { /* ignore */ }
+  return Promise.resolve(null);
+}
+
+export function isStorageQuotaLoaded(): boolean {
+  return cachedQuotaTotal !== null;
+}
+
+/**
+ * Fetches the real origin quota once per session and caches it. The quota
+ * total is stable (unlike `usage`, which lags behind IndexedDB writes), so it
+ * is the only async value used by the storage meter. Resolves with `true` when
+ * a real quota was obtained; callers keep the fallback otherwise. Idempotent.
+ */
+export function ensureStorageQuotaLoaded(): Promise<boolean> {
+  if (cachedQuotaTotal !== null) return Promise.resolve(true);
+  if (!quotaPromise) {
+    quotaPromise = fetchQuotaTotal().then((q) => {
+      if (q !== null) cachedQuotaTotal = q;
+      return q;
+    });
+  }
+  return quotaPromise.then((q) => q !== null);
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -31,44 +67,15 @@ export function getStorageUsage(): StorageUsage {
   const stateJson = JSON.stringify(stateWithoutBlobs);
   const stateBytes = new Blob([stateJson]).size;
   const usedBytes = stateBytes + imageBytes + audioBytes;
-  const percentage = Math.min(100, (usedBytes / ESTIMATED_TOTAL_BYTES) * 100);
+  const totalBytes = cachedQuotaTotal ?? ESTIMATED_TOTAL_BYTES;
+  const percentage = Math.min(100, (usedBytes / totalBytes) * 100);
 
   return {
     usedBytes,
-    totalBytes: ESTIMATED_TOTAL_BYTES,
+    totalBytes,
     percentage,
-    label: `${formatBytes(usedBytes)} / ${formatBytes(ESTIMATED_TOTAL_BYTES)}`
+    label: `${formatBytes(usedBytes)} / ${formatBytes(totalBytes)}`
   };
-}
-
-export interface StorageQuota {
-  usedBytes: number;
-  totalBytes: number;
-  percentage: number;
-  label: string;
-}
-
-/**
- * Real origin quota via the Storage API (covers localStorage + IndexedDB).
- * Falls back to the sync estimate when the API is unavailable.
- */
-export async function getStorageQuota(): Promise<StorageQuota> {
-  try {
-    if (typeof navigator !== "undefined" && navigator.storage?.estimate) {
-      const est = await navigator.storage.estimate();
-      const usedBytes = est.usage ?? 0;
-      const totalBytes = est.quota ?? ESTIMATED_TOTAL_BYTES;
-      const percentage = Math.min(100, (usedBytes / totalBytes) * 100);
-      return {
-        usedBytes,
-        totalBytes,
-        percentage,
-        label: `${formatBytes(usedBytes)} / ${formatBytes(totalBytes)}`
-      };
-    }
-  } catch { /* ignore */ }
-  const fallback = getStorageUsage();
-  return { ...fallback };
 }
 
 export interface CardsWithImagesEntry {
