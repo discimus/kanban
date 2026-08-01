@@ -40,8 +40,6 @@ export const pt: Record<string, string> = {
   "sticky.nLinks": "{n} links",
   "sticky.nComentarios": "{n} comentários",
   "sticky.nImagens": "{n} imagens",
-  "sticky.paraWrap": "Alternar para grade (wrap)",
-  "sticky.paraInline": "Alternar para linha com scroll",
 
   /* ====== Card ====== */
   "card.editar": "Editar",

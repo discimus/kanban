@@ -3813,42 +3813,12 @@ h4 {
   padding: 12px;
 }
 
-.sticky-toggle {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  z-index: 2;
-  flex-shrink: 0;
-  background: var(--md-secondary-container);
-  color: var(--md-on-secondary-container);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-
-.sticky-toggle:hover {
-  background: var(--md-secondary);
-  color: var(--md-on-secondary);
-}
-
 .sticky-row {
   display: flex;
-  gap: 12px;
-  padding: 2px 0 4px;
-  flex-shrink: 0;
-}
-
-.sticky-row--wrap {
   flex-wrap: wrap;
   align-items: flex-start;
-}
-
-.sticky-row--inline {
-  flex-wrap: nowrap;
-  align-items: stretch;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-
-.sticky-row--inline .sticky-card {
+  gap: 12px;
+  padding: 2px 0 4px;
   flex-shrink: 0;
 }
 
