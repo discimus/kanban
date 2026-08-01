@@ -1142,14 +1142,20 @@ body {
 }
 
 .board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.board__columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   grid-auto-rows: min-content;
   align-content: start;
   gap: 16px;
-  overflow: auto;
-  flex: 1;
-  min-height: 0;
 }
 
 .column__header {
@@ -1724,10 +1730,6 @@ button.chip--todo:hover {
 .board-wrapper .board {
   flex: 1;
   min-height: 0;
-}
-
-.board .sticky-block {
-  grid-column: 1 / -1;
 }
 
 .board__filters {
@@ -3303,7 +3305,7 @@ h4 {
     grid-template-columns: min(var(--sidebar-w, 280px), 240px) 1fr;
   }
 
-  .board {
+  .board__columns {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 }
@@ -3416,7 +3418,7 @@ h4 {
     height: 40px;
   }
 
-  .board {
+  .board__columns {
     grid-template-columns: 1fr;
     gap: 12px;
   }
