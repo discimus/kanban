@@ -306,4 +306,58 @@ describe("backlogService", () => {
       expect(result.classification).toBe("note");
     });
   });
+
+  describe("convertFromSticky", () => {
+    function makeSticky() {
+      return {
+        id: "s1",
+        productId: "p1",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        title: "Nota A",
+        description: "Descrição A",
+        links: [{ id: "sl1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z" }],
+        comments: [{ id: "sc1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" }],
+        images: [{
+          id: "si1",
+          dataUrl: "data:image/png;base64,a=",
+          filename: "a.png",
+          mimeType: "image/png",
+          fileSize: 2048,
+          createdAt: "2024-01-01T00:00:00.000Z"
+        }]
+      };
+    }
+
+    it("converts a sticky into a backlog item preserving content", () => {
+      state.stickies = [makeSticky()];
+      const result = backlogService.convertFromSticky("s1");
+
+      expect(state.stickies).toHaveLength(0);
+      expect(state.backlogItems).toHaveLength(1);
+      expect(result.title).toBe("Nota A");
+      expect(result.description).toBe("Descrição A");
+      expect(result.status).toBe("todo");
+      expect(result.priority).toBe("medium");
+      expect(result.classification).toBe("task");
+      expect(state.links).toHaveLength(1);
+      expect(state.links[0].url).toBe("https://x.com");
+      expect(state.links[0].visitedAt).toBe("2024-01-02T00:00:00.000Z");
+      expect(state.links[0].backlogItemId).toBe(result.id);
+      expect(state.comments).toHaveLength(1);
+      expect(state.comments[0].text).toBe("Olá");
+      expect(state.images).toHaveLength(1);
+      expect(state.images[0].filename).toBe("a.png");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("backlog:created", result);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:deleted", "s1");
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => backlogService.convertFromSticky("ghost")).toThrow("Card não encontrado.");
+    });
+
+    it("throws when the sticky has no title", () => {
+      state.stickies = [{ id: "s1", productId: "p1", createdAt: "2024-01-01T00:00:00.000Z", title: "", description: "", links: [], comments: [], images: [] }];
+      expect(() => backlogService.convertFromSticky("s1")).toThrow("O título do item é obrigatório.");
+    });
+  });
 });

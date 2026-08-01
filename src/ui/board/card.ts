@@ -6,6 +6,7 @@ import { commentService } from "@contexts/comment/application/comment.service";
 import { imageService } from "@contexts/image/application/image.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
+import { stickyService } from "@contexts/sticky/application/sticky.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { showToast } from "@ui/components/notification";
@@ -546,6 +547,22 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     showAlert(t("card.projetoLocked"));
   };
 
+  const convertToNote = (item: BacklogItem): void => {
+    showConfirm(t("card.converterNotaAviso"), t("card.converterNotaPerdidos")).then((ok) => {
+      if (!ok) return;
+      try {
+        const sticky = stickyService.convertFromBacklog(item.id);
+        const cardEl = document.querySelector<HTMLElement>(`.sticky-card[data-id="${sticky.id}"]`);
+        if (cardEl) {
+          cardEl.classList.add("card--just-moved");
+          setTimeout(() => cardEl.classList.remove("card--just-moved"), 500);
+        }
+      } catch (e) {
+        showAlert((e as Error).message);
+      }
+    });
+  };
+
   const moveTo = (status: (typeof KANBAN_COLUMNS)[number]["status"]): void => {
     try {
       backlogService.move(item.id, status);
@@ -603,7 +620,16 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             action: () => copyCardTitle(item.title)
           },
           ...(isNotes ? [] : [{ label: t("card.moverParaColuna"), icon: "swap_horiz", submenu: columnSubmenu }]),
-          { label: t("card.moverParaProjeto"), icon: "output", action: locked ? lockedAlert : () => openMoveToProjectDialog(item) },
+          {
+            label: t("card.moverParaProjeto"),
+            icon: "output",
+            action: locked ? lockedAlert : () => openMoveToProjectDialog(item)
+          },
+          ...(isNotes ? [] : [{
+            label: t("card.converterNota"),
+            icon: "sticky_note_2",
+            action: locked ? lockedAlert : () => convertToNote(item)
+          }]),
           { label: t("card.arquivar"), icon: "archive", action: () => backlogService.archive(item.id) },
           {
             label: t("card.excluir"),

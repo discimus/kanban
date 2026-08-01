@@ -1,4 +1,4 @@
-import { Sticky, StickyComment, StickyImage, StickyLink } from "@shared/types";
+import { Sticky, StickyComment, StickyImage, StickyLink, BacklogItem, Link, Comment, Image } from "@shared/types";
 import { uuid, nowISO } from "@shared/utils";
 
 export interface CreateStickyProps {
@@ -94,4 +94,39 @@ export function addStickyImage(sticky: Sticky, props: AddStickyImageProps): Stic
 
 export function removeStickyImage(sticky: Sticky, imageId: string): Sticky {
   return { ...sticky, images: sticky.images.filter((img) => img.id !== imageId) };
+}
+
+export function stickyLinkFromLink(link: Link): StickyLink {
+  return { id: uuid(), url: link.url, visitedAt: link.visitedAt };
+}
+
+export function stickyCommentFromComment(comment: Comment): StickyComment {
+  return { id: uuid(), text: comment.text, createdAt: comment.createdAt, updatedAt: comment.updatedAt };
+}
+
+export function stickyImageFromImage(image: Image): StickyImage {
+  return {
+    id: uuid(),
+    dataUrl: image.dataUrl,
+    filename: image.filename,
+    mimeType: image.mimeType,
+    fileSize: image.fileSize,
+    createdAt: image.createdAt
+  };
+}
+
+export function createStickyFromBacklog(
+  item: BacklogItem,
+  content: { links: Link[]; comments: Comment[]; images: Image[] }
+): Sticky {
+  return {
+    id: uuid(),
+    productId: item.productId,
+    createdAt: nowISO(),
+    title: item.title,
+    description: item.description,
+    links: content.links.map(stickyLinkFromLink),
+    comments: content.comments.map(stickyCommentFromComment),
+    images: content.images.map(stickyImageFromImage)
+  };
 }

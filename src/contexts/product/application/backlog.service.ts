@@ -1,10 +1,22 @@
 import { BacklogItem, KanbanStatus, Priority, TaskClassification, Product } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { nowISO } from "@shared/utils";
-import { createBacklogItem, CreateBacklogItemProps, archive as archiveItem, restore as restoreItem, changeProduct as changeProductDomain, defaultClassificationForCategory } from "../domain/backlog-item";
+import { store } from "@shared/storage";
+import {
+  createBacklogItem,
+  CreateBacklogItemProps,
+  archive as archiveItem,
+  restore as restoreItem,
+  changeProduct as changeProductDomain,
+  defaultClassificationForCategory,
+  linkFromStickyLink,
+  commentFromStickyComment,
+  imageFromStickyImage
+} from "../domain/backlog-item";
 import { backlogRepository } from "../infrastructure/backlog.repository";
 import { productRepository } from "../infrastructure/product.repository";
 import { productService } from "./product.service";
+import { stickyService } from "@contexts/sticky/application/sticky.service";
 
 function assertProductEditable(productId: string): void {
   const product = productService.get(productId);
@@ -138,6 +150,30 @@ export const backlogService = {
     if (existing) assertProductEditable(existing.productId);
     backlogRepository.remove(id);
     eventBus.emit("backlog:deleted", id);
+  },
+
+  convertFromSticky(stickyId: string): BacklogItem {
+    const sticky = stickyService.get(stickyId);
+    if (!sticky) throw new Error("Card não encontrado.");
+    assertProductEditable(sticky.productId);
+    const product = productService.get(sticky.productId);
+    const classification = defaultClassificationForCategory(product?.category ?? "development");
+    const item = createBacklogItem({
+      productId: sticky.productId,
+      title: sticky.title,
+      description: sticky.description,
+      classification
+    });
+    backlogRepository.add(item);
+    eventBus.emit("backlog:created", item);
+    store.update((s) => {
+      for (const sl of sticky.links) s.links.push(linkFromStickyLink(sl, item.id));
+      for (const sc of sticky.comments) s.comments.push(commentFromStickyComment(sc, item.id));
+      for (const si of sticky.images) s.images.push(imageFromStickyImage(si, item.id));
+    });
+    stickyService.delete(sticky.id);
+    productService.recomputeStatus(item.productId);
+    return item;
   },
 
   archive(id: string): BacklogItem {

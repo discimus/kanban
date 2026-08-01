@@ -6,6 +6,7 @@ import {
   CreateStickyProps,
   setStickyTitle,
   setStickyDescription,
+  createStickyFromBacklog,
   addStickyLink,
   AddStickyLinkProps,
   markStickyLinkVisited,
@@ -18,10 +19,19 @@ import {
   removeStickyImage
 } from "../domain/sticky";
 import { stickyRepository } from "../infrastructure/sticky.repository";
+import { backlogRepository } from "@contexts/product/infrastructure/backlog.repository";
+import { linkService } from "@contexts/link/application/link.service";
+import { commentService } from "@contexts/comment/application/comment.service";
+import { imageService } from "@contexts/image/application/image.service";
+import { productService } from "@contexts/product/application/product.service";
 
 export const stickyService = {
   byProduct(productId: string): Sticky[] {
     return stickyRepository.byProduct(productId);
+  },
+
+  get(id: string): Sticky | undefined {
+    return stickyRepository.findById(id);
   },
 
   create(props: CreateStickyProps): Sticky {
@@ -34,6 +44,27 @@ export const stickyService = {
   delete(id: string): void {
     stickyRepository.remove(id);
     eventBus.emit("sticky:deleted", id);
+  },
+
+  convertFromBacklog(backlogItemId: string): Sticky {
+    const item = backlogRepository.findById(backlogItemId);
+    if (!item) throw new Error("Item de backlog não encontrado.");
+    if (item.archivedAt) throw new Error("Itens arquivados não podem ser convertidos.");
+    const product = productService.get(item.productId);
+    if (product && (product.status === "completed" || product.status === "canceled" || product.archivedAt)) {
+      throw new Error("O projeto está concluído, cancelado ou arquivado. Não é possível modificar os itens.");
+    }
+    const sticky = createStickyFromBacklog(item, {
+      links: linkService.byBacklogItem(item.id),
+      comments: commentService.byBacklogItem(item.id),
+      images: imageService.byBacklogItem(item.id)
+    });
+    stickyRepository.add(sticky);
+    eventBus.emit("sticky:created", sticky);
+    backlogRepository.remove(item.id);
+    eventBus.emit("backlog:deleted", item.id);
+    productService.recomputeStatus(item.productId);
+    return sticky;
   },
 
   updateContent(id: string, props: { title: string; description: string }): Sticky {

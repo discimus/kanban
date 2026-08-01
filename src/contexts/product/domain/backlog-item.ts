@@ -1,4 +1,4 @@
-import { BacklogItem, KanbanStatus, Priority, TaskClassification, ProductCategory, CATEGORY_CLASSIFICATIONS } from "@shared/types";
+import { BacklogItem, KanbanStatus, Priority, TaskClassification, ProductCategory, CATEGORY_CLASSIFICATIONS, Link, Comment, Image, StickyLink, StickyComment, StickyImage } from "@shared/types";
 import { uuid } from "@shared/utils";
 
 export interface CreateBacklogItemProps {
@@ -55,5 +55,25 @@ export function changeProduct(item: BacklogItem, newProductId: string, classific
     classification: classification ?? item.classification,
     archivedAt: null,
     completedAt: null
+  };
+}
+
+export function linkFromStickyLink(link: StickyLink, backlogItemId: string): Link {
+  return { id: uuid(), backlogItemId, url: link.url, visitedAt: link.visitedAt };
+}
+
+export function commentFromStickyComment(comment: StickyComment, backlogItemId: string): Comment {
+  return { id: uuid(), backlogItemId, text: comment.text, createdAt: comment.createdAt, updatedAt: comment.updatedAt };
+}
+
+export function imageFromStickyImage(image: StickyImage, backlogItemId: string): Image {
+  return {
+    id: uuid(),
+    backlogItemId,
+    dataUrl: image.dataUrl,
+    filename: image.filename,
+    mimeType: image.mimeType,
+    fileSize: image.fileSize,
+    createdAt: image.createdAt
   };
 }

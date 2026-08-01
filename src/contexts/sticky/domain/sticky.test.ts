@@ -3,6 +3,10 @@ import {
   createSticky,
   setStickyTitle,
   setStickyDescription,
+  createStickyFromBacklog,
+  stickyLinkFromLink,
+  stickyCommentFromComment,
+  stickyImageFromImage,
   addStickyLink,
   markStickyLinkVisited,
   removeStickyLink,
@@ -11,6 +15,7 @@ import {
   addStickyImage,
   removeStickyImage
 } from "@contexts/sticky/domain/sticky";
+import type { BacklogItem, Link, Comment, Image } from "@shared/types";
 
 describe("createSticky", () => {
   it("returns a Sticky with generated id and empty children", () => {
@@ -72,6 +77,107 @@ describe("setStickyDescription", () => {
   it("allows clearing the description", () => {
     const sticky = createSticky({ productId: "p1" });
     expect(setStickyDescription(sticky, "").description).toBe("");
+  });
+});
+
+describe("createStickyFromBacklog", () => {
+  const item = {
+    id: "bi1",
+    productId: "p1",
+    title: "Tarefa A",
+    description: "Descrição A",
+    priority: "high",
+    status: "doing",
+    storyPoints: 3,
+    classification: "task",
+    createdAt: "2024-01-01T00:00:00.000Z",
+    archivedAt: null,
+    completedAt: null
+  } as BacklogItem;
+
+  const content = {
+    links: [{ id: "l1", backlogItemId: "bi1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z" }] as Link[],
+    comments: [{ id: "c1", backlogItemId: "bi1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" }] as Comment[],
+    images: [{
+      id: "i1",
+      backlogItemId: "bi1",
+      dataUrl: "data:image/png;base64,a=",
+      filename: "a.png",
+      mimeType: "image/png",
+      fileSize: 2048,
+      createdAt: "2024-01-01T00:00:00.000Z"
+    }] as Image[]
+  };
+
+  it("builds a sticky preserving title, description and content", () => {
+    const sticky = createStickyFromBacklog(item, content);
+    expect(sticky.productId).toBe("p1");
+    expect(sticky.title).toBe("Tarefa A");
+    expect(sticky.description).toBe("Descrição A");
+    expect(sticky.links).toHaveLength(1);
+    expect(sticky.links[0].url).toBe("https://x.com");
+    expect(sticky.links[0].visitedAt).toBe("2024-01-02T00:00:00.000Z");
+    expect(sticky.comments).toHaveLength(1);
+    expect(sticky.comments[0].text).toBe("Olá");
+    expect(sticky.comments[0].createdAt).toBe("2024-01-01T00:00:00.000Z");
+    expect(sticky.images).toHaveLength(1);
+    expect(sticky.images[0].dataUrl).toBe("data:image/png;base64,a=");
+    expect(sticky.images[0].fileSize).toBe(2048);
+  });
+
+  it("generates new ids for the copied content", () => {
+    const sticky = createStickyFromBacklog(item, content);
+    expect(sticky.links[0].id).not.toBe("l1");
+    expect(sticky.comments[0].id).not.toBe("c1");
+    expect(sticky.images[0].id).not.toBe("i1");
+  });
+
+  it("preserves updatedAt on comments when present", () => {
+    const edited = { ...content.comments[0], updatedAt: "2024-01-03T00:00:00.000Z" };
+    const sticky = createStickyFromBacklog(item, { ...content, comments: [edited] });
+    expect(sticky.comments[0].updatedAt).toBe("2024-01-03T00:00:00.000Z");
+  });
+});
+
+describe("stickyLinkFromLink", () => {
+  it("maps a link preserving url and visitedAt", () => {
+    const mapped = stickyLinkFromLink({ id: "l1", backlogItemId: "bi1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z" });
+    expect(mapped.url).toBe("https://x.com");
+    expect(mapped.visitedAt).toBe("2024-01-02T00:00:00.000Z");
+    expect(mapped.id).toBeTypeOf("string");
+  });
+});
+
+describe("stickyCommentFromComment", () => {
+  it("maps a comment preserving text and timestamps", () => {
+    const mapped = stickyCommentFromComment({
+      id: "c1",
+      backlogItemId: "bi1",
+      text: "Olá",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      updatedAt: "2024-01-02T00:00:00.000Z"
+    });
+    expect(mapped.text).toBe("Olá");
+    expect(mapped.createdAt).toBe("2024-01-01T00:00:00.000Z");
+    expect(mapped.updatedAt).toBe("2024-01-02T00:00:00.000Z");
+  });
+});
+
+describe("stickyImageFromImage", () => {
+  it("maps an image preserving file metadata", () => {
+    const mapped = stickyImageFromImage({
+      id: "i1",
+      backlogItemId: "bi1",
+      dataUrl: "data:image/png;base64,a=",
+      filename: "a.png",
+      mimeType: "image/png",
+      fileSize: 2048,
+      createdAt: "2024-01-01T00:00:00.000Z"
+    });
+    expect(mapped.filename).toBe("a.png");
+    expect(mapped.mimeType).toBe("image/png");
+    expect(mapped.fileSize).toBe(2048);
+    expect(mapped.createdAt).toBe("2024-01-01T00:00:00.000Z");
   });
 });
 

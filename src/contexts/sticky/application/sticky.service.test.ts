@@ -92,6 +92,55 @@ describe("stickyService", () => {
     });
   });
 
+  describe("convertFromBacklog", () => {
+    it("converts a backlog item into a sticky preserving content", () => {
+      state.backlogItems = [{
+        id: "bi1",
+        productId: "p1",
+        title: "Tarefa A",
+        description: "Descrição A",
+        priority: "high",
+        status: "doing",
+        storyPoints: 3,
+        classification: "task",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        archivedAt: null,
+        completedAt: null
+      }];
+      state.links = [{ id: "l1", backlogItemId: "bi1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z" }];
+      state.comments = [{ id: "c1", backlogItemId: "bi1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" }];
+      state.images = [{
+        id: "i1",
+        backlogItemId: "bi1",
+        dataUrl: "data:image/png;base64,a=",
+        filename: "a.png",
+        mimeType: "image/png",
+        fileSize: 2048,
+        createdAt: "2024-01-01T00:00:00.000Z"
+      }];
+
+      const result = stickyService.convertFromBacklog("bi1");
+
+      expect(state.backlogItems).toHaveLength(0);
+      expect(state.stickies).toHaveLength(1);
+      expect(result.title).toBe("Tarefa A");
+      expect(result.description).toBe("Descrição A");
+      expect(result.links).toHaveLength(1);
+      expect(result.links[0].url).toBe("https://x.com");
+      expect(result.links[0].visitedAt).toBe("2024-01-02T00:00:00.000Z");
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0].text).toBe("Olá");
+      expect(result.images).toHaveLength(1);
+      expect(result.images[0].filename).toBe("a.png");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:created", result);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("backlog:deleted", "bi1");
+    });
+
+    it("throws when backlog item not found", () => {
+      expect(() => stickyService.convertFromBacklog("ghost")).toThrow("Item de backlog não encontrado.");
+    });
+  });
+
   describe("updateContent", () => {
     it("updates title and description, saves and emits sticky:content-updated", () => {
       state.stickies = [makeSticky()];

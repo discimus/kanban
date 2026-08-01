@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { createBacklogItem, isValidTransition, changeProduct, defaultClassificationForCategory } from "@contexts/product/domain/backlog-item";
+import {
+  createBacklogItem,
+  isValidTransition,
+  changeProduct,
+  defaultClassificationForCategory,
+  linkFromStickyLink,
+  commentFromStickyComment,
+  imageFromStickyImage
+} from "@contexts/product/domain/backlog-item";
 import type { CreateBacklogItemProps } from "@contexts/product/domain/backlog-item";
 
 describe("createBacklogItem", () => {
@@ -173,5 +181,49 @@ describe("defaultClassificationForCategory", () => {
 
   it("returns 'note' for notes", () => {
     expect(defaultClassificationForCategory("notes")).toBe("note");
+  });
+});
+
+describe("linkFromStickyLink", () => {
+  it("maps a sticky link preserving url and visitedAt", () => {
+    const mapped = linkFromStickyLink({ id: "sl1", url: "https://x.com", visitedAt: "2024-01-02T00:00:00.000Z" }, "bi1");
+    expect(mapped.backlogItemId).toBe("bi1");
+    expect(mapped.url).toBe("https://x.com");
+    expect(mapped.visitedAt).toBe("2024-01-02T00:00:00.000Z");
+    expect(mapped.id).toBeTypeOf("string");
+  });
+});
+
+describe("commentFromStickyComment", () => {
+  it("maps a sticky comment preserving text and timestamps", () => {
+    const mapped = commentFromStickyComment(
+      { id: "sc1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z", updatedAt: "2024-01-02T00:00:00.000Z" },
+      "bi1"
+    );
+    expect(mapped.backlogItemId).toBe("bi1");
+    expect(mapped.text).toBe("Olá");
+    expect(mapped.createdAt).toBe("2024-01-01T00:00:00.000Z");
+    expect(mapped.updatedAt).toBe("2024-01-02T00:00:00.000Z");
+  });
+});
+
+describe("imageFromStickyImage", () => {
+  it("maps a sticky image preserving file metadata", () => {
+    const mapped = imageFromStickyImage(
+      {
+        id: "si1",
+        dataUrl: "data:image/png;base64,a=",
+        filename: "a.png",
+        mimeType: "image/png",
+        fileSize: 2048,
+        createdAt: "2024-01-01T00:00:00.000Z"
+      },
+      "bi1"
+    );
+    expect(mapped.backlogItemId).toBe("bi1");
+    expect(mapped.dataUrl).toBe("data:image/png;base64,a=");
+    expect(mapped.filename).toBe("a.png");
+    expect(mapped.fileSize).toBe(2048);
+    expect(mapped.createdAt).toBe("2024-01-01T00:00:00.000Z");
   });
 });

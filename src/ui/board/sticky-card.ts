@@ -1,8 +1,9 @@
 import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
 import { Sticky } from "@shared/types";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
+import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
-import { showConfirm } from "@ui/components/dialog";
+import { showConfirm, showAlert } from "@ui/components/dialog";
 import { showToast } from "@ui/components/notification";
 import { timeAgo, formatDate } from "@shared/utils";
 import { t, localeDateTimeString } from "@shared/i18n";
@@ -354,12 +355,33 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
     tryClipboard();
   };
 
+  const convertToTask = (): void => {
+    showConfirm(t("sticky.converterTarefaAviso")).then((ok) => {
+      if (!ok) return;
+      try {
+        const item = backlogService.convertFromSticky(sticky.id);
+        const cardEl = document.querySelector<HTMLElement>(`.card[data-id="${item.id}"]`);
+        if (cardEl) {
+          cardEl.classList.add("card--just-moved");
+          setTimeout(() => cardEl.classList.remove("card--just-moved"), 500);
+        }
+      } catch (e) {
+        showAlert((e as Error).message);
+      }
+    });
+  };
+
   const menuItems: MenuItem[] = [];
   if (!readOnly) {
     menuItems.push({
       label: t("sticky.editarNota"),
       icon: "edit",
       action: () => openStickyForm({ productId: sticky.productId, sticky })
+    });
+    menuItems.push({
+      label: t("sticky.converterTarefa"),
+      icon: "checklist",
+      action: convertToTask
     });
   }
   menuItems.push({
