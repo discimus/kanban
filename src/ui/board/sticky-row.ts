@@ -23,6 +23,23 @@ export function renderStickyRow(productId: string, readOnly: boolean): HTMLEleme
       row.append(stickyCard(sticky, readOnly));
     }
 
+    if (!readOnly) {
+      const addBtn = el("button", {
+        class: "sticky-row__add-card",
+        type: "button",
+        title: t("sticky.adicionarTitle"),
+        "aria-label": t("sticky.adicionarTitle")
+      }, [
+        icon("add"),
+        el("span", { class: "sticky-row__add-label" }, [t("sticky.novoCard")])
+      ]);
+      addBtn.addEventListener("click", () => {
+        setStickyCollapsed(productId, false);
+        openStickyForm({ productId });
+      });
+      row.append(addBtn);
+    }
+
     const toggleBtn = el("button", {
       class: "sticky-block__toggle",
       type: "button",
