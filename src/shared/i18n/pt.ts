@@ -32,7 +32,6 @@ export const pt: Record<string, string> = {
   "board.todas": "Todas",
 
   /* ====== Sticky ====== */
-  "sticky.adicionar": "Adicionar card",
   "sticky.adicionarTitle": "Adicionar card na faixa",
   "sticky.excluir": "Excluir card",
   "sticky.excluirConfirm": "Excluir este card?",
@@ -40,6 +39,10 @@ export const pt: Record<string, string> = {
   "sticky.nLinks": "{n} links",
   "sticky.nComentarios": "{n} comentários",
   "sticky.nImagens": "{n} imagens",
+  "sticky.notas": "Notas ({n})",
+  "sticky.notasLabel": "Notas",
+  "sticky.recolherNotas": "Recolher notas",
+  "sticky.expandirNotas": "Expandir notas",
 
   /* ====== Card ====== */
   "card.editar": "Editar",

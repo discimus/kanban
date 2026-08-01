@@ -3813,6 +3813,64 @@ h4 {
   padding: 12px;
 }
 
+.sticky-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sticky-block__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sticky-block__toggle:hover {
+  color: var(--text);
+  background: var(--md-surface-container);
+}
+
+.sticky-block__toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sticky-block__toggle .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.sticky-block__title {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.sticky-block__add {
+  flex-shrink: 0;
+}
+
+.sticky-block__add:hover {
+  color: var(--primary);
+  background: var(--md-primary-container);
+}
+
 .sticky-row {
   display: flex;
   flex-wrap: wrap;
@@ -3822,24 +3880,8 @@ h4 {
   flex-shrink: 0;
 }
 
-.sticky-row__add {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 120px;
-  min-height: 48px;
-  align-self: flex-start;
-  justify-content: center;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.sticky-row__add:hover {
-  color: var(--primary);
-  border-color: var(--primary);
-  background: var(--md-primary-container);
+.sticky-row[hidden] {
+  display: none;
 }
 
 /* ── Sticky Card ── */
