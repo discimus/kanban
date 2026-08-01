@@ -1,4 +1,4 @@
-import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
+import { el, icon, clear, actionsMenu, MenuItem, flashCard, flashItem } from "@ui/components/dom";
 import { BacklogItem, PRIORITIES, KANBAN_COLUMNS, CATEGORY_CLASSIFICATIONS, TaskClassification, ProductCategory, Task } from "@shared/types";
 import { taskService } from "@contexts/task/application/task.service";
 import { linkService } from "@contexts/link/application/link.service";
@@ -202,7 +202,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       }
 
       taskList.append(
-        el("div", { class: `card__task${done ? " card__task--done" : ""}` }, [
+        el("div", { class: `card__task${done ? " card__task--done" : ""}`, "data-id": task.id }, [
           checkbox,
           el("span", { class: "card__task-text" }, [task.title]),
           del
@@ -272,7 +272,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         : null;
 
       linkList.append(
-        el("div", { class: "card__task" }, [
+        el("div", { class: "card__task", "data-id": link.id }, [
           linkBtn,
           el("span", { class: "card__task-text" }, [displayUrl]),
           count,
@@ -307,7 +307,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       const url = urlInput.value.trim();
       if (url) {
         done = true;
-        linkService.create({ backlogItemId: item.id, url });
+        const created = linkService.create({ backlogItemId: item.id, url });
+        flashItem(created.id);
       }
     };
     const cancel = (): void => {
@@ -358,7 +359,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       const title = input.value.trim();
       if (title) {
         done = true;
-        taskService.create({ backlogItemId: item.id, title });
+        const created = taskService.create({ backlogItemId: item.id, title });
+        flashItem(created.id);
       }
     };
     const cancel = (): void => {
@@ -409,7 +411,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       }
 
       const actions = el("div", { class: "card__image-actions" }, [copyBtn, downloadBtn, delBtn]);
-      const wrap = el("div", { class: "card__image-wrap" }, [thumb, actions]);
+      const wrap = el("div", { class: "card__image-wrap", "data-id": img.id }, [thumb, actions]);
       thumb.addEventListener("click", () => openImageModal(img.dataUrl, img.filename, img.mimeType));
       imageList.append(wrap);
     }
@@ -438,7 +440,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       }, [relativeTime(c.updatedAt ?? c.createdAt)]);
 
       commentList.append(
-        el("div", { class: "card__task" }, [
+        el("div", { class: "card__task", "data-id": c.id }, [
           el("span", { class: "card__comment-icon" }, [icon("chat")]),
           el("span", { class: "card__task-text" }, [c.text]),
           timeSpan,
@@ -470,7 +472,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       const text = input.value.trim();
       if (text) {
         done = true;
-        commentService.create({ backlogItemId: item.id, text });
+        const created = commentService.create({ backlogItemId: item.id, text });
+        flashItem(created.id);
       }
     };
     const cancel = (): void => {
@@ -509,13 +512,14 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
               const reader = new FileReader();
               reader.addEventListener("load", () => {
                 expandCard();
-                imageService.create({
+                const created = imageService.create({
                   backlogItemId: item.id,
                   dataUrl: reader.result as string,
                   filename: `clipboard-${Date.now()}.png`,
                   mimeType: mime,
                   fileSize: blob.size
                 });
+                flashItem(created.id);
               });
               reader.readAsDataURL(blob);
             });
@@ -537,13 +541,14 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         const reader = new FileReader();
         reader.addEventListener("load", () => {
           expandCard();
-          imageService.create({
+          const created = imageService.create({
             backlogItemId: item.id,
             dataUrl: reader.result as string,
             filename: file.name,
             mimeType: file.type,
             fileSize: file.size
           });
+          flashItem(created.id);
         });
         reader.readAsDataURL(file);
       });
@@ -564,11 +569,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       if (!ok) return;
       try {
         const sticky = stickyService.convertFromBacklog(item.id);
-        const cardEl = document.querySelector<HTMLElement>(`.sticky-card[data-id="${sticky.id}"]`);
-        if (cardEl) {
-          cardEl.classList.add("card--just-moved");
-          setTimeout(() => cardEl.classList.remove("card--just-moved"), 500);
-        }
+        flashCard(sticky.id);
       } catch (e) {
         showAlert((e as Error).message);
       }

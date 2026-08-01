@@ -1,4 +1,4 @@
-import { el } from "@ui/components/dom";
+import { el, flashCard } from "@ui/components/dom";
 import { field, textInput, textArea, formActions, errorText } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
@@ -27,11 +27,7 @@ export function openStickyForm({ productId, sticky }: StickyFormTarget): void {
         stickyService.updateContent(sticky.id, { title: titleValue, description: description.value });
       } else {
         const created = stickyService.create({ productId, title: titleValue, description: description.value });
-        const cardEl = document.querySelector<HTMLElement>(`.sticky-card[data-id="${created.id}"]`);
-        if (cardEl) {
-          cardEl.classList.add("card--just-moved");
-          setTimeout(() => cardEl.classList.remove("card--just-moved"), 500);
-        }
+        flashCard(created.id);
       }
       closeModal();
     } catch (e) {

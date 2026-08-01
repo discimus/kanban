@@ -51,6 +51,26 @@ export function on<K extends keyof HTMLElementEventMap>(
   node.addEventListener(event, handler);
 }
 
+/**
+ * Highlights an element by id right after a state change re-renders the board.
+ * `flashCard` locates a whole card (drop / creation / conversion); `flashItem`
+ * locates the newly added row (subtask, comment, link, image).
+ */
+function flashById(id: string, className: string, duration: number): void {
+  const node = document.querySelector<HTMLElement>(`[data-id="${id}"]`);
+  if (!node) return;
+  node.classList.add(className);
+  setTimeout(() => node.classList.remove(className), duration);
+}
+
+export function flashCard(id: string, duration = 500): void {
+  flashById(id, "card--just-moved", duration);
+}
+
+export function flashItem(id: string, duration = 1200): void {
+  flashById(id, "item--flash", duration);
+}
+
 export interface MenuItem {
   label: string;
   icon?: string;

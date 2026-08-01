@@ -1,4 +1,4 @@
-﻿import { el, icon } from "@ui/components/dom";
+﻿import { el, icon, flashCard } from "@ui/components/dom";
 import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory, TaskClassification, CATEGORY_CLASSIFICATIONS } from "@shared/types";
 
 import { backlogService } from "@contexts/product/application/backlog.service";
@@ -201,15 +201,12 @@ function renderColumn(
       if (!id) return;
       try {
         backlogService.move(id, status);
-        const card = document.querySelector(`[data-id="${id}"]`);
+        const card = document.querySelector<HTMLElement>(`[data-id="${id}"]`);
         if (status === "done" && card) {
           const rect = card.getBoundingClientRect();
           showConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
         }
-        if (card) {
-          card.classList.add("card--just-moved");
-          setTimeout(() => card.classList.remove("card--just-moved"), 500);
-        }
+        flashCard(id);
       } catch (e) {
         showAlert((e as Error).message);
       }

@@ -1,4 +1,4 @@
-import { el, icon, clear, actionsMenu, MenuItem } from "@ui/components/dom";
+import { el, icon, clear, actionsMenu, MenuItem, flashCard, flashItem } from "@ui/components/dom";
 import { Sticky } from "@shared/types";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
 import { backlogService } from "@contexts/product/application/backlog.service";
@@ -128,7 +128,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
         : null;
 
       linkList.append(
-        el("div", { class: "card__task" }, [
+        el("div", { class: "card__task", "data-id": link.id }, [
           linkBtn,
           el("span", { class: "card__task-text" }, [displayUrl]),
           count,
@@ -160,7 +160,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
       }, [relativeTime(c.updatedAt ?? c.createdAt)]);
 
       commentList.append(
-        el("div", { class: "card__task" }, [
+        el("div", { class: "card__task", "data-id": c.id }, [
           el("span", { class: "card__comment-icon" }, [icon("chat")]),
           el("span", { class: "card__task-text" }, [c.text]),
           timeSpan,
@@ -197,7 +197,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
         });
       }
 
-      const wrap = el("div", { class: "card__image-wrap" }, [thumb, el("div", { class: "card__image-actions" }, [copyBtn, downloadBtn, delBtn])]);
+      const wrap = el("div", { class: "card__image-wrap", "data-id": img.id }, [thumb, el("div", { class: "card__image-actions" }, [copyBtn, downloadBtn, delBtn])]);
       thumb.addEventListener("click", () => openImageModal(img.dataUrl, img.filename, img.mimeType));
       imageList.append(wrap);
     }
@@ -245,7 +245,8 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
       const url = urlInput.value.trim();
       if (url) {
         done = true;
-        stickyService.addLink(sticky.id, { url });
+        const updated = stickyService.addLink(sticky.id, { url });
+        flashItem(updated.links[updated.links.length - 1].id);
       }
     };
     const cancel = (): void => {
@@ -291,7 +292,8 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
       const text = input.value.trim();
       if (text) {
         done = true;
-        stickyService.addComment(sticky.id, { text });
+        const updated = stickyService.addComment(sticky.id, { text });
+        flashItem(updated.comments[updated.comments.length - 1].id);
       }
     };
     const cancel = (): void => {
@@ -323,12 +325,13 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
               const reader = new FileReader();
               reader.addEventListener("load", () => {
                 setExpanded(true);
-                stickyService.addImage(sticky.id, {
+                const updated = stickyService.addImage(sticky.id, {
                   dataUrl: reader.result as string,
                   filename: `clipboard-${Date.now()}.png`,
                   mimeType: mime,
                   fileSize: blob.size
                 });
+                flashItem(updated.images[updated.images.length - 1].id);
               });
               reader.readAsDataURL(blob);
             });
@@ -350,12 +353,13 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
         const reader = new FileReader();
         reader.addEventListener("load", () => {
           setExpanded(true);
-          stickyService.addImage(sticky.id, {
+          const updated = stickyService.addImage(sticky.id, {
             dataUrl: reader.result as string,
             filename: file.name,
             mimeType: file.type,
             fileSize: file.size
           });
+          flashItem(updated.images[updated.images.length - 1].id);
         });
         reader.readAsDataURL(file);
       });
@@ -372,11 +376,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
       if (!ok) return;
       try {
         const item = backlogService.convertFromSticky(sticky.id);
-        const cardEl = document.querySelector<HTMLElement>(`.card[data-id="${item.id}"]`);
-        if (cardEl) {
-          cardEl.classList.add("card--just-moved");
-          setTimeout(() => cardEl.classList.remove("card--just-moved"), 500);
-        }
+        flashCard(item.id);
       } catch (e) {
         showAlert((e as Error).message);
       }

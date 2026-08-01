@@ -3642,6 +3642,40 @@ h4 {
   100% { background-color: var(--elevation-3); }
 }
 
+/* New item highlight: ring only on images; text rows blink icon + text color */
+.item--flash {
+  animation: item-ring 1s ease-out;
+}
+
+/* Text rows (subtask, comment, link): blink icon/text color, no ring */
+.card__task.item--flash {
+  animation: none;
+}
+.card__task.item--flash .card__task-text,
+.card__task.item--flash .material-symbols-outlined {
+  animation: item-text-blink 1s ease-out;
+}
+
+@keyframes item-ring {
+  0%   { box-shadow: 0 0 0 2px var(--primary); }
+  35%  { box-shadow: 0 0 0 2px var(--primary); }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+@keyframes item-text-blink {
+  0%   { color: var(--primary); }
+  35%  { color: var(--primary); }
+  100% { color: inherit; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item--flash,
+  .card__task.item--flash .card__task-text,
+  .card__task.item--flash .material-symbols-outlined {
+    animation: none;
+  }
+}
+
 /* Prevent hover-lift on touch devices (avoids sticky hover states) */
 @media (hover: none) {
   .card:hover {
