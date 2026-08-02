@@ -1,5 +1,6 @@
 export type DomainEvent =
   | "state:changed"
+  | "ui:refresh"
   | "product:created"
   | "product:updated"
   | "product:pending-completion"

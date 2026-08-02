@@ -114,17 +114,10 @@ export const pt: Record<string, string> = {
   "card.acessosInfo": "{n} acessos · {last}",
 
   /* ====== Audio ====== */
-  "audio.titulo": "Gravar áudio",
-  "audio.gravar": "Gravar",
   "audio.parar": "Parar",
-  "audio.salvar": "Salvar",
-  "audio.descartar": "Descartar",
-  "audio.pronto": "Pronto para gravar",
   "audio.gravando": "Gravando…",
-  "audio.prontoParaSalvar": "Gravação concluída",
   "audio.permissaoNegada": "Permissão de microfone negada. Habilite o acesso ao microfone nas configurações do navegador.",
   "audio.erroGravar": "Erro ao gravar o áudio.",
-  "audio.limiteAudio": "Limite de {n}s por gravação.",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Atalhos do teclado",

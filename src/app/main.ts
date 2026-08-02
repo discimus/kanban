@@ -29,6 +29,10 @@ async function boot(): Promise<void> {
     renderApp(appRoot);
   });
 
+  eventBus.on("ui:refresh", () => {
+    renderApp(appRoot);
+  });
+
   eventBus.on("backlog:archived", () => {
     showToast(t("main.cardArquivado"), "archive");
   });

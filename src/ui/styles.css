@@ -2340,6 +2340,47 @@ button.chip--todo:hover {
   color: var(--md-on-primary-container);
 }
 
+/* Inline audio recording: red stop button + elapsed-time label */
+.card__action-btn--recording {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
+  animation: recorder-pulse 1s ease-in-out infinite;
+}
+
+.card__action-btn--recording:hover {
+  background: var(--md-error);
+  color: var(--md-on-error);
+}
+
+.card__recorder-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--md-error);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.card__recorder-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--md-error);
+  animation: recorder-pulse 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* Narrow cards: while recording, show only the stop button.
+   Declared after the base `.card__recorder-timer` rule so it wins the cascade. */
+@container (max-width: 260px) {
+  .card__recorder-timer {
+    display: none;
+  }
+}
+
 .card__expand-btn {
   display: flex;
   justify-content: center;
@@ -3167,7 +3208,9 @@ button.chip--todo:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .recorder__dot--recording {
+  .recorder__dot--recording,
+  .card__action-btn--recording,
+  .card__recorder-dot {
     animation: none;
   }
 }

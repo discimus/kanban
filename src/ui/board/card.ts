@@ -5,7 +5,9 @@ import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
 import { imageService } from "@contexts/image/application/image.service";
 import { audioService } from "@contexts/audio/application/audio.service";
-import { openAudioRecorderForm } from "@ui/modal/audio-recorder-form";
+import { startRecording, extensionForMimeType, MicPermissionError, type AudioRecorderController } from "@ui/recorder/audio-recorder";
+import { MAX_AUDIO_DURATION } from "@contexts/audio/domain/audio";
+import { eventBus } from "@shared/events";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
@@ -119,6 +121,95 @@ function formatDuration(seconds: number): string {
   return `${mm}:${ss}`;
 }
 
+interface ActiveRecording {
+  controller: AudioRecorderController;
+  startedAt: number;
+}
+
+/**
+ * In-flight audio recordings keyed by backlog item. Kept out of the render
+ * closure so a full re-render (every `state:changed`) doesn't lose the
+ * recording; `backlogCard` reads it to render the live "recording" state.
+ */
+const activeRecordings = new Map<string, ActiveRecording>();
+const startingRecordings = new Set<string>();
+let recorderTimer: number | null = null;
+
+function ensureRecorderTimer(): void {
+  if (recorderTimer !== null) return;
+  recorderTimer = window.setInterval(() => {
+    for (const [itemId, rec] of activeRecordings) {
+      const label = document.querySelector<HTMLElement>(`[data-id="${CSS.escape(itemId)}"] .card__recorder-timer`);
+      const elapsed = (Date.now() - rec.startedAt) / 1000;
+      if (label) label.textContent = formatDuration(elapsed);
+      if (elapsed >= MAX_AUDIO_DURATION) stopInlineRecording(itemId);
+    }
+    if (activeRecordings.size === 0) {
+      if (recorderTimer !== null) window.clearInterval(recorderTimer);
+      recorderTimer = null;
+    }
+  }, 250);
+}
+
+function startInlineRecording(itemId: string): void {
+  if (activeRecordings.has(itemId) || startingRecordings.has(itemId)) return;
+  startingRecordings.add(itemId);
+  startRecording()
+    .then((controller) => {
+      activeRecordings.set(itemId, { controller, startedAt: Date.now() });
+      startingRecordings.delete(itemId);
+      ensureRecorderTimer();
+      eventBus.emit("ui:refresh");
+    })
+    .catch((e) => {
+      startingRecordings.delete(itemId);
+      if (e instanceof MicPermissionError) showAlert(t("audio.permissaoNegada"));
+      else showAlert(t("audio.erroGravar"));
+    });
+}
+
+function stopInlineRecording(itemId: string): void {
+  const rec = activeRecordings.get(itemId);
+  if (!rec) return;
+  activeRecordings.delete(itemId);
+  const controller = rec.controller;
+  controller.stop()
+    .then((result) => {
+      const created = audioService.create({
+        backlogItemId: itemId,
+        dataUrl: result.dataUrl,
+        filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
+        mimeType: result.mimeType,
+        fileSize: result.fileSize,
+        duration: result.duration
+      });
+      flashItem(created.id);
+    })
+    .catch(() => showAlert(t("audio.erroGravar")));
+}
+
+function renderAudioControl(itemId: string, recording: ActiveRecording | undefined): HTMLElement {
+  const btn = el("button", {
+    class: `card__action-btn${recording ? " card__action-btn--recording" : ""}`,
+    type: "button",
+    "aria-label": recording ? t("audio.parar") : t("card.adicionarAudio"),
+    title: recording ? t("audio.parar") : t("card.adicionarAudio")
+  }, [icon(recording ? "stop" : "mic")]);
+  btn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    if (recording) stopInlineRecording(itemId);
+    else startInlineRecording(itemId);
+  });
+  return btn;
+}
+
+function renderRecorderTimer(recording: ActiveRecording): HTMLElement {
+  return el("span", { class: "card__recorder-timer", role: "timer", "aria-label": t("audio.gravando") }, [
+    el("span", { class: "card__recorder-dot", "aria-hidden": "true" }),
+    formatDuration((Date.now() - recording.startedAt) / 1000)
+  ]);
+}
+
 const expandedCards = new Map<string, boolean>();
 
 async function copyImageToClipboard(dataUrl: string, mimeType: string): Promise<void> {
@@ -183,6 +274,7 @@ function openImageModal(dataUrl: string, filename: string, mimeType = "image/png
 
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development", minimal = false): HTMLElement {
   const isArchived = !!item.archivedAt;
+  const recording = activeRecordings.get(item.id);
   const readOnly = locked || isArchived;
   const taskList = el("div", { class: "card__tasks" }, []);
 
@@ -681,7 +773,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: t("card.comentario"), icon: "chat", action: locked ? lockedAlert : addComment },
             { label: t("card.link"), icon: "link", action: locked ? lockedAlert : addLink },
             { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage },
-            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => openAudioRecorderForm(item.id) }
+            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => startInlineRecording(item.id) }
           ]},
           {
             label: t("card.copiarTitulo"),
@@ -787,7 +879,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const audioCount = audioService.byBacklogItem(item.id).length;
   const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0 || audioCount > 0;
 
-  const bodyExpanded = expandedCards.get(item.id) === true;
+  const bodyExpanded = expandedCards.get(item.id) === true || recording !== undefined;
+  if (recording) expandedCards.set(item.id, true);
   const cardBody = el("div", {
     class: `card__body${bodyExpanded ? " card__body--expanded" : ""}`
   }, []);
@@ -848,7 +941,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
         cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
         cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
-        cardActionBtn("mic", t("card.adicionarAudio"), locked ? lockedAlert : () => openAudioRecorderForm(item.id))
+        renderAudioControl(item.id, recording),
+        recording ? renderRecorderTimer(recording) : null
       ]);
       footer.append(actionsFooter);
     }

@@ -114,17 +114,10 @@ export const en: Record<string, string> = {
   "card.acessosInfo": "{n} accesses · {last}",
 
   /* ====== Audio ====== */
-  "audio.titulo": "Record audio",
-  "audio.gravar": "Record",
   "audio.parar": "Stop",
-  "audio.salvar": "Save",
-  "audio.descartar": "Discard",
-  "audio.pronto": "Ready to record",
   "audio.gravando": "Recording…",
-  "audio.prontoParaSalvar": "Recording complete",
   "audio.permissaoNegada": "Microphone permission denied. Enable mic access in your browser settings.",
   "audio.erroGravar": "Error recording audio.",
-  "audio.limiteAudio": "{n}s max per recording.",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Keyboard Shortcuts",
