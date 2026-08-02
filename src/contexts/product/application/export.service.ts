@@ -205,6 +205,7 @@ export function validateAndImport(jsonString: string, overwrite = false): Export
       if (s.links !== undefined && !Array.isArray(s.links)) return { success: false, error: "Cada sticky precisa de links como array." };
       if (s.comments !== undefined && !Array.isArray(s.comments)) return { success: false, error: "Cada sticky precisa de comments como array." };
       if (s.images !== undefined && !Array.isArray(s.images)) return { success: false, error: "Cada sticky precisa de images como array." };
+      if (s.audios !== undefined && !Array.isArray(s.audios)) return { success: false, error: "Cada sticky precisa de audios como array." };
     }
   }
 

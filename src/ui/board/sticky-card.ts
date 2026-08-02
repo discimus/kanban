@@ -9,8 +9,19 @@ import { timeAgo, formatDate } from "@shared/utils";
 import { t, localeDateTimeString } from "@shared/i18n";
 import { openModal } from "@ui/modal";
 import { openStickyForm } from "@ui/modal/sticky-form";
+import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
+import { createInlineRecorder, renderRecordingControl, renderRecorderTimer, formatDuration } from "@ui/recorder/inline-recorder";
+import { eventBus } from "@shared/events";
 
 const expandedStickies = new Map<string, boolean>();
+
+const recorder = createInlineRecorder({
+  onStarted: () => eventBus.emit("ui:refresh"),
+  onError: (_id, e) => {
+    if (e instanceof MicPermissionError) showAlert(t("audio.permissaoNegada"));
+    else showAlert(t("audio.erroGravar"));
+  }
+});
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -82,6 +93,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   const linkList = el("div", { class: "card__links" }, []);
   const commentList = el("div", { class: "card__links" }, []);
   const imageList = el("div", { class: "card__images" }, []);
+  const audioList = el("div", { class: "card__audios" }, []);
   const body = el("div", { class: "sticky-card__body" }, []);
 
   const renderLinks = (): void => {
@@ -204,12 +216,56 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   };
   renderImages();
 
+  const renderAudios = (): void => {
+    clear(audioList);
+    for (const a of sticky.audios ?? []) {
+      const player = el("audio", { class: "card__audio-player", src: a.dataUrl, preload: "metadata" }) as HTMLAudioElement;
+
+      const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]);
+      const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;
+      let playing = false;
+      playBtn.addEventListener("click", () => {
+        if (playing) player.pause();
+        else void player.play();
+      });
+      player.addEventListener("play", () => { playing = true; playIcon().textContent = "pause"; });
+      player.addEventListener("pause", () => { playing = false; playIcon().textContent = "play_arrow"; });
+      player.addEventListener("ended", () => { playing = false; playIcon().textContent = "play_arrow"; });
+
+      const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
+      downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));
+
+      const delBtn = el("button", { class: "card__audio-action card__audio-action--delete", "aria-label": t("card.excluirAudio"), type: "button" }, [icon("delete")]);
+      delBtn.disabled = readOnly;
+      if (!readOnly) {
+        delBtn.addEventListener("click", () => {
+          showConfirm(t("card.excluirAudio"), a.filename).then((ok) => {
+            if (ok) stickyService.removeAudio(sticky.id, a.id);
+          });
+        });
+      }
+
+      audioList.append(
+        el("div", { class: "card__audio", "data-id": a.id }, [
+          playBtn,
+          el("span", { class: "card__audio-name" }, [a.filename]),
+          el("span", { class: "card__audio-duration" }, [formatDuration(a.duration)]),
+          player,
+          downloadBtn,
+          delBtn
+        ])
+      );
+    }
+  };
+  renderAudios();
+
+  const audioCount = (sticky.audios ?? []).length;
   const hasText = Boolean((sticky.title ?? "").trim()) || Boolean((sticky.description ?? "").trim());
-  const hasBodyContent = Boolean((sticky.description ?? "").trim()) || sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0;
-  const hasContent = hasText || sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0;
+  const hasBodyContent = Boolean((sticky.description ?? "").trim()) || sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0 || audioCount > 0;
+  const hasContent = hasText || sticky.links.length > 0 || sticky.comments.length > 0 || sticky.images.length > 0 || audioCount > 0;
 
   if (sticky.description) body.append(el("p", { class: "sticky-card__desc" }, [sticky.description]));
-  body.append(linkList, commentList, imageList);
+  body.append(linkList, commentList, imageList, audioList);
   if (!hasContent) {
     body.append(el("p", { class: "sticky-card__empty" }, [t("sticky.semConteudo")]));
   }
@@ -412,7 +468,8 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   const badges = el("div", { class: "sticky-card__badges" }, [
     badge("link", sticky.links.length, t("sticky.nLinks", { n: sticky.links.length })),
     badge("chat", sticky.comments.length, t("sticky.nComentarios", { n: sticky.comments.length })),
-    badge("image", sticky.images.length, t("sticky.nImagens", { n: sticky.images.length }))
+    badge("image", sticky.images.length, t("sticky.nImagens", { n: sticky.images.length })),
+    badge("mic", audioCount, t("sticky.nAudios", { n: audioCount }))
   ]);
 
   function badge(iconName: string, count: number, label: string): HTMLElement {
@@ -431,6 +488,20 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
 
   const bodyExpanded = expandedStickies.get(sticky.id) === true;
   if (bodyExpanded) body.classList.add("sticky-card__body--expanded");
+
+  const recording = recorder.getActive(sticky.id);
+  const saveRecording = (result: RecordedAudio): void => {
+    setExpanded(true);
+    const updated = stickyService.addAudio(sticky.id, {
+      dataUrl: result.dataUrl,
+      filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
+      mimeType: result.mimeType,
+      fileSize: result.fileSize,
+      duration: result.duration
+    });
+    const added = updated.audios![updated.audios!.length - 1];
+    flashItem(added.id);
+  };
 
   const footer = el("div", { class: "card__footer sticky-card__footer" }, []);
 
@@ -451,7 +522,9 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
     const actionsFooter = el("div", { class: "card__footer-actions" }, [
       actionBtn("link", t("card.adicionarLink"), addLink),
       actionBtn("chat", t("card.adicionarComentario"), addComment),
-      actionBtn("add_photo_alternate", t("card.adicionarImagem"), addImage)
+      actionBtn("add_photo_alternate", t("card.adicionarImagem"), addImage),
+      renderRecordingControl(recorder, sticky.id, saveRecording),
+      recording ? renderRecorderTimer(recording) : null
     ]);
     footer.append(actionsFooter);
   }

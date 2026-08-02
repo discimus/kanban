@@ -642,6 +642,43 @@ describe("normalizeSticky", () => {
     const result = normalizeSticky(sticky);
     expect(result.links[0].visitCount).toBe(5);
   });
+
+  it("preserves sticky audios when present", () => {
+    const sticky = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [],
+      comments: [],
+      images: [],
+      audios: [{
+        id: "au1",
+        dataUrl: "data:audio/webm;base64,xx",
+        filename: "a.webm",
+        mimeType: "audio/webm",
+        fileSize: 2048,
+        duration: 5,
+        createdAt: "2026-07-13T00:00:00.000Z",
+      }],
+    } as unknown as Sticky;
+    const result = normalizeSticky(sticky);
+    expect(result.audios).toHaveLength(1);
+    expect(result.audios![0].fileSize).toBe(2048);
+    expect(result.audios![0].duration).toBe(5);
+  });
+
+  it("leaves audios undefined for legacy stickies without them", () => {
+    const legacy = {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      links: [],
+      comments: [],
+      images: [],
+    } as unknown as Sticky;
+    const result = normalizeSticky(legacy);
+    expect(result.audios).toBeUndefined();
+  });
 });
 
 describe("reviveState with stickies", () => {
@@ -682,6 +719,28 @@ describe("Store blob hydration and persistence", () => {
     };
   }
 
+  function makeStickyWithAudio(dataUrl: string): Sticky {
+    return {
+      id: "s1",
+      productId: "p1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      title: "",
+      description: "",
+      links: [],
+      comments: [],
+      images: [],
+      audios: [{
+        id: "sau1",
+        dataUrl,
+        filename: "a.webm",
+        mimeType: "audio/webm",
+        fileSize: 5,
+        duration: 3,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      }],
+    };
+  }
+
   beforeEach(async () => {
     await clearBlobs();
     store.replaceState(emptyState());
@@ -698,11 +757,25 @@ describe("Store blob hydration and persistence", () => {
     expect(await blob!.text()).toBe("hello");
   });
 
+  it("migrates inline sticky audio dataUrls into the blob store", async () => {
+    store.replaceState({ ...emptyState(), stickies: [makeStickyWithAudio("data:audio/webm;base64,aGVsbG8=")] });
+    const blob = await getBlob("sau1");
+    expect(blob).not.toBeNull();
+    expect(await blob!.text()).toBe("hello");
+  });
+
   it("hydrate restores the in-memory dataUrl from IndexedDB", async () => {
     await putBlob("img1", new Blob(["hello"], { type: "image/png" }));
     store.replaceState({ ...emptyState(), images: [makeImage({ dataUrl: "" })] });
     await store.hydrate();
     expect(store.getState().images[0].dataUrl).toBe("data:image/png;base64,aGVsbG8=");
+  });
+
+  it("hydrate restores the sticky audio dataUrl from IndexedDB", async () => {
+    await putBlob("sau1", new Blob(["hello"], { type: "audio/webm" }));
+    store.replaceState({ ...emptyState(), stickies: [makeStickyWithAudio("")] });
+    await store.hydrate();
+    expect(store.getState().stickies![0].audios![0].dataUrl).toBe("data:audio/webm;base64,aGVsbG8=");
   });
 
   it("persists a lean state without inline dataUrls", async () => {
@@ -720,9 +793,31 @@ describe("Store blob hydration and persistence", () => {
     expect(raw.images[0].dataUrl).toBe("");
   });
 
+  it("persists a lean state without inline sticky audio dataUrls", async () => {
+    const values = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => values.get(k) ?? null,
+      setItem: (k: string, v: string) => void values.set(k, v),
+      removeItem: (k: string) => void values.delete(k),
+      clear: () => values.clear(),
+    });
+
+    store.replaceState({ ...emptyState(), stickies: [makeStickyWithAudio("data:audio/webm;base64,aGVsbG8=")] });
+    const raw = JSON.parse(values.get("kanban-ddd-state")!);
+    expect(raw.stickies).toHaveLength(1);
+    expect(raw.stickies[0].audios).toHaveLength(1);
+    expect(raw.stickies[0].audios[0].dataUrl).toBe("");
+  });
+
   it("hydrate keeps the in-memory dataUrl when the blob is missing", async () => {
     store.replaceState({ ...emptyState(), images: [makeImage({ dataUrl: "" })] });
     await store.hydrate();
     expect(store.getState().images[0].dataUrl).toBe("");
+  });
+
+  it("hydrate keeps the sticky audio dataUrl empty when the blob is missing", async () => {
+    store.replaceState({ ...emptyState(), stickies: [makeStickyWithAudio("")] });
+    await store.hydrate();
+    expect(store.getState().stickies![0].audios![0].dataUrl).toBe("");
   });
 });

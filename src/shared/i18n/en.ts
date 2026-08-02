@@ -46,6 +46,7 @@ export const en: Record<string, string> = {
   "sticky.nLinks": "{n} links",
   "sticky.nComentarios": "{n} comments",
   "sticky.nImagens": "{n} images",
+  "sticky.nAudios": "{n} audios",
   "sticky.notas": "Notes ({n})",
   "sticky.notasLabel": "Notes",
   "sticky.recolherNotas": "Collapse notes",

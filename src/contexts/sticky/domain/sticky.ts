@@ -1,4 +1,4 @@
-import { Sticky, StickyComment, StickyImage, StickyLink, BacklogItem, Link, Comment, Image } from "@shared/types";
+import { Sticky, StickyComment, StickyImage, StickyAudio, StickyLink, BacklogItem, Link, Comment, Image, AudioRecording } from "@shared/types";
 import { uuid, nowISO } from "@shared/utils";
 
 export interface CreateStickyProps {
@@ -22,8 +22,19 @@ export interface AddStickyImageProps {
   fileSize: number;
 }
 
+export interface AddStickyAudioProps {
+  dataUrl: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  duration: number;
+}
+
 const MAX_IMAGE_SIZE = 3 * 1024 * 1024;
 const VALID_MIME_PREFIX = "image/";
+const MAX_AUDIO_SIZE = 2 * 1024 * 1024;
+const MAX_AUDIO_DURATION = 60;
+const VALID_AUDIO_MIME_PREFIX = "audio/";
 
 export function createSticky(props: CreateStickyProps): Sticky {
   if (!props.productId) throw new Error("O card precisa pertencer a um produto.");
@@ -35,7 +46,8 @@ export function createSticky(props: CreateStickyProps): Sticky {
     description: (props.description ?? "").trim(),
     links: [],
     comments: [],
-    images: []
+    images: [],
+    audios: []
   };
 }
 
@@ -96,6 +108,30 @@ export function removeStickyImage(sticky: Sticky, imageId: string): Sticky {
   return { ...sticky, images: sticky.images.filter((img) => img.id !== imageId) };
 }
 
+export function addStickyAudio(sticky: Sticky, props: AddStickyAudioProps): Sticky {
+  if (!props.dataUrl) throw new Error("Os dados do áudio são obrigatórios.");
+  if (!props.filename?.trim()) throw new Error("O nome do arquivo é obrigatório.");
+  if (!props.mimeType?.startsWith(VALID_AUDIO_MIME_PREFIX)) throw new Error("O arquivo precisa ser um áudio.");
+  if (props.fileSize > MAX_AUDIO_SIZE) throw new Error("O áudio excede o limite de 2 MB.");
+  if (!Number.isFinite(props.duration) || props.duration <= 0 || props.duration > MAX_AUDIO_DURATION) {
+    throw new Error(`A duração do áudio é inválida (máx. ${MAX_AUDIO_DURATION}s).`);
+  }
+  const audio: StickyAudio = {
+    id: uuid(),
+    dataUrl: props.dataUrl,
+    filename: props.filename.trim(),
+    mimeType: props.mimeType,
+    fileSize: props.fileSize,
+    duration: Number(props.duration.toFixed(1)),
+    createdAt: nowISO()
+  };
+  return { ...sticky, audios: [...(sticky.audios ?? []), audio] };
+}
+
+export function removeStickyAudio(sticky: Sticky, audioId: string): Sticky {
+  return { ...sticky, audios: (sticky.audios ?? []).filter((a) => a.id !== audioId) };
+}
+
 export function stickyLinkFromLink(link: Link): StickyLink {
   return { id: uuid(), url: link.url, visitedAt: link.visitedAt, visitCount: link.visitCount };
 }
@@ -115,9 +151,21 @@ export function stickyImageFromImage(image: Image): StickyImage {
   };
 }
 
+export function stickyAudioFromAudio(audio: AudioRecording): StickyAudio {
+  return {
+    id: uuid(),
+    dataUrl: audio.dataUrl,
+    filename: audio.filename,
+    mimeType: audio.mimeType,
+    fileSize: audio.fileSize,
+    duration: audio.duration,
+    createdAt: audio.createdAt
+  };
+}
+
 export function createStickyFromBacklog(
   item: BacklogItem,
-  content: { links: Link[]; comments: Comment[]; images: Image[] }
+  content: { links: Link[]; comments: Comment[]; images: Image[]; audios?: AudioRecording[] }
 ): Sticky {
   return {
     id: uuid(),
@@ -127,6 +175,7 @@ export function createStickyFromBacklog(
     description: item.description,
     links: content.links.map(stickyLinkFromLink),
     comments: content.comments.map(stickyCommentFromComment),
-    images: content.images.map(stickyImageFromImage)
+    images: content.images.map(stickyImageFromImage),
+    audios: (content.audios ?? []).map(stickyAudioFromAudio)
   };
 }

@@ -189,6 +189,59 @@ describe("validateAndImport", () => {
     expect(result.success).toBe(true);
   });
 
+  it("sticky with non-array audios is rejected", () => {
+    const json = JSON.stringify({
+      products: [validProduct()],
+      stickies: [{
+        id: "s1",
+        productId: "p1",
+        createdAt: "2025-01-01T00:00:00.000Z",
+        title: "Nota",
+        description: "",
+        links: [],
+        comments: [],
+        images: [],
+        audios: "nope"
+      }]
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("audios");
+  });
+
+  it("sticky with a valid audios array is imported", () => {
+    const json = JSON.stringify({
+      products: [validProduct()],
+      backlogItems: [],
+      tasks: [],
+      links: [],
+      comments: [],
+      estimations: [],
+      stickies: [{
+        id: "s1",
+        productId: "p1",
+        createdAt: "2025-01-01T00:00:00.000Z",
+        title: "Nota",
+        description: "",
+        links: [],
+        comments: [],
+        images: [],
+        audios: [{
+          id: "au1",
+          dataUrl: "data:audio/webm;base64,xx",
+          filename: "a.webm",
+          mimeType: "audio/webm",
+          fileSize: 2048,
+          duration: 5,
+          createdAt: "2025-01-01T00:00:00.000Z"
+        }]
+      }]
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(true);
+    expect(state.stickies![0].audios).toHaveLength(1);
+  });
+
   it("checkImportConflicts returns conflicts when product exists", () => {
     state.products = [validProduct({ id: "p1", name: "Existente" }) as Product];
     const json = JSON.stringify({

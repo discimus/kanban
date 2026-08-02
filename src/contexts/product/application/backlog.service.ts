@@ -17,6 +17,7 @@ import { backlogRepository } from "../infrastructure/backlog.repository";
 import { productRepository } from "../infrastructure/product.repository";
 import { productService } from "./product.service";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
+import { audioService } from "@contexts/audio/application/audio.service";
 
 function assertProductEditable(productId: string): void {
   const product = productService.get(productId);
@@ -171,6 +172,16 @@ export const backlogService = {
       for (const sc of sticky.comments) s.comments.push(commentFromStickyComment(sc, item.id));
       for (const si of sticky.images) s.images.push(imageFromStickyImage(si, item.id));
     });
+    for (const sa of sticky.audios ?? []) {
+      audioService.create({
+        backlogItemId: item.id,
+        dataUrl: sa.dataUrl,
+        filename: sa.filename,
+        mimeType: sa.mimeType,
+        fileSize: sa.fileSize,
+        duration: sa.duration
+      });
+    }
     stickyService.delete(sticky.id);
     productService.recomputeStatus(item.productId);
     return item;

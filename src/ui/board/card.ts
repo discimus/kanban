@@ -5,8 +5,8 @@ import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
 import { imageService } from "@contexts/image/application/image.service";
 import { audioService } from "@contexts/audio/application/audio.service";
-import { startRecording, extensionForMimeType, MicPermissionError, type AudioRecorderController } from "@ui/recorder/audio-recorder";
-import { MAX_AUDIO_DURATION } from "@contexts/audio/domain/audio";
+import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
+import { createInlineRecorder, renderRecordingControl, renderRecorderTimer, formatDuration } from "@ui/recorder/inline-recorder";
 import { eventBus } from "@shared/events";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
@@ -114,104 +114,28 @@ function fullDateTime(iso: string): string {
   return localeDateTimeString(new Date(iso));
 }
 
-function formatDuration(seconds: number): string {
-  const s = Math.max(0, Math.floor(seconds));
-  const mm = String(Math.floor(s / 60)).padStart(2, "0");
-  const ss = String(s % 60).padStart(2, "0");
-  return `${mm}:${ss}`;
-}
-
-interface ActiveRecording {
-  controller: AudioRecorderController;
-  startedAt: number;
-}
-
-/**
- * In-flight audio recordings keyed by backlog item. Kept out of the render
- * closure so a full re-render (every `state:changed`) doesn't lose the
- * recording; `backlogCard` reads it to render the live "recording" state.
- */
-const activeRecordings = new Map<string, ActiveRecording>();
-const startingRecordings = new Set<string>();
-let recorderTimer: number | null = null;
-
-function ensureRecorderTimer(): void {
-  if (recorderTimer !== null) return;
-  recorderTimer = window.setInterval(() => {
-    for (const [itemId, rec] of activeRecordings) {
-      const label = document.querySelector<HTMLElement>(`[data-id="${CSS.escape(itemId)}"] .card__recorder-timer`);
-      const elapsed = (Date.now() - rec.startedAt) / 1000;
-      if (label) label.textContent = formatDuration(elapsed);
-      if (elapsed >= MAX_AUDIO_DURATION) stopInlineRecording(itemId);
-    }
-    if (activeRecordings.size === 0) {
-      if (recorderTimer !== null) window.clearInterval(recorderTimer);
-      recorderTimer = null;
-    }
-  }, 250);
-}
-
-function startInlineRecording(itemId: string): void {
-  if (activeRecordings.has(itemId) || startingRecordings.has(itemId)) return;
-  startingRecordings.add(itemId);
-  startRecording()
-    .then((controller) => {
-      activeRecordings.set(itemId, { controller, startedAt: Date.now() });
-      startingRecordings.delete(itemId);
-      ensureRecorderTimer();
-      eventBus.emit("ui:refresh");
-    })
-    .catch((e) => {
-      startingRecordings.delete(itemId);
-      if (e instanceof MicPermissionError) showAlert(t("audio.permissaoNegada"));
-      else showAlert(t("audio.erroGravar"));
-    });
-}
-
-function stopInlineRecording(itemId: string): void {
-  const rec = activeRecordings.get(itemId);
-  if (!rec) return;
-  activeRecordings.delete(itemId);
-  const controller = rec.controller;
-  controller.stop()
-    .then((result) => {
-      expandedCards.set(itemId, true);
-      const created = audioService.create({
-        backlogItemId: itemId,
-        dataUrl: result.dataUrl,
-        filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
-        mimeType: result.mimeType,
-        fileSize: result.fileSize,
-        duration: result.duration
-      });
-      flashItem(created.id);
-    })
-    .catch(() => showAlert(t("audio.erroGravar")));
-}
-
-function renderAudioControl(itemId: string, recording: ActiveRecording | undefined): HTMLElement {
-  const btn = el("button", {
-    class: `card__action-btn${recording ? " card__action-btn--recording" : ""}`,
-    type: "button",
-    "aria-label": recording ? t("audio.parar") : t("card.adicionarAudio"),
-    title: recording ? t("audio.parar") : t("card.adicionarAudio")
-  }, [icon(recording ? "stop" : "mic")]);
-  btn.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    if (recording) stopInlineRecording(itemId);
-    else startInlineRecording(itemId);
-  });
-  return btn;
-}
-
-function renderRecorderTimer(recording: ActiveRecording): HTMLElement {
-  return el("span", { class: "card__recorder-timer", role: "timer", "aria-label": t("audio.gravando") }, [
-    el("span", { class: "card__recorder-dot", "aria-hidden": "true" }),
-    formatDuration((Date.now() - recording.startedAt) / 1000)
-  ]);
-}
-
 const expandedCards = new Map<string, boolean>();
+
+const recorder = createInlineRecorder({
+  onStarted: () => eventBus.emit("ui:refresh"),
+  onError: (_id, e) => {
+    if (e instanceof MicPermissionError) showAlert(t("audio.permissaoNegada"));
+    else showAlert(t("audio.erroGravar"));
+  }
+});
+
+function saveStoppedRecording(itemId: string, result: RecordedAudio): void {
+  expandedCards.set(itemId, true);
+  const created = audioService.create({
+    backlogItemId: itemId,
+    dataUrl: result.dataUrl,
+    filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
+    mimeType: result.mimeType,
+    fileSize: result.fileSize,
+    duration: result.duration
+  });
+  flashItem(created.id);
+}
 
 async function copyImageToClipboard(dataUrl: string, mimeType: string): Promise<void> {
   try {
@@ -275,7 +199,7 @@ function openImageModal(dataUrl: string, filename: string, mimeType = "image/png
 
 export function backlogCard(item: BacklogItem, locked = false, showPriority = true, category: ProductCategory = "development", minimal = false): HTMLElement {
   const isArchived = !!item.archivedAt;
-  const recording = activeRecordings.get(item.id);
+  const recording = recorder.getActive(item.id);
   const readOnly = locked || isArchived;
   const taskList = el("div", { class: "card__tasks" }, []);
 
@@ -775,7 +699,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: t("card.comentario"), icon: "chat", action: locked ? lockedAlert : addComment },
             { label: t("card.link"), icon: "link", action: locked ? lockedAlert : addLink },
             { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage },
-            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => startInlineRecording(item.id) }
+            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r)) }
           ]},
           {
             label: t("card.copiarTitulo"),
@@ -942,7 +866,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
         cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
         cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
-        renderAudioControl(item.id, recording),
+        renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r)),
         recording ? renderRecorderTimer(recording) : null
       ]);
       footer.append(actionsFooter);

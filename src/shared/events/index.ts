@@ -35,6 +35,8 @@ export type DomainEvent =
   | "sticky:comment-removed"
   | "sticky:image-added"
   | "sticky:image-removed"
+  | "sticky:audio-added"
+  | "sticky:audio-removed"
   | "backlog:auto-archived"
   | "backlog:product-changed"
   | "product:archived"

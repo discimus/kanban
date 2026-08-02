@@ -246,4 +246,43 @@ describe("stickyService", () => {
       expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:image-removed", result);
     });
   });
+
+  describe("addAudio", () => {
+    it("adds an audio, saves and emits sticky:audio-added", () => {
+      state.stickies = [makeSticky()];
+      const result = stickyService.addAudio("s1", {
+        dataUrl: "data:audio/webm;base64,xx",
+        filename: "audio-123.webm",
+        mimeType: "audio/webm",
+        fileSize: 2048,
+        duration: 5
+      });
+      expect(result.audios).toHaveLength(1);
+      expect(state.stickies![0].audios).toHaveLength(1);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:audio-added", result);
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => stickyService.addAudio("ghost", {
+        dataUrl: "data:audio/webm;base64,xx",
+        filename: "a.webm",
+        mimeType: "audio/webm",
+        fileSize: 1,
+        duration: 1
+      })).toThrow("Card não encontrado.");
+    });
+  });
+
+  describe("removeAudio", () => {
+    it("removes the audio and emits sticky:audio-removed", () => {
+      state.stickies = [makeSticky({ audios: [{ id: "au1", dataUrl: "a", filename: "a.webm", mimeType: "audio/webm", fileSize: 1, duration: 2, createdAt: "2024-01-01T00:00:00.000Z" }] })];
+      const result = stickyService.removeAudio("s1", "au1");
+      expect(result.audios).toHaveLength(0);
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:audio-removed", result);
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => stickyService.removeAudio("ghost", "au1")).toThrow("Card não encontrado.");
+    });
+  });
 });

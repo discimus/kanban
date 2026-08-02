@@ -81,6 +81,7 @@ beforeEach(() => {
   state.comments.length = 0;
   state.images.length = 0;
   state.estimations.length = 0;
+  state.audios.length = 0;
   mockStore.update.mockClear();
   mockEventBus.emit.mockClear();
   vi.mocked(productService.get).mockReturnValue({
@@ -360,6 +361,27 @@ describe("backlogService", () => {
       expect(state.links[0].visitedAt).toBe("2024-01-02T00:00:00.000Z");
       expect(state.links[0].visitCount).toBe(4);
       expect(state.links[0].backlogItemId).toBe(result.id);
+    });
+
+    it("converts a sticky into a backlog item preserving audios", () => {
+      state.stickies = [{
+        ...makeSticky(),
+        audios: [{
+          id: "sa1",
+          dataUrl: "data:audio/webm;base64,YQ==",
+          filename: "a.webm",
+          mimeType: "audio/webm",
+          fileSize: 2048,
+          duration: 5,
+          createdAt: "2024-01-01T00:00:00.000Z"
+        }]
+      }];
+      const result = backlogService.convertFromSticky("s1");
+
+      expect(state.audios).toHaveLength(1);
+      expect(state.audios[0].backlogItemId).toBe(result.id);
+      expect(state.audios[0].filename).toBe("a.webm");
+      expect(state.audios[0].duration).toBe(5);
     });
 
     it("throws when sticky not found", () => {

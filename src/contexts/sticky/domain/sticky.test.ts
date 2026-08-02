@@ -7,15 +7,18 @@ import {
   stickyLinkFromLink,
   stickyCommentFromComment,
   stickyImageFromImage,
+  stickyAudioFromAudio,
   addStickyLink,
   markStickyLinkVisited,
   removeStickyLink,
   addStickyComment,
   removeStickyComment,
   addStickyImage,
-  removeStickyImage
+  removeStickyImage,
+  addStickyAudio,
+  removeStickyAudio
 } from "@contexts/sticky/domain/sticky";
-import type { BacklogItem, Link, Comment, Image } from "@shared/types";
+import type { BacklogItem, Link, Comment, Image, AudioRecording } from "@shared/types";
 
 describe("createSticky", () => {
   it("returns a Sticky with generated id and empty children", () => {
@@ -334,5 +337,155 @@ describe("removeStickyImage", () => {
     const updated = removeStickyImage(sticky, removedId);
     expect(updated.images).toHaveLength(1);
     expect(updated.images.some((img) => img.id === removedId)).toBe(false);
+  });
+});
+
+describe("createSticky audios", () => {
+  it("initializes audios to an empty array", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(sticky.audios).toEqual([]);
+  });
+});
+
+describe("addStickyAudio", () => {
+  const base = {
+    dataUrl: "data:audio/webm;base64,GkXfo0AgQoa",
+    filename: "audio-123.webm",
+    mimeType: "audio/webm",
+    fileSize: 2048,
+    duration: 12.5
+  };
+
+  it("appends an audio with generated id, trimmed filename and rounded duration", () => {
+    const sticky = createSticky({ productId: "p1" });
+    const updated = addStickyAudio(sticky, { ...base, filename: "  audio-123.webm  " });
+    expect(updated).not.toBe(sticky);
+    expect(updated.audios).toHaveLength(1);
+    expect(updated.audios![0].filename).toBe("audio-123.webm");
+    expect(updated.audios![0].duration).toBe(12.5);
+    expect(updated.audios![0].id).toBeTypeOf("string");
+    expect(updated.audios![0].createdAt).toBeTypeOf("string");
+  });
+
+  it("appends to existing audios", () => {
+    let sticky = createSticky({ productId: "p1" });
+    sticky = addStickyAudio(sticky, base);
+    const updated = addStickyAudio(sticky, { ...base, duration: 5 });
+    expect(updated.audios).toHaveLength(2);
+  });
+
+  it("throws Error when dataUrl is empty", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, dataUrl: "" })).toThrow(Error);
+  });
+
+  it("throws Error when filename is empty", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, filename: "" })).toThrow(Error);
+  });
+
+  it("throws Error when mimeType is not an audio", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, mimeType: "application/pdf" })).toThrow(Error);
+  });
+
+  it("throws Error when fileSize exceeds 2 MB", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, fileSize: 2 * 1024 * 1024 + 1 })).toThrow(Error);
+  });
+
+  it("throws Error when duration is zero", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, duration: 0 })).toThrow(Error);
+  });
+
+  it("throws Error when duration exceeds 60 seconds", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, duration: 61 })).toThrow(Error);
+  });
+
+  it("throws Error when duration is not finite", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => addStickyAudio(sticky, { ...base, duration: Number.NaN })).toThrow(Error);
+  });
+});
+
+describe("removeStickyAudio", () => {
+  it("removes the matching audio", () => {
+    let sticky = createSticky({ productId: "p1" });
+    sticky = addStickyAudio(sticky, { dataUrl: "a", filename: "a.webm", mimeType: "audio/webm", fileSize: 1, duration: 1 });
+    sticky = addStickyAudio(sticky, { dataUrl: "b", filename: "b.webm", mimeType: "audio/webm", fileSize: 1, duration: 2 });
+    const removedId = sticky.audios![0].id;
+    const updated = removeStickyAudio(sticky, removedId);
+    expect(updated.audios).toHaveLength(1);
+    expect(updated.audios!.some((a) => a.id === removedId)).toBe(false);
+  });
+
+  it("is a no-op for an unknown audio id", () => {
+    let sticky = createSticky({ productId: "p1" });
+    sticky = addStickyAudio(sticky, { dataUrl: "a", filename: "a.webm", mimeType: "audio/webm", fileSize: 1, duration: 1 });
+    const updated = removeStickyAudio(sticky, "ghost");
+    expect(updated.audios).toHaveLength(1);
+  });
+});
+
+describe("stickyAudioFromAudio", () => {
+  const audio: AudioRecording = {
+    id: "a1",
+    backlogItemId: "b1",
+    dataUrl: "data:audio/webm;base64,xx",
+    filename: "audio.webm",
+    mimeType: "audio/webm",
+    fileSize: 2048,
+    duration: 7,
+    createdAt: "2026-01-01T00:00:00.000Z"
+  };
+
+  it("maps an AudioRecording to a StickyAudio with a new id", () => {
+    const result = stickyAudioFromAudio(audio);
+    expect(result.id).not.toBe(audio.id);
+    expect(result.dataUrl).toBe(audio.dataUrl);
+    expect(result.filename).toBe(audio.filename);
+    expect(result.mimeType).toBe(audio.mimeType);
+    expect(result.fileSize).toBe(audio.fileSize);
+    expect(result.duration).toBe(audio.duration);
+    expect(result.createdAt).toBe(audio.createdAt);
+  });
+});
+
+describe("createStickyFromBacklog", () => {
+  const item: BacklogItem = {
+    id: "b1",
+    productId: "p1",
+    title: "Item",
+    description: "desc",
+    priority: "medium",
+    status: "todo",
+    storyPoints: 0,
+    classification: "task",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    archivedAt: null,
+    completedAt: null
+  };
+
+  it("carries audios into the sticky", () => {
+    const audio: AudioRecording = {
+      id: "a1",
+      backlogItemId: "b1",
+      dataUrl: "data:audio/webm;base64,xx",
+      filename: "audio.webm",
+      mimeType: "audio/webm",
+      fileSize: 2048,
+      duration: 7,
+      createdAt: "2026-01-01T00:00:00.000Z"
+    };
+    const sticky = createStickyFromBacklog(item, { links: [], comments: [], images: [], audios: [audio] });
+    expect(sticky.audios).toHaveLength(1);
+    expect(sticky.audios![0].duration).toBe(7);
+  });
+
+  it("defaults audios to empty when not provided", () => {
+    const sticky = createStickyFromBacklog(item, { links: [], comments: [], images: [] });
+    expect(sticky.audios).toEqual([]);
   });
 });

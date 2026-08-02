@@ -1,4 +1,4 @@
-import { BacklogItem, KanbanStatus, Priority, TaskClassification, ProductCategory, CATEGORY_CLASSIFICATIONS, Link, Comment, Image, StickyLink, StickyComment, StickyImage } from "@shared/types";
+import { BacklogItem, KanbanStatus, Priority, TaskClassification, ProductCategory, CATEGORY_CLASSIFICATIONS, Link, Comment, Image, AudioRecording, StickyLink, StickyComment, StickyImage, StickyAudio } from "@shared/types";
 import { uuid } from "@shared/utils";
 
 export interface CreateBacklogItemProps {
@@ -75,5 +75,18 @@ export function imageFromStickyImage(image: StickyImage, backlogItemId: string):
     mimeType: image.mimeType,
     fileSize: image.fileSize,
     createdAt: image.createdAt
+  };
+}
+
+export function audioFromStickyAudio(audio: StickyAudio, backlogItemId: string): AudioRecording {
+  return {
+    id: uuid(),
+    backlogItemId,
+    dataUrl: audio.dataUrl,
+    filename: audio.filename,
+    mimeType: audio.mimeType,
+    fileSize: audio.fileSize,
+    duration: audio.duration,
+    createdAt: audio.createdAt
   };
 }

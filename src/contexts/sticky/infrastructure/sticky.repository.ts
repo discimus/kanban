@@ -1,5 +1,6 @@
 import { Sticky } from "@shared/types";
 import { store } from "@shared/storage";
+import { deleteBlob } from "@shared/storage/blob-store";
 
 export const stickyRepository = {
   all(): Sticky[] {
@@ -30,8 +31,10 @@ export const stickyRepository = {
   },
 
   remove(id: string): void {
+    const removed = (store.getState().stickies ?? []).find((st) => st.id === id);
     store.update((s) => {
       s.stickies = (s.stickies ?? []).filter((st) => st.id !== id);
     });
+    for (const a of removed?.audios ?? []) void deleteBlob(a.id);
   }
 };

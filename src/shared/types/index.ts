@@ -220,6 +220,16 @@ export interface StickyImage {
   createdAt: ISODate;
 }
 
+export interface StickyAudio {
+  id: ID;
+  dataUrl: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  duration: number;
+  createdAt: ISODate;
+}
+
 export interface Sticky {
   id: ID;
   productId: ID;
@@ -229,6 +239,8 @@ export interface Sticky {
   links: StickyLink[];
   comments: StickyComment[];
   images: StickyImage[];
+  /** Presente em dados novos; opcional para compatibilidade com dados legados e mocks. */
+  audios?: StickyAudio[];
 }
 
 export interface AppState {

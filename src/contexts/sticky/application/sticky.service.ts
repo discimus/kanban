@@ -16,14 +16,19 @@ import {
   removeStickyComment,
   addStickyImage,
   AddStickyImageProps,
-  removeStickyImage
+  removeStickyImage,
+  addStickyAudio,
+  AddStickyAudioProps,
+  removeStickyAudio
 } from "../domain/sticky";
 import { stickyRepository } from "../infrastructure/sticky.repository";
 import { backlogRepository } from "@contexts/product/infrastructure/backlog.repository";
 import { linkService } from "@contexts/link/application/link.service";
 import { commentService } from "@contexts/comment/application/comment.service";
 import { imageService } from "@contexts/image/application/image.service";
+import { audioService } from "@contexts/audio/application/audio.service";
 import { productService } from "@contexts/product/application/product.service";
+import { putBlob, deleteBlob, dataUrlToBlob } from "@shared/storage/blob-store";
 
 export const stickyService = {
   byProduct(productId: string): Sticky[] {
@@ -57,9 +62,11 @@ export const stickyService = {
     const sticky = createStickyFromBacklog(item, {
       links: linkService.byBacklogItem(item.id),
       comments: commentService.byBacklogItem(item.id),
-      images: imageService.byBacklogItem(item.id)
+      images: imageService.byBacklogItem(item.id),
+      audios: audioService.byBacklogItem(item.id)
     });
     stickyRepository.add(sticky);
+    for (const a of sticky.audios ?? []) void putBlob(a.id, dataUrlToBlob(a.dataUrl));
     eventBus.emit("sticky:created", sticky);
     backlogRepository.remove(item.id);
     eventBus.emit("backlog:deleted", item.id);
@@ -136,6 +143,27 @@ export const stickyService = {
     const updated = removeStickyImage(existing, imageId);
     stickyRepository.save(updated);
     eventBus.emit("sticky:image-removed", updated);
+    return updated;
+  },
+
+  addAudio(id: string, props: AddStickyAudioProps): Sticky {
+    const existing = stickyRepository.findById(id);
+    if (!existing) throw new Error("Card não encontrado.");
+    const updated = addStickyAudio(existing, props);
+    stickyRepository.save(updated);
+    const added = updated.audios![updated.audios!.length - 1];
+    void putBlob(added.id, dataUrlToBlob(added.dataUrl));
+    eventBus.emit("sticky:audio-added", updated);
+    return updated;
+  },
+
+  removeAudio(id: string, audioId: string): Sticky {
+    const existing = stickyRepository.findById(id);
+    if (!existing) throw new Error("Card não encontrado.");
+    const updated = removeStickyAudio(existing, audioId);
+    stickyRepository.save(updated);
+    void deleteBlob(audioId);
+    eventBus.emit("sticky:audio-removed", updated);
     return updated;
   }
 };

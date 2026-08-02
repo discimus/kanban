@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, Link, Image, AudioRecording, Sticky, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, Image, AudioRecording, Sticky, StickyAudio, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { putBlob, getBlob, deleteBlob, clearBlobs, getAllBlobKeys, dataUrlToBlob, blobToDataUrl } from "./blob-store";
 
@@ -32,7 +32,7 @@ export function reviveState(raw: unknown): AppState {
 }
 
 export function normalizeSticky(sticky: Sticky): Sticky {
-  return {
+  const normalized: Sticky = {
     ...sticky,
     title: (sticky as any).title ?? "",
     description: (sticky as any).description ?? "",
@@ -40,6 +40,10 @@ export function normalizeSticky(sticky: Sticky): Sticky {
     comments: Array.isArray((sticky as any).comments) ? (sticky as any).comments : [],
     images: Array.isArray((sticky as any).images) ? (sticky as any).images.map((img: Sticky["images"][number]) => ({ ...img, fileSize: (img as any).fileSize ?? 0 })) : []
   };
+  if (Array.isArray((sticky as any).audios)) {
+    normalized.audios = (sticky as any).audios.map((a: StickyAudio) => ({ ...a, fileSize: (a as any).fileSize ?? 0, duration: (a as any).duration ?? 0 }));
+  }
+  return normalized;
 }
 
 const VALID_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
@@ -117,21 +121,32 @@ class Store {
     return {
       ...state,
       images: state.images.map((img) => ({ ...img, dataUrl: "" })),
-      audios: state.audios.map((a) => ({ ...a, dataUrl: "" }))
+      audios: state.audios.map((a) => ({ ...a, dataUrl: "" })),
+      stickies: state.stickies?.map((s) => ({
+        ...s,
+        audios: (s.audios ?? []).map((a) => ({ ...a, dataUrl: "" }))
+      }))
     };
   }
 
   /** Idempotently moves inline blobs into IndexedDB and deletes orphaned ones. */
   private async reconcileBlobs(): Promise<void> {
+    const stickyAudioIds = (this.state.stickies ?? []).flatMap((s) => (s.audios ?? []).map((a) => a.id));
     const keep = new Set<string>([
       ...this.state.images.map((i) => i.id),
-      ...this.state.audios.map((a) => a.id)
+      ...this.state.audios.map((a) => a.id),
+      ...stickyAudioIds
     ]);
     for (const img of this.state.images) {
       if (img.dataUrl.startsWith("data:")) await putBlob(img.id, dataUrlToBlob(img.dataUrl));
     }
     for (const a of this.state.audios) {
       if (a.dataUrl.startsWith("data:")) await putBlob(a.id, dataUrlToBlob(a.dataUrl));
+    }
+    for (const s of this.state.stickies ?? []) {
+      for (const a of s.audios ?? []) {
+        if (a.dataUrl.startsWith("data:")) await putBlob(a.id, dataUrlToBlob(a.dataUrl));
+      }
     }
     const keys = await getAllBlobKeys();
     for (const k of keys) {
@@ -146,7 +161,11 @@ class Store {
    */
   async hydrate(): Promise<void> {
     await this.reconcileBlobs();
-    const ids = [...this.state.images.map((i) => i.id), ...this.state.audios.map((a) => a.id)];
+    const ids = [
+      ...this.state.images.map((i) => i.id),
+      ...this.state.audios.map((a) => a.id),
+      ...(this.state.stickies ?? []).flatMap((s) => (s.audios ?? []).map((a) => a.id))
+    ];
     const restored = await Promise.all(ids.map(async (id) => {
       const blob = await getBlob(id);
       return blob ? { id, dataUrl: await blobToDataUrl(blob) } : null;
@@ -159,6 +178,12 @@ class Store {
     for (const a of this.state.audios) {
       const url = byId.get(a.id);
       if (url) a.dataUrl = url;
+    }
+    for (const s of this.state.stickies ?? []) {
+      for (const a of s.audios ?? []) {
+        const url = byId.get(a.id);
+        if (url) a.dataUrl = url;
+      }
     }
   }
 
