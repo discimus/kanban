@@ -162,3 +162,24 @@ export function getCardsWithMedia(state: AppState, type: StorageMediaType = "all
 
   return entries;
 }
+
+/**
+ * Returns the ids of products that have at least one non-archived board card
+ * (backlog item) holding audio. Excludes archived products and archived items
+ * so the indicator matches what is reachable from the current board.
+ */
+export function getProductIdsWithAudio(state: AppState): Set<string> {
+  const productById = new Map(state.products.map((p) => [p.id, p] as const));
+  const ids = new Set<string>();
+
+  for (const item of state.backlogItems) {
+    if (item.archivedAt) continue;
+    const product = productById.get(item.productId);
+    if (!product || product.archivedAt) continue;
+    if (state.audios.some((a) => a.backlogItemId === item.id)) {
+      ids.add(item.productId);
+    }
+  }
+
+  return ids;
+}

@@ -831,8 +831,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           critical: "priority_high"
         }[item.priority])]) : null
       ]),
-      minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
-      pointsBtn
+      el("div", { class: "card__trailing" }, [
+        audioCount > 0 ? el("span", { class: "badge badge--audio", title: t("card.comAudio") }, [icon("graphic_eq")]) : null,
+        minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
+        pointsBtn
+      ])
     ]),
     el(minimal ? "h3" : "h4", { class: `card__title${minimal ? " card__title--note" : ""}` }, [item.title]),
     progressBar,

@@ -5,7 +5,8 @@ import { Product, ProductStatus, ProductCategory, PALETTES, PRODUCT_STATUSES, PR
 import { productService } from "@contexts/product/application/product.service";
 import { openProductForm } from "@ui/modal/product-form";
 import { openNotesForm } from "@ui/modal/notes-form";
-import { getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded } from "@shared/storage/storage-usage";
+import { getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded, getProductIdsWithAudio } from "@shared/storage/storage-usage";
+import { store } from "@shared/storage";
 import { t, loc } from "@shared/i18n";
 
 let archivedOpen = false;
@@ -146,6 +147,7 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
 }
 
 export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void, onPinToggle?: (id: string, action: "pin" | "unpin") => void, highlightedId?: string, onOpenStorage?: () => void): HTMLElement {
+  const productsWithAudio = getProductIdsWithAudio(store.getState());
   let active = products.filter(p => !p.archivedAt);
 
   if (filterCategory !== null) {
@@ -204,6 +206,9 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
           ]),
           el("span", { class: "product-item__palette", style: `background:${paletteSeed(product.palette)}` }),
           el("span", { class: "product-item__name-text" }, [product.name]),
+          productsWithAudio.has(product.id)
+            ? el("span", { class: "product-item__audio", title: t("sidebar.comAudio") }, [icon("graphic_eq")])
+            : null,
           product.category !== "notes" ? el("span", { class: `product-item__status product-item__status--${status}` }, [
             icon(STATUS_ICONS[status]),
             statusLabel(status)

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type { AppState, BacklogItem, Image, Product, AudioRecording } from "@shared/types";
 import { emptyState } from "@shared/types";
 import { store } from "@shared/storage";
-import { getCardsWithImages, getCardsWithMedia, getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded, formatBytes } from "./storage-usage";
+import { getCardsWithImages, getCardsWithMedia, getProductIdsWithAudio, getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded, formatBytes } from "./storage-usage";
 
 function makeProduct(id: string, name: string, overrides: Record<string, unknown> = {}): Product {
   return {
@@ -312,6 +312,68 @@ describe("getCardsWithMedia", () => {
     expect(result).toHaveLength(1);
     expect(result[0].images.map((i) => i.id)).toEqual(["img1", "img2"]);
     expect(result[0].audios.map((a) => a.id)).toEqual(["a1", "a2"]);
+  });
+});
+
+describe("getProductIdsWithAudio", () => {
+  it("returns an empty set when no card holds audio", () => {
+    const state = makeState({
+      products: [makeProduct("p1", "Alpha")],
+      backlogItems: [makeItem("b1", "p1")]
+    });
+
+    expect(getProductIdsWithAudio(state)).toEqual(new Set());
+  });
+
+  it("includes the product when a card holds audio", () => {
+    const state = makeState({
+      products: [makeProduct("p1", "Alpha")],
+      backlogItems: [makeItem("b1", "p1")],
+      audios: [makeAudio("a1", "b1")]
+    });
+
+    expect(getProductIdsWithAudio(state)).toEqual(new Set(["p1"]));
+  });
+
+  it("does not duplicate a product with several audio cards", () => {
+    const state = makeState({
+      products: [makeProduct("p1", "Alpha")],
+      backlogItems: [makeItem("b1", "p1"), makeItem("b2", "p1")],
+      audios: [makeAudio("a1", "b1"), makeAudio("a2", "b2")]
+    });
+
+    expect(getProductIdsWithAudio(state)).toEqual(new Set(["p1"]));
+  });
+
+  it("ignores cards without audio and products whose cards only have images", () => {
+    const state = makeState({
+      products: [makeProduct("p1", "Alpha"), makeProduct("p2", "Beta")],
+      backlogItems: [makeItem("b1", "p1"), makeItem("b2", "p2")],
+      images: [makeImage("img1", "b1")],
+      audios: [makeAudio("a1", "b2")]
+    });
+
+    expect(getProductIdsWithAudio(state)).toEqual(new Set(["p2"]));
+  });
+
+  it("excludes archived cards and archived products", () => {
+    const state = makeState({
+      products: [makeProduct("p1", "Alpha", { archivedAt: "2026-02-01T00:00:00.000Z" })],
+      backlogItems: [makeItem("b1", "p1", { archivedAt: "2026-02-01T00:00:00.000Z" })],
+      audios: [makeAudio("a1", "b1")]
+    });
+
+    expect(getProductIdsWithAudio(state)).toEqual(new Set());
+  });
+
+  it("excludes orphan cards without a matching product", () => {
+    const state = makeState({
+      products: [makeProduct("p1", "Alpha")],
+      backlogItems: [makeItem("b1", "missing")],
+      audios: [makeAudio("a1", "b1")]
+    });
+
+    expect(getProductIdsWithAudio(state)).toEqual(new Set());
   });
 });
 

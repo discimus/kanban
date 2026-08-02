@@ -807,6 +807,22 @@ body {
   flex-grow: 1;
 }
 
+.product-item__audio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  flex-shrink: 0;
+}
+
+.product-item__audio .material-symbols-outlined {
+  font-size: 0.8rem;
+}
+
 .product-item__palette {
   width: 8px;
   height: 8px;
@@ -1400,6 +1416,13 @@ body {
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
+}
+
+.card__trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .card > .actions-menu {
@@ -2590,6 +2613,11 @@ button.chip--todo:hover {
 .badge--critical {
   background: var(--critical);
   color: var(--md-on-error-container);
+}
+
+.badge--audio {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
 }
 
 /* Buttons — MD3 (filled / text / outlined) */
