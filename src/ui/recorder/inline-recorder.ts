@@ -2,8 +2,6 @@ import { el, icon } from "@ui/components/dom";
 import { startRecording, type AudioRecorderController, type RecordedAudio } from "./audio-recorder";
 import { t } from "@shared/i18n";
 
-export const MAX_INLINE_RECORDING_DURATION = 60;
-
 export function formatDuration(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
   const mm = String(Math.floor(s / 60)).padStart(2, "0");
@@ -19,8 +17,6 @@ export interface ActiveRecording {
 export interface InlineRecorderOptions {
   /** Injected recorder factory; defaults to the MediaRecorder wrapper. Testable. */
   startRecordingFn?: () => Promise<AudioRecorderController>;
-  /** Seconds after which an active recording is stopped automatically. Default 60. */
-  maxDuration?: number;
   /** Resolves the timer label element for an id; defaults to the card selector. */
   getTimerEl?: (id: string) => HTMLElement | null;
   /** Called once the recording is live (mic granted). */
@@ -47,12 +43,11 @@ interface RecordingEntry extends ActiveRecording {
  * re-render (`renderApp` → `clear(root)`) doesn't drop an in-flight
  * recording; callers read `getActive(id)` to render the live state.
  *
- * The `onResult` handler is captured at `start` so the auto-stop timer and
- * the manual stop button run the exact same save flow.
+ * The `onResult` handler is captured at `start` so the manual stop button runs
+ * the exact same save flow as any other stop path.
  */
 export function createInlineRecorder(options: InlineRecorderOptions = {}): InlineRecorder {
   const startRecordingFn = options.startRecordingFn ?? startRecording;
-  const maxDuration = options.maxDuration ?? MAX_INLINE_RECORDING_DURATION;
   const getTimerEl = options.getTimerEl ?? ((id: string) =>
     document.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"] .card__recorder-timer`));
 
@@ -67,7 +62,6 @@ export function createInlineRecorder(options: InlineRecorderOptions = {}): Inlin
         const label = getTimerEl(id);
         const elapsed = (Date.now() - rec.startedAt) / 1000;
         if (label) label.textContent = formatDuration(elapsed);
-        if (elapsed >= maxDuration) stop(id);
       }
       if (activeRecordings.size === 0) {
         if (recorderTimer !== null) clearInterval(recorderTimer);

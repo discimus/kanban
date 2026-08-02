@@ -109,13 +109,12 @@ describe("createInlineRecorder", () => {
     expect(() => rec.stop("ghost")).not.toThrow();
   });
 
-  it("auto-stops when elapsed exceeds maxDuration and saves via onResult", async () => {
+  it("does not auto-stop when elapsed exceeds one minute", async () => {
     vi.useFakeTimers();
     const fake = makeController();
     const onResult = vi.fn();
     const rec = createInlineRecorder({
       startRecordingFn: () => Promise.resolve(fake.controller),
-      maxDuration: 60,
       getTimerEl: () => null
     });
 
@@ -124,10 +123,10 @@ describe("createInlineRecorder", () => {
     expect(rec.isRecording("a1")).toBe(true);
 
     vi.advanceTimersByTime(61_000);
-    await Promise.resolve();
-    expect(rec.isRecording("a1")).toBe(false);
-    expect(fake.stop).toHaveBeenCalled();
+    expect(rec.isRecording("a1")).toBe(true);
+    expect(fake.stop).not.toHaveBeenCalled();
 
+    rec.stop("a1");
     fake.finish(AUDIO_RESULT);
     await Promise.resolve();
     expect(onResult).toHaveBeenCalledWith(AUDIO_RESULT);

@@ -492,15 +492,19 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   const recording = recorder.getActive(sticky.id);
   const saveRecording = (result: RecordedAudio): void => {
     setExpanded(true);
-    const updated = stickyService.addAudio(sticky.id, {
-      dataUrl: result.dataUrl,
-      filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
-      mimeType: result.mimeType,
-      fileSize: result.fileSize,
-      duration: result.duration
-    });
-    const added = updated.audios![updated.audios!.length - 1];
-    flashItem(added.id);
+    try {
+      const updated = stickyService.addAudio(sticky.id, {
+        dataUrl: result.dataUrl,
+        filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
+        mimeType: result.mimeType,
+        fileSize: result.fileSize,
+        duration: result.duration
+      });
+      const added = updated.audios![updated.audios!.length - 1];
+      flashItem(added.id);
+    } catch {
+      showToast(t("audio.erroSalvar"), "error");
+    }
   };
 
   const footer = el("div", { class: "card__footer sticky-card__footer" }, []);
@@ -519,13 +523,17 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   }
 
   if (!readOnly) {
-    const actionsFooter = el("div", { class: "card__footer-actions" }, [
-      actionBtn("link", t("card.adicionarLink"), addLink),
-      actionBtn("chat", t("card.adicionarComentario"), addComment),
-      actionBtn("add_photo_alternate", t("card.adicionarImagem"), addImage),
-      renderRecordingControl(recorder, sticky.id, saveRecording),
-      recording ? renderRecorderTimer(recording) : null
-    ]);
+    const actionsFooter = el("div", { class: `card__footer-actions${recording ? " card__footer-actions--recording" : ""}` }, recording
+      ? [
+          renderRecorderTimer(recording),
+          renderRecordingControl(recorder, sticky.id, saveRecording)
+        ]
+      : [
+          actionBtn("link", t("card.adicionarLink"), addLink),
+          actionBtn("chat", t("card.adicionarComentario"), addComment),
+          actionBtn("add_photo_alternate", t("card.adicionarImagem"), addImage),
+          renderRecordingControl(recorder, sticky.id, saveRecording)
+        ]);
     footer.append(actionsFooter);
   }
 

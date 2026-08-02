@@ -126,15 +126,19 @@ const recorder = createInlineRecorder({
 
 function saveStoppedRecording(itemId: string, result: RecordedAudio): void {
   expandedCards.set(itemId, true);
-  const created = audioService.create({
-    backlogItemId: itemId,
-    dataUrl: result.dataUrl,
-    filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
-    mimeType: result.mimeType,
-    fileSize: result.fileSize,
-    duration: result.duration
-  });
-  flashItem(created.id);
+  try {
+    const created = audioService.create({
+      backlogItemId: itemId,
+      dataUrl: result.dataUrl,
+      filename: `audio-${Date.now()}.${extensionForMimeType(result.mimeType)}`,
+      mimeType: result.mimeType,
+      fileSize: result.fileSize,
+      duration: result.duration
+    });
+    flashItem(created.id);
+  } catch {
+    showToast(t("audio.erroSalvar"), "error");
+  }
 }
 
 async function copyImageToClipboard(dataUrl: string, mimeType: string): Promise<void> {
@@ -861,14 +865,18 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
 
     if (showActions) {
-      const actionsFooter = el("div", { class: "card__footer-actions" }, [
-        cardActionBtn("playlist_add", t("card.adicionarSubtarefa"), locked ? lockedAlert : addSubtask),
-        cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
-        cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
-        cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
-        renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r)),
-        recording ? renderRecorderTimer(recording) : null
-      ]);
+      const actionsFooter = el("div", { class: `card__footer-actions${recording ? " card__footer-actions--recording" : ""}` }, recording
+        ? [
+            renderRecorderTimer(recording),
+            renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
+          ]
+        : [
+            cardActionBtn("playlist_add", t("card.adicionarSubtarefa"), locked ? lockedAlert : addSubtask),
+            cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
+            cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
+            cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
+            renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
+          ]);
       footer.append(actionsFooter);
     }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createAudio, MAX_AUDIO_SIZE, MAX_AUDIO_DURATION } from "@contexts/audio/domain/audio";
+import { createAudio, MAX_AUDIO_SIZE } from "@contexts/audio/domain/audio";
 
 function makeProps(overrides: Record<string, unknown> = {}) {
   return {
@@ -84,8 +84,9 @@ describe("createAudio", () => {
     expect(audio.fileSize).toBe(MAX_AUDIO_SIZE);
   });
 
-  it("throws Error when duration exceeds the limit", () => {
-    expect(() => createAudio(makeProps({ duration: MAX_AUDIO_DURATION + 1 }))).toThrow(Error);
+  it("accepts long durations", () => {
+    const audio = createAudio(makeProps({ duration: 600 }));
+    expect(audio.duration).toBe(600);
   });
 
   it("throws Error when duration is zero or negative", () => {

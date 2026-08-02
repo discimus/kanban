@@ -389,9 +389,9 @@ describe("addStickyAudio", () => {
     expect(() => addStickyAudio(sticky, { ...base, mimeType: "application/pdf" })).toThrow(Error);
   });
 
-  it("throws Error when fileSize exceeds 2 MB", () => {
+  it("throws Error when fileSize exceeds 25 MB", () => {
     const sticky = createSticky({ productId: "p1" });
-    expect(() => addStickyAudio(sticky, { ...base, fileSize: 2 * 1024 * 1024 + 1 })).toThrow(Error);
+    expect(() => addStickyAudio(sticky, { ...base, fileSize: 25 * 1024 * 1024 + 1 })).toThrow(Error);
   });
 
   it("throws Error when duration is zero", () => {
@@ -399,9 +399,10 @@ describe("addStickyAudio", () => {
     expect(() => addStickyAudio(sticky, { ...base, duration: 0 })).toThrow(Error);
   });
 
-  it("throws Error when duration exceeds 60 seconds", () => {
+  it("accepts long durations", () => {
     const sticky = createSticky({ productId: "p1" });
-    expect(() => addStickyAudio(sticky, { ...base, duration: 61 })).toThrow(Error);
+    const updated = addStickyAudio(sticky, { ...base, duration: 600 });
+    expect(updated.audios![0].duration).toBe(600);
   });
 
   it("throws Error when duration is not finite", () => {
