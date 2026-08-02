@@ -391,7 +391,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         done = true;
         const created = taskService.create({ backlogItemId: item.id, title });
         flashItem(created.id);
-        document.querySelector<HTMLElement>(`[data-id="${CSS.escape(created.id)}"]`)?.focus();
       }
     };
     const cancel = (): void => {
