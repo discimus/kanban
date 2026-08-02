@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type { AppState, BacklogItem, Image, Product, AudioRecording } from "@shared/types";
 import { emptyState } from "@shared/types";
 import { store } from "@shared/storage";
-import { getCardsWithImages, getCardsWithMedia, getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded } from "./storage-usage";
+import { getCardsWithImages, getCardsWithMedia, getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded, formatBytes } from "./storage-usage";
 
 function makeProduct(id: string, name: string, overrides: Record<string, unknown> = {}): Product {
   return {
@@ -312,5 +312,32 @@ describe("getCardsWithMedia", () => {
     expect(result).toHaveLength(1);
     expect(result[0].images.map((i) => i.id)).toEqual(["img1", "img2"]);
     expect(result[0].audios.map((a) => a.id)).toEqual(["a1", "a2"]);
+  });
+});
+
+describe("formatBytes", () => {
+  it("formats bytes below one KB as B", () => {
+    expect(formatBytes(0)).toBe("0 B");
+    expect(formatBytes(512)).toBe("512 B");
+  });
+
+  it("formats KB with one decimal below 10 and whole above", () => {
+    expect(formatBytes(1536)).toBe("1.5 KB");
+    expect(formatBytes(12 * 1024)).toBe("12 KB");
+  });
+
+  it("formats MB with one decimal below 10 and whole above", () => {
+    expect(formatBytes(1024 * 1024)).toBe("1 MB");
+    expect(formatBytes(5 * 1024 * 1024)).toBe("5 MB");
+    expect(formatBytes(2.5 * 1024 * 1024)).toBe("2.5 MB");
+  });
+
+  it("formats GB with one decimal below 10 and whole above", () => {
+    expect(formatBytes(2.5 * 1024 * 1024 * 1024)).toBe("2.5 GB");
+    expect(formatBytes(5 * 1024 * 1024 * 1024)).toBe("5 GB");
+  });
+
+  it("formats TB when bytes are large", () => {
+    expect(formatBytes(1.25 * 1024 * 1024 * 1024 * 1024)).toBe("1.3 TB");
   });
 });

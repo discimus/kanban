@@ -39,10 +39,18 @@ export function ensureStorageQuotaLoaded(): Promise<boolean> {
   return quotaPromise.then((q) => q !== null);
 }
 
+const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
+
 export function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < BYTE_UNITS.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  const text = value >= 10 ? String(Math.round(value)) : String(Math.round(value * 10) / 10);
+  return `${text} ${BYTE_UNITS[unit]}`;
 }
 
 export interface StorageUsage {
