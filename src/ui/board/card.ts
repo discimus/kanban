@@ -304,7 +304,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       }
 
       taskList.append(
-        el("div", { class: `card__task${done ? " card__task--done" : ""}`, "data-id": task.id }, [
+        el("div", { class: `card__task${done ? " card__task--done" : ""}`, "data-id": task.id, tabindex: "-1" }, [
           checkbox,
           el("span", { class: "card__task-text" }, [task.title]),
           del
@@ -463,6 +463,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         done = true;
         const created = taskService.create({ backlogItemId: item.id, title });
         flashItem(created.id);
+        document.querySelector<HTMLElement>(`[data-id="${CSS.escape(created.id)}"]`)?.focus();
       }
     };
     const cancel = (): void => {

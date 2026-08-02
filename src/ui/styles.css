@@ -1890,6 +1890,12 @@ button.chip--todo:hover {
   color: var(--text-muted);
 }
 
+.card__task:focus {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .card__task-check {
   flex-shrink: 0;
   width: 18px;
@@ -3793,6 +3799,10 @@ h4 {
 @media (max-width: 720px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .card__recorder-timer {
+    display: none;
   }
 
   .sidebar-resizer {
