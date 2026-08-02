@@ -174,7 +174,7 @@ export function renderApp(root: HTMLElement): void {
     clearUrlParam();
     setDrawer(false);
     renderApp(root);
-  }, () => setDrawer(false), () => renderApp(root), onPinToggle, highlightedProductId ?? undefined);
+  }, () => setDrawer(false), () => renderApp(root), onPinToggle, highlightedProductId ?? undefined, () => setDrawer(false));
   highlightedProductId = null;
 
   const scrim = el("div", { class: "drawer-scrim", "aria-hidden": "true" }, []);

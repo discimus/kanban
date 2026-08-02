@@ -145,7 +145,7 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
   return bar;
 }
 
-export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void, onPinToggle?: (id: string, action: "pin" | "unpin") => void, highlightedId?: string): HTMLElement {
+export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void, onPinToggle?: (id: string, action: "pin" | "unpin") => void, highlightedId?: string, onOpenStorage?: () => void): HTMLElement {
   let active = products.filter(p => !p.archivedAt);
 
   if (filterCategory !== null) {
@@ -311,6 +311,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
 
   storageBar.addEventListener("click", () => {
     if (storageLoading) return;
+    onOpenStorage?.();
     storageLoading = true;
     storageBar.disabled = true;
     storageBar.setAttribute("aria-busy", "true");
