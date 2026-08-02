@@ -2362,7 +2362,7 @@ button.chip--todo:hover {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: 6px;
+  margin-right: 6px;
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--md-error);
@@ -2377,14 +2377,6 @@ button.chip--todo:hover {
   background: var(--md-error);
   animation: recorder-pulse 1s ease-in-out infinite;
   flex-shrink: 0;
-}
-
-/* Narrow cards: while recording, show only the stop button.
-   Declared after the base `.card__recorder-timer` rule so it wins the cascade. */
-@container (max-width: 260px) {
-  .card__recorder-timer {
-    display: none;
-  }
 }
 
 .card__expand-btn {
@@ -3799,10 +3791,6 @@ h4 {
 @media (max-width: 720px) {
   .layout {
     grid-template-columns: 1fr;
-  }
-
-  .card__recorder-timer {
-    display: none;
   }
 
   .sidebar-resizer {
