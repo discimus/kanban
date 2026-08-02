@@ -175,6 +175,7 @@ function stopInlineRecording(itemId: string): void {
   const controller = rec.controller;
   controller.stop()
     .then((result) => {
+      expandedCards.set(itemId, true);
       const created = audioService.create({
         backlogItemId: itemId,
         dataUrl: result.dataUrl,
@@ -879,8 +880,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const audioCount = audioService.byBacklogItem(item.id).length;
   const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0 || audioCount > 0;
 
-  const bodyExpanded = expandedCards.get(item.id) === true || recording !== undefined;
-  if (recording) expandedCards.set(item.id, true);
+  const bodyExpanded = expandedCards.get(item.id) === true;
   const cardBody = el("div", {
     class: `card__body${bodyExpanded ? " card__body--expanded" : ""}`
   }, []);
