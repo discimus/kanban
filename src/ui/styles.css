@@ -3900,6 +3900,19 @@ h4 {
     gap: 12px;
   }
 
+  .sticky-card {
+    flex: 1 1 100%;
+    width: auto;
+    min-width: 0;
+  }
+
+  .sticky-row__add-card {
+    flex: 1 1 100%;
+    width: auto;
+    min-width: 0;
+    min-height: 72px;
+  }
+
   .column {
     min-height: auto;
   }
@@ -4319,19 +4332,6 @@ h4 {
   .card--note {
     width: 100%;
   }
-
-  .sticky-card {
-    flex: 1 1 100%;
-    width: auto;
-    min-width: 0;
-  }
-
-  .sticky-row__add-card {
-    flex: 1 1 100%;
-    width: auto;
-    min-width: 0;
-    min-height: 72px;
-  }
 }
 
 .classify-popup {
@@ -4431,8 +4431,8 @@ h4 {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 260px;
-  min-width: 260px;
+  width: 320px;
+  min-width: 320px;
   min-height: 140px;
   padding: 12px;
   border: 1px dashed var(--border);
@@ -4470,8 +4470,8 @@ h4 {
 .sticky-card {
   display: flex;
   flex-direction: column;
-  width: 260px;
-  min-width: 260px;
+  width: 320px;
+  min-width: 320px;
   cursor: default;
   background: var(--md-surface-container-low);
 }
