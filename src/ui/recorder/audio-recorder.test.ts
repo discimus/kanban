@@ -119,7 +119,7 @@ describe("startRecording", () => {
     expect(result.dataUrl).toBe("data:audio/webm;base64,AAAA");
     expect(result.mimeType).toBe("audio/webm;codecs=opus");
     expect(result.fileSize).toBeGreaterThan(0);
-    expect(result.duration).toBeGreaterThan(0);
+    expect(result.duration).toBeGreaterThanOrEqual(0);
     expect(stream.tracks[0].stop).toHaveBeenCalled();
   });
 

@@ -57,6 +57,28 @@ describe("releaseAudioPlaybackUrl", () => {
     expect(created).toHaveLength(2);
   });
 
+  it("produces a fresh URL on every render cycle (release-then-recreate)", () => {
+    const first = getAudioPlaybackUrl(DATA_URL);
+    releaseAudioPlaybackUrl(DATA_URL);
+    const second = getAudioPlaybackUrl(DATA_URL);
+    releaseAudioPlaybackUrl(DATA_URL);
+    const third = getAudioPlaybackUrl(DATA_URL);
+
+    expect(second).not.toBe(first);
+    expect(third).not.toBe(second);
+    expect(created).toHaveLength(3);
+    expect(revoked).toEqual([first, second]);
+  });
+
+  it("releasing before a rebuild never hands back a revoked URL", () => {
+    const urls = new Set<string>();
+    for (let i = 0; i < 3; i++) {
+      urls.add(getAudioPlaybackUrl(DATA_URL));
+      releaseAudioPlaybackUrl(DATA_URL);
+    }
+    expect(urls.size).toBe(3);
+  });
+
   it("is a no-op for an unknown data URL", () => {
     expect(() => releaseAudioPlaybackUrl(DATA_URL)).not.toThrow();
     expect(revoked).toHaveLength(0);

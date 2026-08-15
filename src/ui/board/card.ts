@@ -7,7 +7,8 @@ import { imageService } from "@contexts/image/application/image.service";
 import { audioService } from "@contexts/audio/application/audio.service";
 import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
 import { createInlineRecorder, renderRecordingControl, renderRecorderTimer, formatDuration } from "@ui/recorder/inline-recorder";
-import { getAudioPlaybackUrl, releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
+import { createAudioPlayer } from "@ui/recorder/audio-player";
+import { releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
 import { eventBus } from "@shared/events";
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
@@ -452,21 +453,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const audioList = el("div", { class: "card__audios" }, []);
 
   const renderAudios = (): void => {
-    clear(audioList);
     const audios = audioService.byBacklogItem(item.id);
+    for (const a of audios) releaseAudioPlaybackUrl(a.dataUrl);
+    clear(audioList);
     for (const a of audios) {
-      const player = el("audio", { class: "card__audio-player", src: getAudioPlaybackUrl(a.dataUrl), preload: "metadata" }) as HTMLAudioElement;
-
-      const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]);
-      const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;
-      let playing = false;
-      playBtn.addEventListener("click", () => {
-        if (playing) player.pause();
-        else void player.play();
-      });
-      player.addEventListener("play", () => { playing = true; playIcon().textContent = "pause"; });
-      player.addEventListener("pause", () => { playing = false; playIcon().textContent = "play_arrow"; });
-      player.addEventListener("ended", () => { playing = false; playIcon().textContent = "play_arrow"; });
+      const { player, playBtn } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"));
 
       const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
       downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));

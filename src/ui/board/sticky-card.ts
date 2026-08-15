@@ -11,7 +11,8 @@ import { openModal } from "@ui/modal";
 import { openStickyForm } from "@ui/modal/sticky-form";
 import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
 import { createInlineRecorder, renderRecordingControl, renderRecorderTimer, formatDuration } from "@ui/recorder/inline-recorder";
-import { getAudioPlaybackUrl, releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
+import { createAudioPlayer } from "@ui/recorder/audio-player";
+import { releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
 import { eventBus } from "@shared/events";
 
 const expandedStickies = new Map<string, boolean>();
@@ -218,20 +219,11 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   renderImages();
 
   const renderAudios = (): void => {
+    const audios = sticky.audios ?? [];
+    for (const a of audios) releaseAudioPlaybackUrl(a.dataUrl);
     clear(audioList);
-    for (const a of sticky.audios ?? []) {
-      const player = el("audio", { class: "card__audio-player", src: getAudioPlaybackUrl(a.dataUrl), preload: "metadata" }) as HTMLAudioElement;
-
-      const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]);
-      const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;
-      let playing = false;
-      playBtn.addEventListener("click", () => {
-        if (playing) player.pause();
-        else void player.play();
-      });
-      player.addEventListener("play", () => { playing = true; playIcon().textContent = "pause"; });
-      player.addEventListener("pause", () => { playing = false; playIcon().textContent = "play_arrow"; });
-      player.addEventListener("ended", () => { playing = false; playIcon().textContent = "play_arrow"; });
+    for (const a of audios) {
+      const { player, playBtn } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"));
 
       const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
       downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));
