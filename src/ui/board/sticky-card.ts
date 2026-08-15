@@ -11,6 +11,7 @@ import { openModal } from "@ui/modal";
 import { openStickyForm } from "@ui/modal/sticky-form";
 import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
 import { createInlineRecorder, renderRecordingControl, renderRecorderTimer, formatDuration } from "@ui/recorder/inline-recorder";
+import { getAudioPlaybackUrl, releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
 import { eventBus } from "@shared/events";
 
 const expandedStickies = new Map<string, boolean>();
@@ -219,7 +220,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   const renderAudios = (): void => {
     clear(audioList);
     for (const a of sticky.audios ?? []) {
-      const player = el("audio", { class: "card__audio-player", src: a.dataUrl, preload: "metadata" }) as HTMLAudioElement;
+      const player = el("audio", { class: "card__audio-player", src: getAudioPlaybackUrl(a.dataUrl), preload: "metadata" }) as HTMLAudioElement;
 
       const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]);
       const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;
@@ -240,7 +241,10 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
       if (!readOnly) {
         delBtn.addEventListener("click", () => {
           showConfirm(t("card.excluirAudio"), a.filename).then((ok) => {
-            if (ok) stickyService.removeAudio(sticky.id, a.id);
+            if (ok) {
+              stickyService.removeAudio(sticky.id, a.id);
+              releaseAudioPlaybackUrl(a.dataUrl);
+            }
           });
         });
       }

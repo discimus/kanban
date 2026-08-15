@@ -1,0 +1,73 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { getAudioPlaybackUrl, releaseAudioPlaybackUrl, clearAudioPlaybackUrls } from "./audio-url";
+
+const created: string[] = [];
+const revoked: string[] = [];
+let counter = 0;
+
+beforeEach(() => {
+  created.length = 0;
+  revoked.length = 0;
+  counter = 0;
+  vi.stubGlobal("URL", {
+    createObjectURL: vi.fn((_blob: Blob) => {
+      const url = `blob:kanban-${counter++}`;
+      created.push(url);
+      return url;
+    }),
+    revokeObjectURL: vi.fn((url: string) => { revoked.push(url); })
+  });
+});
+
+afterEach(() => {
+  clearAudioPlaybackUrls();
+  vi.unstubAllGlobals();
+});
+
+const DATA_URL = "data:audio/webm;base64,aGVsbG8=";
+
+describe("getAudioPlaybackUrl", () => {
+  it("returns an object URL for a data URL", () => {
+    const url = getAudioPlaybackUrl(DATA_URL);
+    expect(url).toMatch(/^blob:/);
+    expect(created).toHaveLength(1);
+  });
+
+  it("returns an empty string for an empty data URL", () => {
+    expect(getAudioPlaybackUrl("")).toBe("");
+    expect(created).toHaveLength(0);
+  });
+
+  it("caches the object URL per data URL", () => {
+    const first = getAudioPlaybackUrl(DATA_URL);
+    const second = getAudioPlaybackUrl(DATA_URL);
+    expect(second).toBe(first);
+    expect(created).toHaveLength(1);
+  });
+});
+
+describe("releaseAudioPlaybackUrl", () => {
+  it("revokes the cached object URL and removes it from the cache", () => {
+    const url = getAudioPlaybackUrl(DATA_URL);
+    releaseAudioPlaybackUrl(DATA_URL);
+    expect(revoked).toEqual([url]);
+
+    const again = getAudioPlaybackUrl(DATA_URL);
+    expect(again).not.toBe(url);
+    expect(created).toHaveLength(2);
+  });
+
+  it("is a no-op for an unknown data URL", () => {
+    expect(() => releaseAudioPlaybackUrl(DATA_URL)).not.toThrow();
+    expect(revoked).toHaveLength(0);
+  });
+});
+
+describe("clearAudioPlaybackUrls", () => {
+  it("revokes every cached object URL", () => {
+    const a = getAudioPlaybackUrl(DATA_URL);
+    const b = getAudioPlaybackUrl("data:audio/mp4;base64,QUFB");
+    clearAudioPlaybackUrls();
+    expect(revoked).toEqual([a, b]);
+  });
+});
