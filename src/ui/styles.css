@@ -2248,6 +2248,12 @@ button.chip--todo:hover {
   min-width: 0;
 }
 
+.card__audio--next {
+  background: var(--md-primary-container);
+  border-color: var(--md-primary);
+  transition: background 0.15s, border-color 0.15s;
+}
+
 .card__audio-play {
   flex-shrink: 0;
   width: 28px;

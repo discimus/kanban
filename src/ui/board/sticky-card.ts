@@ -12,6 +12,7 @@ import { openStickyForm } from "@ui/modal/sticky-form";
 import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
 import { createInlineRecorder, renderRecordingControl, renderRecorderTimer } from "@ui/recorder/inline-recorder";
 import { createAudioPlayer } from "@ui/recorder/audio-player";
+import { createAudioCascade, type AudioCascade, type CascadeEntry } from "@ui/recorder/audio-cascade";
 import { releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
 import { eventBus } from "@shared/events";
 
@@ -96,6 +97,7 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
   const commentList = el("div", { class: "card__links" }, []);
   const imageList = el("div", { class: "card__images" }, []);
   const audioList = el("div", { class: "card__audios" }, []);
+  let cascade: AudioCascade | null = null;
   const body = el("div", { class: "sticky-card__body" }, []);
 
   const renderLinks = (): void => {
@@ -220,8 +222,10 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
 
   const renderAudios = (): void => {
     const audios = sticky.audios ?? [];
+    cascade?.stop();
     for (const a of audios) releaseAudioPlaybackUrl(a.dataUrl);
     clear(audioList);
+    const entries: CascadeEntry[] = [];
     for (const a of audios) {
       const { player, playBtn, progressBar, durationEl } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"), a.duration);
 
@@ -241,18 +245,19 @@ export function stickyCard(sticky: Sticky, readOnly: boolean): HTMLElement {
         });
       }
 
-      audioList.append(
-        el("div", { class: "card__audio", "data-id": a.id }, [
-          playBtn,
-          el("span", { class: "card__audio-name" }, [a.filename]),
-          durationEl,
-          player,
-          downloadBtn,
-          delBtn,
-          progressBar
-        ])
-      );
+      const row = el("div", { class: "card__audio", "data-id": a.id }, [
+        playBtn,
+        el("span", { class: "card__audio-name" }, [a.filename]),
+        durationEl,
+        player,
+        downloadBtn,
+        delBtn,
+        progressBar
+      ]);
+      audioList.append(row);
+      entries.push({ player, playBtn, row });
     }
+    cascade = createAudioCascade(entries, { onError: () => showToast(t("audio.erroGravar"), "error") });
   };
   renderAudios();
 
