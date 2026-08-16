@@ -2,6 +2,7 @@ import { el, icon } from "@ui/components/dom";
 import { t } from "@shared/i18n";
 import { getAudioPlaybackUrl } from "./audio-url";
 import { formatDuration } from "./inline-recorder";
+import { playStartCue } from "./audio-cue";
 
 export interface AudioPlayerControls {
   player: HTMLAudioElement;
@@ -127,7 +128,9 @@ export function createAudioPlayer(
       player.pause();
       return;
     }
+    const freshStart = player.ended || player.currentTime === 0;
     if (player.ended) player.currentTime = 0;
+    if (freshStart) playStartCue();
     player.play().catch(() => onError?.());
   });
 

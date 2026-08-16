@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createAudioPlayer, computeAudioProgress } from "./audio-player";
+import { playStartCue } from "./audio-cue";
+
+vi.mock("./audio-cue", () => ({ playStartCue: vi.fn() }));
 
 // ---------------------------------------------------------------------------
 // audio-player.ts depends on DOM APIs only at call time. We stub document and
@@ -55,6 +58,7 @@ function makeNode(tag: string): FakeNode {
 
 beforeEach(() => {
   iconText.textContent = "";
+  vi.mocked(playStartCue).mockClear();
   vi.stubGlobal("document", {
     createElement: (tag: string) => makeNode(tag),
     createTextNode: () => ({})
@@ -165,6 +169,39 @@ describe("createAudioPlayer", () => {
     expect(iconText.textContent).toBe("pause");
     player.dispatch("pause");
     expect(iconText.textContent).toBe("play_arrow");
+  });
+
+  it("sounds the start cue on a fresh play from the beginning", () => {
+    const { player, playBtn } = makeControls();
+    player.currentTime = 0;
+    playBtn.dispatch("click");
+    expect(player.play).toHaveBeenCalledTimes(1);
+    expect(playStartCue).toHaveBeenCalledTimes(1);
+  });
+
+  it("sounds the start cue when replaying from the end", () => {
+    const { player, playBtn } = makeControls();
+    player.ended = true;
+    player.currentTime = 8;
+    playBtn.dispatch("click");
+    expect(player.play).toHaveBeenCalledTimes(1);
+    expect(playStartCue).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not sound the cue when pausing", () => {
+    const { player, playBtn } = makeControls();
+    player.dispatch("play");
+    playBtn.dispatch("click");
+    expect(player.pause).toHaveBeenCalledTimes(1);
+    expect(playStartCue).not.toHaveBeenCalled();
+  });
+
+  it("does not sound the cue when resuming mid-track", () => {
+    const { player, playBtn } = makeControls();
+    player.currentTime = 5;
+    playBtn.dispatch("click");
+    expect(player.play).toHaveBeenCalledTimes(1);
+    expect(playStartCue).not.toHaveBeenCalled();
   });
 });
 

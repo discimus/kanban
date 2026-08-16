@@ -1,3 +1,5 @@
+import { playStartCue } from "./audio-cue";
+
 /**
  * Sequencial autoplay ("cascade") for the audio rows inside a card.
  *
@@ -95,6 +97,7 @@ export function createAudioCascade(entries: CascadeEntry[], options?: AudioCasca
       current = next;
       autoStarting.add(next);
       pauseOthers(next);
+      playStartCue();
       entry.player.play().catch(() => {
         autoStarting.delete(next);
         stopCascade();

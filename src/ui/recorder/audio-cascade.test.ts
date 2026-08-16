@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
 import { createAudioCascade, type CascadeEntry } from "./audio-cascade";
+import { playStartCue } from "./audio-cue";
+
+vi.mock("./audio-cue", () => ({ playStartCue: vi.fn() }));
 
 // ---------------------------------------------------------------------------
 // audio-cascade.ts is a pure orchestrator: it only needs players with
@@ -100,6 +103,7 @@ function ends(fixture: Fixture, i: number): void {
 describe("createAudioCascade", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.mocked(playStartCue).mockClear();
   });
 
   afterEach(() => {
@@ -248,5 +252,29 @@ describe("createAudioCascade", () => {
     fixture.rows[1].isConnected = false;
     vi.advanceTimersByTime(300);
     expect(fixture.players[1].play).not.toHaveBeenCalled();
+  });
+
+  it("sounds the start cue for each auto-started track, not while scheduled", () => {
+    const fixture = makeFixture(3);
+    userStarts(fixture, 0);
+    ends(fixture, 0);
+    expect(playStartCue).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(300);
+    expect(playStartCue).toHaveBeenCalledTimes(1);
+
+    ends(fixture, 1);
+    vi.advanceTimersByTime(300);
+    expect(playStartCue).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not sound the cue for an auto-start that never happens", () => {
+    const fixture = makeFixture(2);
+    userStarts(fixture, 0);
+    ends(fixture, 0);
+
+    fixture.rows[1].isConnected = false;
+    vi.advanceTimersByTime(300);
+    expect(playStartCue).not.toHaveBeenCalled();
   });
 });
