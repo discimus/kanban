@@ -122,6 +122,7 @@ export const en: Record<string, string> = {
   "audio.permissaoNegada": "Microphone permission denied. Enable mic access in your browser settings.",
   "audio.erroGravar": "Error recording audio.",
   "audio.erroSalvar": "Could not save the audio. Check the size and try again.",
+  "audio.progress": "Playing audio",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Keyboard Shortcuts",

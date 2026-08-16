@@ -6,7 +6,7 @@ import { commentService } from "@contexts/comment/application/comment.service";
 import { imageService } from "@contexts/image/application/image.service";
 import { audioService } from "@contexts/audio/application/audio.service";
 import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
-import { createInlineRecorder, renderRecordingControl, renderRecorderTimer, formatDuration } from "@ui/recorder/inline-recorder";
+import { createInlineRecorder, renderRecordingControl, renderRecorderTimer } from "@ui/recorder/inline-recorder";
 import { createAudioPlayer } from "@ui/recorder/audio-player";
 import { releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
 import { eventBus } from "@shared/events";
@@ -457,7 +457,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     for (const a of audios) releaseAudioPlaybackUrl(a.dataUrl);
     clear(audioList);
     for (const a of audios) {
-      const { player, playBtn } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"));
+      const { player, playBtn, progressBar, durationEl } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"), a.duration);
 
       const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
       downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));
@@ -479,10 +479,11 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         el("div", { class: "card__audio", "data-id": a.id }, [
           playBtn,
           el("span", { class: "card__audio-name" }, [a.filename]),
-          el("span", { class: "card__audio-duration" }, [formatDuration(a.duration)]),
+          durationEl,
           player,
           downloadBtn,
-          delBtn
+          delBtn,
+          progressBar
         ])
       );
     }

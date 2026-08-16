@@ -2238,6 +2238,7 @@ button.chip--todo:hover {
 
 .card__audio {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
@@ -2292,8 +2293,42 @@ button.chip--todo:hover {
   font-variant-numeric: tabular-nums;
 }
 
+.card__audio-duration--remaining {
+  color: var(--md-primary);
+  font-variant-numeric: tabular-nums;
+}
+
 .card__audio-player {
   display: none;
+}
+
+.card__audio-progress {
+  flex-basis: 100%;
+  height: 4px;
+  margin-top: 2px;
+  background: var(--md-surface-container-highest);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.card__audio-progress[hidden] {
+  display: none;
+}
+
+.card__audio-progress:not([hidden]) {
+  animation: card-audio-progress-in 0.2s ease;
+}
+
+@keyframes card-audio-progress-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card__audio-progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--md-primary);
+  border-radius: var(--radius-pill);
 }
 
 .card__audio-action {

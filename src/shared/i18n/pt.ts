@@ -122,6 +122,7 @@ export const pt: Record<string, string> = {
   "audio.permissaoNegada": "Permissão de microfone negada. Habilite o acesso ao microfone nas configurações do navegador.",
   "audio.erroGravar": "Erro ao gravar o áudio.",
   "audio.erroSalvar": "Não foi possível salvar o áudio. Verifique o tamanho e tente novamente.",
+  "audio.progress": "Reproduzindo áudio",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Atalhos do teclado",
