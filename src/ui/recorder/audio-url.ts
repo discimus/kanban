@@ -12,11 +12,17 @@ import { dataUrlToBlob } from "@shared/storage/blob-store";
 
 const objectUrls = new Map<string, string>();
 
-export function getAudioPlaybackUrl(dataUrl: string): string {
+/**
+ * Resolves an audio data URL into a cached object URL. `mimeType` is used to
+ * type the underlying Blob when the data URL itself carries no mime (older
+ * records can end up as `data:;base64,...`), which iOS Safari refuses to
+ * decode without a type hint.
+ */
+export function getAudioPlaybackUrl(dataUrl: string, mimeType?: string): string {
   if (!dataUrl) return "";
   const cached = objectUrls.get(dataUrl);
   if (cached) return cached;
-  const url = URL.createObjectURL(dataUrlToBlob(dataUrl));
+  const url = URL.createObjectURL(dataUrlToBlob(dataUrl, mimeType));
   objectUrls.set(dataUrl, url);
   return url;
 }

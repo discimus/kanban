@@ -59,9 +59,15 @@ export function computeAudioProgress(total: number, currentTime: number): AudioP
 export function createAudioPlayer(
   dataUrl: string,
   onError?: () => void,
-  knownDuration?: number
+  knownDuration?: number,
+  mimeType?: string
 ): AudioPlayerControls {
-  const player = el("audio", { class: "card__audio-player", src: getAudioPlaybackUrl(dataUrl), preload: "metadata" }) as HTMLAudioElement;
+  const player = el("audio", {
+    class: "card__audio-player",
+    src: getAudioPlaybackUrl(dataUrl, mimeType),
+    preload: "metadata",
+    ...(mimeType ? { type: mimeType } : {})
+  }) as HTMLAudioElement;
 
   const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]) as HTMLButtonElement;
   const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;

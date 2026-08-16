@@ -461,7 +461,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     clear(audioList);
     const entries: CascadeEntry[] = [];
     for (const a of audios) {
-      const { player, playBtn, progressBar, durationEl } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"), a.duration);
+      const { player, playBtn, progressBar, durationEl } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"), a.duration, a.mimeType);
 
       const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
       downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));

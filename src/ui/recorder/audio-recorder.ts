@@ -1,17 +1,9 @@
-export interface RecordedAudio {
-  dataUrl: string;
-  mimeType: string;
-  fileSize: number;
-  duration: number;
-}
+import { MicPermissionError, type AudioRecorderController, type RecordedAudio } from "./audio-recorder-types";
+import { startWavRecording } from "./wav-recorder";
+import { isAppleIOS } from "./platform";
 
-export interface AudioRecorderController {
-  elapsed(): number;
-  stop(): Promise<RecordedAudio>;
-  cancel(): void;
-}
-
-export class MicPermissionError extends Error {}
+export { MicPermissionError };
+export type { AudioRecorderController, RecordedAudio };
 
 /**
  * Recording candidates in priority order.
@@ -42,21 +34,43 @@ export function pickSupportedMimeTypes(isTypeSupported: (mimeType: string) => bo
 
 export function extensionForMimeType(mimeType: string): string {
   if (mimeType.includes("mp4")) return "mp4";
+  if (mimeType.includes("wav")) return "wav";
   if (mimeType.includes("ogg")) return "ogg";
   return "webm";
 }
 
 /**
- * Requests the microphone and starts an audio recording.
+ * Requests the microphone and starts an audio recording, choosing the engine
+ * per platform:
+ * - iOS Safari: Web Audio PCM -> WAV (see wav-recorder.ts). The MediaRecorder
+ *   `audio/mp4` encoder is unreliable there (multiple WebKit regressions), so
+ *   it is avoided. If the WAV capture fails for a non-permission reason, we
+ *   fall back to MediaRecorder rather than giving up.
+ * - Everywhere else: MediaRecorder with the browser's best supported codec.
+ *
  * Resolves with a controller once the mic is granted and the recorder is
  * running; rejects with {@link MicPermissionError} when access is denied.
- *
- * iOS quirk handled here: `MediaRecorder.isTypeSupported()` can report a type
- * as supported while `start()` still throws `NotSupportedError`. Every
- * candidate is therefore tried defensively, falling back to the next one and
- * finally to the browser default (no mimeType) before giving up.
  */
 export async function startRecording(): Promise<AudioRecorderController> {
+  if (isAppleIOS()) {
+    try {
+      return await startWavRecording();
+    } catch (error) {
+      if (error instanceof MicPermissionError) throw error;
+      // WAV capture unavailable (e.g. no AudioContext) — fall through to MediaRecorder.
+    }
+  }
+  return startMediaRecorderRecording();
+}
+
+/**
+ * MediaRecorder-based engine. iOS quirk handled here:
+ * `MediaRecorder.isTypeSupported()` can report a type as supported while
+ * `start()` still throws `NotSupportedError`. Every candidate is therefore
+ * tried defensively, falling back to the next one and finally to the browser
+ * default (no mimeType) before giving up.
+ */
+async function startMediaRecorderRecording(): Promise<AudioRecorderController> {
   if (typeof MediaRecorder === "undefined") {
     throw new Error("Seu navegador não suporta gravação de áudio.");
   }

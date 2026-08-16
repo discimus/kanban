@@ -132,10 +132,10 @@ export async function countBlobBytes(): Promise<number> {
   }
 }
 
-export function dataUrlToBlob(dataUrl: string): Blob {
+export function dataUrlToBlob(dataUrl: string, fallbackMime?: string): Blob {
   const comma = dataUrl.indexOf(",");
   const meta = comma >= 0 ? dataUrl.slice(5, comma) : "";
-  const mime = meta.match(/^([^;]+)/)?.[1] ?? "";
+  const mime = (meta.match(/^([^;]+)/)?.[1] ?? "") || fallbackMime || "";
   const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);

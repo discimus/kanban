@@ -93,3 +93,34 @@ describe("clearAudioPlaybackUrls", () => {
     expect(revoked).toEqual([a, b]);
   });
 });
+
+describe("getAudioPlaybackUrl mime fallback", () => {
+  it("types the blob with the provided mimeType when the data URL carries none", () => {
+    let lastBlobType = "";
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn((blob: Blob) => {
+        lastBlobType = blob.type;
+        return "blob:mime-fallback";
+      }),
+      revokeObjectURL: vi.fn()
+    });
+
+    const url = getAudioPlaybackUrl("data:;base64,Y2FyYW9m", "audio/wav");
+    expect(url).toBe("blob:mime-fallback");
+    expect(lastBlobType).toBe("audio/wav");
+  });
+
+  it("prefers the mime embedded in the data URL over the fallback", () => {
+    let lastBlobType = "";
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn((blob: Blob) => {
+        lastBlobType = blob.type;
+        return "blob:mime-embedded";
+      }),
+      revokeObjectURL: vi.fn()
+    });
+
+    getAudioPlaybackUrl("data:audio/mp4;base64,YmFubmFuYQ==", "audio/wav");
+    expect(lastBlobType).toBe("audio/mp4");
+  });
+});
