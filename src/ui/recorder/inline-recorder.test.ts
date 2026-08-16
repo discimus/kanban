@@ -91,6 +91,34 @@ describe("createInlineRecorder", () => {
     expect(rec.isStarting("a1")).toBe(false);
   });
 
+  it("plays the recording-start cue once the recording is live", async () => {
+    const recordStartCueFn = vi.fn();
+    const rec = createInlineRecorder({
+      startRecordingFn: () => Promise.resolve(makeController().controller),
+      recordStartCueFn,
+      getTimerEl: () => null
+    });
+
+    rec.start("a1", vi.fn());
+    await vi.waitFor(() => expect(rec.isRecording("a1")).toBe(true));
+    expect(recordStartCueFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not play the recording-start cue when start fails", async () => {
+    const recordStartCueFn = vi.fn();
+    const onError = vi.fn();
+    const rec = createInlineRecorder({
+      startRecordingFn: () => Promise.reject(new Error("mic denied")),
+      recordStartCueFn,
+      onError,
+      getTimerEl: () => null
+    });
+
+    rec.start("a1", vi.fn());
+    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(recordStartCueFn).not.toHaveBeenCalled();
+  });
+
   it("stops the controller and resolves onResult with the audio", async () => {
     const onResult = vi.fn();
     const fake = makeController();

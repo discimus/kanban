@@ -1,5 +1,6 @@
 import { el, icon } from "@ui/components/dom";
 import { startRecording, type AudioRecorderController, type RecordedAudio } from "./audio-recorder";
+import { playRecordingStartCue } from "./audio-cue";
 import { t } from "@shared/i18n";
 
 export function formatDuration(seconds: number): string {
@@ -17,6 +18,8 @@ export interface ActiveRecording {
 export interface InlineRecorderOptions {
   /** Injected recorder factory; defaults to the MediaRecorder wrapper. Testable. */
   startRecordingFn?: () => Promise<AudioRecorderController>;
+  /** Injected "recording started" cue; defaults to the synthesized WAV-independent blip. Testable. */
+  recordStartCueFn?: () => void;
   /** Resolves the timer label element for an id; defaults to the card selector. */
   getTimerEl?: (id: string) => HTMLElement | null;
   /** Called once the recording is live (mic granted). */
@@ -48,6 +51,7 @@ interface RecordingEntry extends ActiveRecording {
  */
 export function createInlineRecorder(options: InlineRecorderOptions = {}): InlineRecorder {
   const startRecordingFn = options.startRecordingFn ?? startRecording;
+  const recordStartCueFn = options.recordStartCueFn ?? playRecordingStartCue;
   const getTimerEl = options.getTimerEl ?? ((id: string) =>
     document.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"] .card__recorder-timer`));
 
@@ -79,6 +83,7 @@ export function createInlineRecorder(options: InlineRecorderOptions = {}): Inlin
         startingRecordings.delete(id);
         ensureTimer();
         options.onStarted?.(id);
+        recordStartCueFn();
       })
       .catch((e) => {
         startingRecordings.delete(id);

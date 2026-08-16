@@ -43,9 +43,34 @@ function getAudioContext(): AudioContext | null {
 }
 
 export function playStartCue(options: StartCueOptions = {}): void {
-  const frequency = options.frequency ?? DEFAULT_FREQUENCY;
-  const durationMs = options.durationMs ?? DEFAULT_DURATION_MS;
-  const volume = options.volume ?? DEFAULT_VOLUME;
+  playTone(options);
+}
+
+export interface RecordingStartCueOptions extends StartCueOptions {
+  /** Frequency of the second blip in Hz. */
+  frequencySecond?: number;
+  /** Gap between the two blips in ms. */
+  gapMs?: number;
+}
+
+const DEFAULT_RECORD_FREQUENCY = 988;
+const DEFAULT_RECORD_FREQUENCY_SECOND = 1319;
+const DEFAULT_RECORD_DURATION_MS = 75;
+const DEFAULT_RECORD_GAP_MS = 80;
+const DEFAULT_RECORD_VOLUME = 0.16;
+
+/**
+ * Distinct "recording started" cue: two short ascending blips (B5 -> E6) that
+ * read as "ready, go" instead of the single playback cue. It plays through the
+ * speakers while the mic is already live, so the volume is kept low and the
+ * cue very short to avoid feedback into the recording.
+ */
+export function playRecordingStartCue(options: RecordingStartCueOptions = {}): void {
+  const frequency = options.frequency ?? DEFAULT_RECORD_FREQUENCY;
+  const frequencySecond = options.frequencySecond ?? DEFAULT_RECORD_FREQUENCY_SECOND;
+  const durationMs = options.durationMs ?? DEFAULT_RECORD_DURATION_MS;
+  const gapMs = options.gapMs ?? DEFAULT_RECORD_GAP_MS;
+  const volume = options.volume ?? DEFAULT_RECORD_VOLUME;
 
   try {
     const context = getAudioContext();
@@ -53,6 +78,32 @@ export function playStartCue(options: StartCueOptions = {}): void {
     if (context.state === "suspended") void context.resume();
 
     const now = context.currentTime;
+    const firstStart = now;
+    const secondStart = now + gapMs / 1000;
+
+    playTone({ frequency, durationMs, volume, startAt: firstStart, context });
+    playTone({ frequency: frequencySecond, durationMs, volume, startAt: secondStart, context });
+  } catch {
+    // The cue is a non-critical affordance; never let it break recording.
+  }
+}
+
+interface ToneOptions extends StartCueOptions {
+  startAt?: number;
+  context?: AudioContext;
+}
+
+function playTone(options: ToneOptions = {}): void {
+  const frequency = options.frequency ?? DEFAULT_FREQUENCY;
+  const durationMs = options.durationMs ?? DEFAULT_DURATION_MS;
+  const volume = options.volume ?? DEFAULT_VOLUME;
+
+  try {
+    const context = options.context ?? getAudioContext();
+    if (!context) return;
+    if (context.state === "suspended") void context.resume();
+
+    const now = options.startAt ?? context.currentTime;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
 
