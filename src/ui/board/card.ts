@@ -742,7 +742,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             },
             {
               label: t("card.excluirTabela"),
-              icon: "table_rows_off",
+              icon: "delete",
               danger: true,
               action: locked ? lockedAlert : () => {
                 showConfirm(t("card.excluirTabelaConfirm"), item.title).then((ok) => {
