@@ -4668,17 +4668,38 @@ h4 {
 
 .badge--grid {
   width: auto;
-  padding: 0 6px;
-  gap: 2px;
-  border-radius: var(--radius-pill);
+  height: auto;
+  padding: 2px 7px;
+  gap: 3px;
+  border-radius: 8px;
   background: var(--md-secondary-container);
   color: var(--md-on-secondary-container);
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.62rem;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .badge--grid .material-symbols-outlined {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+}
+
+button.badge--grid {
+  border: none;
+  padding: 2px 7px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+button.badge--grid:hover {
+  filter: brightness(0.92);
+}
+
+button.badge--grid:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
 }
 
 .card__grid {

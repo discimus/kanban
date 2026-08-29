@@ -715,9 +715,33 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: t("card.comentario"), icon: "chat", action: locked ? lockedAlert : addComment },
             { label: t("card.link"), icon: "link", action: locked ? lockedAlert : addLink },
             { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage },
-            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r)) },
-            ...(gridTable ? [] : [{ label: t("card.adicionarTabela"), icon: "table_rows", action: locked ? lockedAlert : addTable }])
+            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r)) }
           ]},
+          ...(gridTable
+            ? [
+                {
+                  label: t("card.abrirTabela"),
+                  icon: "table_rows",
+                  action: locked ? lockedAlert : () => openGridModal(item.id, readOnly)
+                },
+                {
+                  label: t("card.excluirTabela"),
+                  icon: "delete",
+                  danger: true,
+                  action: locked ? lockedAlert : () => {
+                    showConfirm(t("card.excluirTabelaConfirm"), item.title).then((ok) => {
+                      if (ok) gridService.delete(gridTable.id);
+                    });
+                  }
+                }
+              ]
+            : [
+                {
+                  label: t("card.adicionarTabela"),
+                  icon: "table_rows",
+                  action: locked ? lockedAlert : addTable
+                }
+              ]),
           {
             label: t("card.copiarTitulo"),
             icon: "content_copy",
@@ -734,23 +758,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             icon: "sticky_note_2",
             action: locked ? lockedAlert : () => convertToNote(item)
           }]),
-          ...(gridTable ? [
-            {
-              label: t("card.abrirTabela"),
-              icon: "table_rows",
-              action: locked ? lockedAlert : () => openGridModal(item.id, readOnly)
-            },
-            {
-              label: t("card.excluirTabela"),
-              icon: "delete",
-              danger: true,
-              action: locked ? lockedAlert : () => {
-                showConfirm(t("card.excluirTabelaConfirm"), item.title).then((ok) => {
-                  if (ok) gridService.delete(gridTable.id);
-                });
-              }
-            }
-          ] : []),
           { label: t("card.arquivar"), icon: "archive", action: () => backlogService.archive(item.id) },
           {
             label: t("card.excluir"),
@@ -872,10 +879,19 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       ]),
       el("div", { class: "card__trailing" }, [
         audioCount > 0 ? el("span", { class: "badge badge--audio", title: t("card.comAudio") }, [icon("graphic_eq")]) : null,
-        gridTable ? el("span", {
-          class: "badge badge--grid",
-          title: t("grid.resumo", { n: gridTable.rows.length, m: gridTable.columns.length })
-        }, [icon("table_rows"), `${gridTable.rows.length}×${gridTable.columns.length}`]) : null,
+        gridTable ? (() => {
+          const badge = el("button", {
+            class: "badge badge--grid",
+            type: "button",
+            title: t("grid.abrirEditor"),
+            "aria-label": t("grid.resumo", { n: gridTable.rows.length, m: gridTable.columns.length })
+          }, [icon("table_rows"), `${gridTable.rows.length}×${gridTable.columns.length}`]);
+          badge.addEventListener("click", () => {
+            if (locked) lockedAlert();
+            else openGridModal(item.id, readOnly);
+          });
+          return badge;
+        })() : null,
         minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
         pointsBtn
       ])
@@ -916,14 +932,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
         { icon: "link", label: t("card.adicionarLink"), action: locked ? lockedAlert : addLink },
         { icon: "add_photo_alternate", label: t("card.adicionarImagem"), action: locked ? lockedAlert : addImage },
         {
-          icon: "table_rows",
-          label: gridTable ? t("card.abrirTabela") : t("card.adicionarTabela"),
-          action: locked ? lockedAlert : () => {
-            if (gridTable) openGridModal(item.id, readOnly);
-            else addTable();
-          }
-        },
-        {
           icon: "mic",
           label: t("card.adicionarAudio"),
           action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r))
@@ -937,7 +945,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           ]
         : [
             el("div", { class: "card__actions-inline" }, [
-              ...footerActionItems.slice(0, 5).map((a) => cardActionBtn(a.icon, a.label, a.action)),
+              ...footerActionItems.slice(0, 4).map((a) => cardActionBtn(a.icon, a.label, a.action)),
               renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
             ]),
             el("div", { class: "card__actions-menu" }, [
