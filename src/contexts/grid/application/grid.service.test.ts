@@ -99,9 +99,12 @@ describe("gridService", () => {
       expect(updated.rows[0].cells.c2).toBe("y");
     });
 
-    it("deleteColumn throws when it is the last column", () => {
-      state.gridTables = [makeTable()];
-      expect(() => gridService.deleteColumn("g1", "c1")).toThrow(Error);
+    it("deleteColumn allows removing the last column and strips its cells", () => {
+      state.gridTables = [makeTable({ rows: [{ id: "r1", cells: { c1: "x" } }] })];
+      const updated = gridService.deleteColumn("g1", "c1");
+      expect(updated.columns).toEqual([]);
+      expect(updated.rows[0].cells.c1).toBeUndefined();
+      expect(state.gridTables![0].columns).toEqual([]);
     });
 
     it("deleteRow removes the row", () => {

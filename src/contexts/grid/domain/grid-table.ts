@@ -38,7 +38,6 @@ export function renameGridColumn(table: GridTable, columnId: string, name: strin
 }
 
 export function deleteGridColumn(table: GridTable, columnId: string): GridTable {
-  if (table.columns.length <= 1) throw new Error("Uma tabela precisa de pelo menos uma coluna.");
   return {
     ...table,
     columns: table.columns.filter((c) => c.id !== columnId),

@@ -4819,6 +4819,28 @@ h4 {
   color: var(--md-primary);
 }
 
+.grid__empty-cell {
+  border: none;
+}
+
+.grid__empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  min-width: 220px;
+}
+
+.grid__empty-text {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.grid__empty-btn {
+  flex-shrink: 0;
+}
+
 .grid__row-del {
   width: 24px;
   height: 24px;

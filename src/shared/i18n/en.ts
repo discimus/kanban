@@ -135,6 +135,7 @@ export const en: Record<string, string> = {
   "grid.excluirLinhaConfirm": "Delete this row?",
   "grid.abrirEditor": "Open table editor",
   "grid.resumo": "Table: {n} rows × {m} columns",
+  "grid.semColunas": "No columns yet — add one.",
 
   /* ====== Audio ====== */
   "audio.parar": "Stop",

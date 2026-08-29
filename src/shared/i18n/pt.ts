@@ -135,6 +135,7 @@ export const pt: Record<string, string> = {
   "grid.excluirLinhaConfirm": "Excluir esta linha?",
   "grid.abrirEditor": "Abrir editor da tabela",
   "grid.resumo": "Tabela: {n} linhas × {m} colunas",
+  "grid.semColunas": "Nenhuma coluna ainda — adicione uma.",
 
   /* ====== Audio ====== */
   "audio.parar": "Parar",

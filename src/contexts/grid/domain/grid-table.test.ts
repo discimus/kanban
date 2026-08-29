@@ -71,9 +71,11 @@ describe("deleteGridColumn", () => {
     expect(result.rows[0].cells[colId]).toBeUndefined();
   });
 
-  it("throws when deleting the last remaining column", () => {
+  it("allows deleting the last remaining column", () => {
     const t = createGridTable({ backlogItemId: "b1" });
-    expect(() => deleteGridColumn(t, t.columns[0].id)).toThrow(Error);
+    const result = deleteGridColumn(t, t.columns[0].id);
+    expect(result.columns).toEqual([]);
+    expect(result.rows).toEqual([]);
   });
 });
 

@@ -7,7 +7,6 @@ import { t } from "@shared/i18n";
 export interface RenderGridOptions {
   readOnly: boolean;
   onExpand?: () => void;
-  onChange?: (table: GridTable) => void;
   maximized?: boolean;
   onEdit?: () => void;
   /** Container estável que persiste entre re-renders (ex.: corpo do modal). */
@@ -70,7 +69,6 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       r += dir.row;
       if (r >= current.rows.length && dir.row > 0) {
         current = gridService.addRow(current.id);
-        opts.onChange?.(current);
         r = current.rows.length - 1;
       }
     }
@@ -81,7 +79,6 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
         r += 1;
         if (r >= current.rows.length) {
           current = gridService.addRow(current.id);
-          opts.onChange?.(current);
           r = current.rows.length - 1;
         }
       } else if (c < 0) {
@@ -119,8 +116,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       done = true;
       const value = input.value;
       if (value === initial) return;
-      const updated = gridService.setCell(table.id, row.id, column.id, value);
-      opts.onChange?.(updated);
+      gridService.setCell(table.id, row.id, column.id, value);
     };
     const dirty = (): boolean => input.value !== initial;
 
@@ -138,16 +134,14 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
         ev.preventDefault();
         done = true;
         if (input.value !== initial) {
-          const updated = gridService.setCell(table.id, row.id, column.id, input.value);
-          opts.onChange?.(updated);
+          gridService.setCell(table.id, row.id, column.id, input.value);
         }
         moveTo(row.id, column.id, { row: 1 });
       } else if (ev.key === "Tab") {
         ev.preventDefault();
         done = true;
         if (input.value !== initial) {
-          const updated = gridService.setCell(table.id, row.id, column.id, input.value);
-          opts.onChange?.(updated);
+          gridService.setCell(table.id, row.id, column.id, input.value);
         }
         moveTo(row.id, column.id, { col: ev.shiftKey ? -1 : 1 });
       }
@@ -243,7 +237,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
     document.body.appendChild(popup);
 
     const close = (e: Event): void => {
-      if (!popup.contains(e.target as Node) && e.target !== anchor) {
+      if (!popup.contains(e.target as Node) && !anchor.contains(e.target as Node)) {
         popup.remove();
         document.removeEventListener("click", close);
         document.removeEventListener("scroll", close);
@@ -268,56 +262,87 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
         title: t("grid.opcoesColuna")
       }, [icon("more_vert")]);
       trigger.addEventListener("mousedown", (ev) => ev.preventDefault());
-      trigger.addEventListener("click", () => openColumnMenu(trigger, column));
+      trigger.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openColumnMenu(trigger, column);
+      });
       th.append(trigger);
     }
     return th;
+  };
+
+  const createAddColumnButton = (): HTMLElement => {
+    const btn = el("button", {
+      class: "grid__addcol",
+      type: "button",
+      "aria-label": t("grid.adicionarColuna"),
+      title: t("grid.adicionarColuna")
+    }, [icon("add")]);
+    btn.addEventListener("mousedown", (ev) => ev.preventDefault());
+    btn.addEventListener("click", () => {
+      flushPendingEdits();
+      opts.onEdit?.();
+      gridService.addColumn(table.id, t("grid.novaColuna"));
+    });
+    return btn;
   };
 
   const headerRow = el("tr", { class: "grid__row grid__row--header" }, []);
   for (const column of table.columns) headerRow.append(renderColumnHeader(column));
 
   if (!readOnly) {
-    const addCol = el("button", {
-      class: "grid__addcol",
-      type: "button",
-      "aria-label": t("grid.adicionarColuna"),
-      title: t("grid.adicionarColuna")
-    }, [icon("add")]);
-    addCol.addEventListener("mousedown", (ev) => ev.preventDefault());
-    addCol.addEventListener("click", () => {
-      flushPendingEdits();
-      opts.onEdit?.();
-      gridService.addColumn(table.id, t("grid.novaColuna"));
-    });
-    headerRow.append(el("th", { class: "grid__addcol-wrap", scope: "col" }, [addCol]));
+    headerRow.append(el("th", { class: "grid__addcol-wrap", scope: "col" }, [createAddColumnButton()]));
   }
 
   gridTable.append(el("thead", {}, [headerRow]));
 
   const tbody = el("tbody", {}, []);
-  for (const row of table.rows) {
-    const tr = el("tr", { class: "grid__row", "data-grid-row": row.id }, []);
-    for (const column of table.columns) {
-      tr.append(el("td", { class: "grid__cell" }, [createCellEditor(row, column)]));
-    }
-    if (!readOnly) {
-      const del = el("button", {
-        class: "grid__row-del",
-        type: "button",
-        "aria-label": t("grid.excluirLinha"),
-        title: t("grid.excluirLinha")
-      }, [icon("close")]);
-      del.addEventListener("mousedown", (ev) => ev.preventDefault());
-      del.addEventListener("click", () => {
+
+  if (table.columns.length === 0) {
+    const emptyBtn = readOnly ? null : el("button", {
+      class: "btn btn--tonal btn--sm grid__empty-btn",
+      type: "button"
+    }, [icon("add"), t("grid.adicionarColuna")]);
+    if (emptyBtn) {
+      emptyBtn.addEventListener("mousedown", (ev) => ev.preventDefault());
+      emptyBtn.addEventListener("click", () => {
         flushPendingEdits();
-        showConfirm(t("grid.excluirLinhaConfirm")).then((ok) => {
-          if (ok) gridService.deleteRow(table.id, row.id);
-        });
+        opts.onEdit?.();
+        gridService.addColumn(table.id, t("grid.novaColuna"));
       });
-      tr.append(el("td", { class: "grid__cell grid__cell--rowdel" }, [del]));
     }
-    tbody.append(tr);
+    tbody.append(el("tr", { class: "grid__row grid__row--empty" }, [
+      el("td", { class: "grid__empty-cell", colSpan: 1 }, [
+        el("div", { class: "grid__empty" }, [
+          el("span", { class: "grid__empty-text" }, [t("grid.semColunas")]),
+          emptyBtn
+        ])
+      ])
+    ]));
+  } else {
+    for (const row of table.rows) {
+      const tr = el("tr", { class: "grid__row", "data-grid-row": row.id }, []);
+      for (const column of table.columns) {
+        tr.append(el("td", { class: "grid__cell" }, [createCellEditor(row, column)]));
+      }
+      if (!readOnly) {
+        const del = el("button", {
+          class: "grid__row-del",
+          type: "button",
+          "aria-label": t("grid.excluirLinha"),
+          title: t("grid.excluirLinha")
+        }, [icon("close")]);
+        del.addEventListener("mousedown", (ev) => ev.preventDefault());
+        del.addEventListener("click", () => {
+          flushPendingEdits();
+          showConfirm(t("grid.excluirLinhaConfirm")).then((ok) => {
+            if (ok) gridService.deleteRow(table.id, row.id);
+          });
+        });
+        tr.append(el("td", { class: "grid__cell grid__cell--rowdel" }, [del]));
+      }
+      tbody.append(tr);
+    }
   }
   gridTable.append(tbody);
 
@@ -330,8 +355,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
     addRow.addEventListener("click", () => {
       flushPendingEdits();
       opts.onEdit?.();
-      const updated = gridService.addRow(table.id);
-      opts.onChange?.(updated);
+      gridService.addRow(table.id);
     });
     footer.append(addRow);
 
