@@ -1,5 +1,6 @@
 import { el, icon } from "@ui/components/dom";
 import { GridTable, GridColumn, GridRow } from "@shared/types";
+import { linkify } from "@shared/utils";
 import { gridService } from "@contexts/grid/application/grid.service";
 import { showConfirm, showAlert } from "@ui/components/dialog";
 import { t } from "@shared/i18n";
@@ -131,7 +132,16 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
         "data-grid-row": row.id,
         "data-grid-cell": column.id,
         "aria-label": `${column.name}: ${initial}`
-      }, [initial]);
+      }, linkify(initial).map((part) => {
+        if (!part.url) return part.text;
+        return el("a", {
+          class: "grid__link",
+          href: part.url,
+          target: "_blank",
+          rel: "noopener",
+          title: part.url
+        }, [part.text]);
+      }));
     }
 
     const input = el("input", {
@@ -417,7 +427,8 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
 
   if (readOnly && opts.onExpand) {
     wrap.addEventListener("click", (ev) => {
-      if ((ev.target as HTMLElement).closest("button")) return;
+      const target = ev.target as HTMLElement;
+      if (target.closest("button") || target.closest("a")) return;
       opts.onExpand?.();
     });
   }

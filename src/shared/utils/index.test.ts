@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { uuid, nowISO, formatDate, toDateInputValue, fromDateInputValue, timeAgo } from "@shared/utils";
+import { uuid, nowISO, formatDate, toDateInputValue, fromDateInputValue, timeAgo, linkify } from "@shared/utils";
 
 describe("uuid", () => {
   it("returns a non-empty string", () => {
@@ -121,5 +121,64 @@ describe("fromDateInputValue", () => {
   it("returns an ISO string for a valid date input", () => {
     const result = fromDateInputValue("2024-03-15");
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  });
+});
+
+describe("linkify", () => {
+  it("returns a single text part when there is no URL", () => {
+    expect(linkify("apenas texto")).toEqual([{ text: "apenas texto" }]);
+  });
+
+  it("returns an empty array for an empty string", () => {
+    expect(linkify("")).toEqual([]);
+  });
+
+  it("links an https URL inside a sentence", () => {
+    expect(linkify("veja https://exemplo.com agora")).toEqual([
+      { text: "veja " },
+      { text: "https://exemplo.com", url: "https://exemplo.com" },
+      { text: " agora" }
+    ]);
+  });
+
+  it("normalizes www without a scheme to https", () => {
+    expect(linkify("www.exemplo.com")).toEqual([
+      { text: "www.exemplo.com", url: "https://www.exemplo.com" }
+    ]);
+  });
+
+  it("keeps query punctuation intact", () => {
+    expect(linkify("https://x.com/busca?q=a,b")).toEqual([
+      { text: "https://x.com/busca?q=a,b", url: "https://x.com/busca?q=a,b" }
+    ]);
+  });
+
+  it("strips trailing sentence punctuation from the URL and keeps it as text", () => {
+    expect(linkify("veja https://x.com.")).toEqual([
+      { text: "veja " },
+      { text: "https://x.com", url: "https://x.com" },
+      { text: "." }
+    ]);
+  });
+
+  it("strips an unbalanced closing paren", () => {
+    expect(linkify("https://x.com)")).toEqual([
+      { text: "https://x.com", url: "https://x.com" },
+      { text: ")" }
+    ]);
+  });
+
+  it("keeps balanced parens inside the URL", () => {
+    expect(linkify("https://en.wikipedia.org/wiki/Foo_(bar)")).toEqual([
+      { text: "https://en.wikipedia.org/wiki/Foo_(bar)", url: "https://en.wikipedia.org/wiki/Foo_(bar)" }
+    ]);
+  });
+
+  it("handles multiple URLs in one cell", () => {
+    expect(linkify("https://a.com e www.b.com")).toEqual([
+      { text: "https://a.com", url: "https://a.com" },
+      { text: " e " },
+      { text: "www.b.com", url: "https://www.b.com" }
+    ]);
   });
 });
