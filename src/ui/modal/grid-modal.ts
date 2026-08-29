@@ -36,4 +36,5 @@ export function openGridModal(backlogItemId: string, readOnly = false): void {
     autoFocus: false,
     onClose: () => unsubscribe()
   });
+  document.querySelector(".modal")?.classList.add("modal--grid");
 }

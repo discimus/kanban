@@ -4968,6 +4968,30 @@ h4 {
   min-height: 240px;
 }
 
+/* Editor de grid: o modal cresce com linhas/colunas, limitado a ~90% do viewport */
+.modal--grid {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  min-width: min(360px, 90vw);
+  max-width: min(90vw, calc(100vw - 48px));
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal--grid .modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  padding: 20px;
+}
+
+.modal--grid .grid-modal {
+  width: fit-content;
+  min-width: min(320px, 90vw);
+}
+
 @media (max-width: 720px) {
   .grid__scroll {
     -webkit-overflow-scrolling: touch;
