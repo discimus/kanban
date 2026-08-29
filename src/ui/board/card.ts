@@ -910,21 +910,39 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     }
 
     if (showActions) {
+      const footerActionItems = [
+        { icon: "playlist_add", label: t("card.adicionarSubtarefa"), action: locked ? lockedAlert : addSubtask },
+        { icon: "chat", label: t("card.adicionarComentario"), action: locked ? lockedAlert : addComment },
+        { icon: "link", label: t("card.adicionarLink"), action: locked ? lockedAlert : addLink },
+        { icon: "add_photo_alternate", label: t("card.adicionarImagem"), action: locked ? lockedAlert : addImage },
+        {
+          icon: "table_rows",
+          label: gridTable ? t("card.abrirTabela") : t("card.adicionarTabela"),
+          action: locked ? lockedAlert : () => {
+            if (gridTable) openGridModal(item.id, readOnly);
+            else addTable();
+          }
+        },
+        {
+          icon: "mic",
+          label: t("card.adicionarAudio"),
+          action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r))
+        }
+      ];
+
       const actionsFooter = el("div", { class: `card__footer-actions${recording ? " card__footer-actions--recording" : ""}` }, recording
         ? [
             renderRecorderTimer(recording),
             renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
           ]
         : [
-            cardActionBtn("playlist_add", t("card.adicionarSubtarefa"), locked ? lockedAlert : addSubtask),
-            cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
-            cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
-            cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
-            cardActionBtn("table_rows", gridTable ? t("card.abrirTabela") : t("card.adicionarTabela"), locked ? lockedAlert : () => {
-              if (gridTable) openGridModal(item.id, readOnly);
-              else addTable();
-            }),
-            renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
+            el("div", { class: "card__actions-inline" }, [
+              ...footerActionItems.slice(0, 5).map((a) => cardActionBtn(a.icon, a.label, a.action)),
+              renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
+            ]),
+            el("div", { class: "card__actions-menu" }, [
+              actionsMenu(footerActionItems.map((a) => ({ label: a.label, icon: a.icon, action: a.action })))
+            ])
           ]);
       footer.append(actionsFooter);
     }

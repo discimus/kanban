@@ -2410,6 +2410,20 @@ button.chip--todo:hover {
   color: var(--md-on-primary-container);
 }
 
+/* Ações do rodapé: em cards estreitos colapsam em um menu ⋮ */
+.card__actions-menu {
+  display: none;
+}
+
+@container (max-width: 300px) {
+  .card__actions-inline {
+    display: none;
+  }
+  .card__actions-menu {
+    display: block;
+  }
+}
+
 /* Inline audio recording: red stop button + elapsed-time label */
 .card__action-btn--recording {
   background: var(--md-error-container);
