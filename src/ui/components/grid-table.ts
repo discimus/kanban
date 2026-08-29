@@ -8,7 +8,6 @@ export interface RenderGridOptions {
   readOnly: boolean;
   onExpand?: () => void;
   maximized?: boolean;
-  onEdit?: () => void;
   /** Container estável que persiste entre re-renders (ex.: corpo do modal). */
   scopeRoot?: HTMLElement | null;
 }
@@ -28,7 +27,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
   const readOnly = opts.readOnly;
 
   const wrap = el("div", {
-    class: `grid${opts.maximized ? " grid--maximized" : ""}`,
+    class: `grid${opts.maximized ? " grid--maximized" : ""}${readOnly ? " grid--readonly" : ""}`,
     "data-grid-instance": instanceId,
     "data-grid-id": table.id,
     role: "region",
@@ -74,14 +73,12 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
 
   const addColumn = (): void => {
     flushPendingEdits();
-    opts.onEdit?.();
     const updated = gridService.addColumn(table.id, t("grid.novaColuna"));
     flashNewColumn(updated.columns[updated.columns.length - 1].id);
   };
 
   const addRow = (): void => {
     flushPendingEdits();
-    opts.onEdit?.();
     const updated = gridService.addRow(table.id);
     flashNewRow(updated.rows[updated.rows.length - 1].id);
   };
@@ -126,8 +123,17 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
     requestAnimationFrame(() => focusGridCell(targetRow.id, targetCol.id));
   };
 
-  const createCellEditor = (row: GridRow, column: GridColumn): HTMLInputElement => {
+  const createCellEditor = (row: GridRow, column: GridColumn): HTMLElement => {
     const initial = row.cells[column.id] ?? "";
+    if (readOnly) {
+      return el("span", {
+        class: "grid__value",
+        "data-grid-row": row.id,
+        "data-grid-cell": column.id,
+        "aria-label": `${column.name}: ${initial}`
+      }, [initial]);
+    }
+
     const input = el("input", {
       class: "grid__input",
       type: "text",
@@ -136,8 +142,6 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       "data-grid-cell": column.id,
       "aria-label": `${column.name}: ${initial}`
     }) as HTMLInputElement;
-    input.disabled = readOnly;
-    if (readOnly) return input;
 
     let done = false;
     const commit = (): void => {
@@ -152,7 +156,6 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
     (input as unknown as { _commit?: () => void; _dirty?: () => boolean })._commit = commit;
     (input as unknown as { _dirty?: () => boolean })._dirty = dirty;
 
-    input.addEventListener("focus", () => opts.onEdit?.());
     input.addEventListener("blur", commit);
     input.addEventListener("keydown", (ev) => {
       if (ev.key === "Escape") {
@@ -207,7 +210,6 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       done = true;
       const value = input.value.trim();
       if (value && value !== column.name) {
-        opts.onEdit?.();
         gridService.renameColumn(table.id, column.id, value);
       } else {
         restore();
@@ -278,25 +280,28 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
 
   const renderColumnHeader = (column: GridColumn): HTMLElement => {
     const th = el("th", { class: "grid__cell grid__cell--header", scope: "col", "data-grid-col": column.id }, []);
+    if (readOnly) {
+      th.append(el("span", { class: "grid__col-label", title: column.name }, [column.name]));
+      return th;
+    }
+
     const label = el("button", { class: "grid__col-label", type: "button", title: column.name }, [column.name]);
     label.addEventListener("mousedown", (ev) => ev.preventDefault());
     label.addEventListener("click", () => startColumnRename(column));
     th.append(label);
 
-    if (!readOnly) {
-      const trigger = el("button", {
-        class: "actions-menu__trigger grid__col-menu-btn",
-        type: "button",
-        "aria-label": t("grid.opcoesColuna"),
-        title: t("grid.opcoesColuna")
-      }, [icon("more_vert")]);
-      trigger.addEventListener("mousedown", (ev) => ev.preventDefault());
-      trigger.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        openColumnMenu(trigger, column);
-      });
-      th.append(trigger);
-    }
+    const trigger = el("button", {
+      class: "actions-menu__trigger grid__col-menu-btn",
+      type: "button",
+      "aria-label": t("grid.opcoesColuna"),
+      title: t("grid.opcoesColuna")
+    }, [icon("more_vert")]);
+    trigger.addEventListener("mousedown", (ev) => ev.preventDefault());
+    trigger.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openColumnMenu(trigger, column);
+    });
+    th.append(trigger);
     return th;
   };
 
@@ -369,28 +374,28 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
 
   wrap.append(el("div", { class: "grid__scroll" }, [gridTable]));
 
+  const footer = el("div", { class: "grid__footer" }, []);
   if (!readOnly) {
-    const footer = el("div", { class: "grid__footer" }, []);
     const addRowBtn = el("button", { class: "grid__add-row", type: "button" }, [icon("add"), t("grid.adicionarLinha")]);
     addRowBtn.addEventListener("mousedown", (ev) => ev.preventDefault());
     addRowBtn.addEventListener("click", addRow);
     footer.append(addRowBtn);
-
-    footer.append(el("span", { class: "grid__badge" }, [`${table.rows.length} × ${table.columns.length}`]));
-
-    if (opts.onExpand) {
-      const expand = el("button", {
-        class: "grid__expand",
-        type: "button",
-        "aria-label": t("grid.abrirEditor"),
-        title: t("grid.abrirEditor")
-      }, [icon("table_view")]);
-      expand.addEventListener("mousedown", (ev) => ev.preventDefault());
-      expand.addEventListener("click", opts.onExpand);
-      footer.append(expand);
-    }
-    wrap.append(footer);
   }
+
+  footer.append(el("span", { class: "grid__badge" }, [`${table.rows.length} × ${table.columns.length}`]));
+
+  if (opts.onExpand) {
+    const expand = el("button", {
+      class: "grid__expand",
+      type: "button",
+      "aria-label": t("grid.abrirEditor"),
+      title: t("grid.abrirEditor")
+    }, [icon("table_view")]);
+    expand.addEventListener("mousedown", (ev) => ev.preventDefault());
+    expand.addEventListener("click", opts.onExpand);
+    footer.append(expand);
+  }
+  wrap.append(footer);
 
   wrap.addEventListener("mousedown", (ev) => {
     const target = ev.target as HTMLElement;
@@ -404,12 +409,18 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       const activeDirty = (active as unknown as { _dirty?: () => boolean } | null)?._dirty?.();
       if (activeDirty === true) {
         ev.preventDefault();
-        opts.onEdit?.();
         flushPendingEdits();
         requestAnimationFrame(() => focusGridCell(cellInput.dataset.gridRow!, cellInput.dataset.gridCell!));
       }
     }
   });
+
+  if (readOnly && opts.onExpand) {
+    wrap.addEventListener("click", (ev) => {
+      if ((ev.target as HTMLElement).closest("button")) return;
+      opts.onExpand?.();
+    });
+  }
 
   return wrap;
 }

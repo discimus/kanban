@@ -844,15 +844,6 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
     class: `card__body${bodyExpanded ? " card__body--expanded" : ""}`
   }, []);
 
-  const expandCard = (): void => {
-    if (cardBody.classList.contains("card__body--expanded")) return;
-    expandedCards.set(item.id, true);
-    cardBody.classList.add("card__body--expanded");
-    if (expandBtn) {
-      expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, [t("card.recolher")]));
-    }
-  };
-
   if (item.description) {
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
@@ -860,8 +851,7 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const gridSlot = el("div", { class: "card__grid" }, []);
   if (gridTable) {
     gridSlot.append(renderGridTable(gridTable, {
-      readOnly,
-      onEdit: expandCard,
+      readOnly: true,
       onExpand: () => openGridModal(item.id, readOnly)
     }));
   }

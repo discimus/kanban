@@ -4743,6 +4743,26 @@ h4 {
   background: var(--md-surface-container-high);
 }
 
+/* Células de exibição (read-only) */
+.grid__value {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 10px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid--readonly .grid__col-label {
+  cursor: default;
+}
+
+.grid--readonly .grid__col-label:hover {
+  background: transparent;
+}
+
 .grid__cell--header .grid__col-menu-btn {
   position: absolute;
   top: 3px;
