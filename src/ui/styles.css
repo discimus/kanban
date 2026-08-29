@@ -4841,6 +4841,36 @@ h4 {
   flex-shrink: 0;
 }
 
+/* Realce transitório de coluna/linha recém-criada (MD3) */
+.grid__col--new {
+  animation: grid-new-bg-header 1.1s ease-out;
+}
+
+.grid__cell--new,
+.grid__row--new .grid__cell {
+  animation: grid-new-bg 1.1s ease-out;
+}
+
+@keyframes grid-new-bg {
+  0%   { background-color: var(--md-primary-container); }
+  30%  { background-color: var(--md-primary-container); }
+  100% { background-color: transparent; }
+}
+
+@keyframes grid-new-bg-header {
+  0%   { background-color: var(--md-primary-container); }
+  30%  { background-color: var(--md-primary-container); }
+  100% { background-color: var(--md-surface-container-low); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid__col--new,
+  .grid__cell--new,
+  .grid__row--new .grid__cell {
+    animation: none;
+  }
+}
+
 .grid__row-del {
   width: 24px;
   height: 24px;

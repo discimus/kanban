@@ -59,6 +59,33 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
     cell.setSelectionRange(len, len);
   };
 
+  const flashNewColumn = (colId: string): void => {
+    const scope = opts.scopeRoot ?? document;
+    scope.querySelector<HTMLElement>(`th[data-grid-col="${colId}"]`)?.classList.add("grid__col--new");
+    scope.querySelectorAll<HTMLInputElement>(`input[data-grid-cell="${colId}"]`).forEach((cell) => {
+      cell.closest("td")?.classList.add("grid__cell--new");
+    });
+  };
+
+  const flashNewRow = (rowId: string): void => {
+    const scope = opts.scopeRoot ?? document;
+    scope.querySelector<HTMLElement>(`tr[data-grid-row="${rowId}"]`)?.classList.add("grid__row--new");
+  };
+
+  const addColumn = (): void => {
+    flushPendingEdits();
+    opts.onEdit?.();
+    const updated = gridService.addColumn(table.id, t("grid.novaColuna"));
+    flashNewColumn(updated.columns[updated.columns.length - 1].id);
+  };
+
+  const addRow = (): void => {
+    flushPendingEdits();
+    opts.onEdit?.();
+    const updated = gridService.addRow(table.id);
+    flashNewRow(updated.rows[updated.rows.length - 1].id);
+  };
+
   const moveTo = (rowId: string, columnId: string, dir: { row?: number; col?: number }): void => {
     let current = gridService.getForBacklogItem(table.backlogItemId) ?? table;
     let r = current.rows.findIndex((x) => x.id === rowId);
@@ -69,6 +96,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       r += dir.row;
       if (r >= current.rows.length && dir.row > 0) {
         current = gridService.addRow(current.id);
+        flashNewRow(current.rows[current.rows.length - 1].id);
         r = current.rows.length - 1;
       }
     }
@@ -79,6 +107,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
         r += 1;
         if (r >= current.rows.length) {
           current = gridService.addRow(current.id);
+          flashNewRow(current.rows[current.rows.length - 1].id);
           r = current.rows.length - 1;
         }
       } else if (c < 0) {
@@ -279,11 +308,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
       title: t("grid.adicionarColuna")
     }, [icon("add")]);
     btn.addEventListener("mousedown", (ev) => ev.preventDefault());
-    btn.addEventListener("click", () => {
-      flushPendingEdits();
-      opts.onEdit?.();
-      gridService.addColumn(table.id, t("grid.novaColuna"));
-    });
+    btn.addEventListener("click", addColumn);
     return btn;
   };
 
@@ -305,11 +330,7 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
     }, [icon("add"), t("grid.adicionarColuna")]);
     if (emptyBtn) {
       emptyBtn.addEventListener("mousedown", (ev) => ev.preventDefault());
-      emptyBtn.addEventListener("click", () => {
-        flushPendingEdits();
-        opts.onEdit?.();
-        gridService.addColumn(table.id, t("grid.novaColuna"));
-      });
+      emptyBtn.addEventListener("click", addColumn);
     }
     tbody.append(el("tr", { class: "grid__row grid__row--empty" }, [
       el("td", { class: "grid__empty-cell", colSpan: 1 }, [
@@ -350,14 +371,10 @@ export function renderGridTable(table: GridTable, opts: RenderGridOptions): HTML
 
   if (!readOnly) {
     const footer = el("div", { class: "grid__footer" }, []);
-    const addRow = el("button", { class: "grid__add-row", type: "button" }, [icon("add"), t("grid.adicionarLinha")]);
-    addRow.addEventListener("mousedown", (ev) => ev.preventDefault());
-    addRow.addEventListener("click", () => {
-      flushPendingEdits();
-      opts.onEdit?.();
-      gridService.addRow(table.id);
-    });
-    footer.append(addRow);
+    const addRowBtn = el("button", { class: "grid__add-row", type: "button" }, [icon("add"), t("grid.adicionarLinha")]);
+    addRowBtn.addEventListener("mousedown", (ev) => ev.preventDefault());
+    addRowBtn.addEventListener("click", addRow);
+    footer.append(addRowBtn);
 
     footer.append(el("span", { class: "grid__badge" }, [`${table.rows.length} × ${table.columns.length}`]));
 
