@@ -1,5 +1,5 @@
-import { store, normalizeLink, normalizeBacklogItem } from "@shared/storage";
-import { AppState, Product, BacklogItem, Task, Link, Comment, EstimationLog, Sticky, TaskClassification, ProductCategory } from "@shared/types";
+import { store, normalizeLink, normalizeBacklogItem, normalizeGridTable } from "@shared/storage";
+import { AppState, Product, BacklogItem, Task, Link, Comment, EstimationLog, Sticky, GridTable, TaskClassification, ProductCategory } from "@shared/types";
 
 const VALID_PRODUCT_STATUSES = ["backlog", "in_progress", "completed", "canceled"];
 const VALID_KANBAN_STATUSES = ["todo", "doing", "review", "done"];
@@ -37,6 +37,7 @@ export function exportProductState(productId: string): AppState | null {
   const taskIds = new Set(tasks.map((t) => t.id));
   const comments = state.comments.filter((c) => backlogItemIds.has(c.backlogItemId));
   const estimations = state.estimations.filter((e) => taskIds.has(e.taskId));
+  const gridTables = (state.gridTables ?? []).filter((t) => backlogItemIds.has(t.backlogItemId));
 
   return {
     products: [product],
@@ -47,6 +48,7 @@ export function exportProductState(productId: string): AppState | null {
     images: [],
     audios: [],
     estimations,
+    gridTables,
     stickies: (state.stickies ?? []).filter((s) => s.productId === productId)
   };
 }
@@ -209,6 +211,17 @@ export function validateAndImport(jsonString: string, overwrite = false): Export
     }
   }
 
+  if (obj.gridTables !== undefined && !Array.isArray(obj.gridTables)) {
+    return { success: false, error: '"gridTables" deve ser um array.' };
+  }
+  if (Array.isArray(obj.gridTables)) {
+    for (const g of obj.gridTables as GridTable[]) {
+      if (!g.id || !g.backlogItemId) return { success: false, error: "Cada gridTable precisa de id e backlogItemId." };
+      if (g.columns !== undefined && !Array.isArray(g.columns)) return { success: false, error: "Cada gridTable precisa de columns como array." };
+      if (g.rows !== undefined && !Array.isArray(g.rows)) return { success: false, error: "Cada gridTable precisa de rows como array." };
+    }
+  }
+
   doImport(data as AppState, overwrite);
   return { success: true };
 }
@@ -225,6 +238,7 @@ function doImport(data: AppState, overwrite = false): void {
           state.links = state.links.filter((l) => !removedItems.includes(l.backlogItemId));
           state.comments = state.comments.filter((c) => !removedItems.includes(c.backlogItemId));
           state.estimations = state.estimations.filter((e) => !removedTasks.includes(e.taskId));
+          state.gridTables = (state.gridTables ?? []).filter((t) => !removedItems.includes(t.backlogItemId));
           state.stickies = (state.stickies ?? []).filter((s) => s.productId !== product.id);
           state.products = state.products.filter((p) => p.id !== product.id);
         }
@@ -267,6 +281,14 @@ function doImport(data: AppState, overwrite = false): void {
       for (const sticky of data.stickies) {
         if (!state.stickies.some((s) => s.id === sticky.id)) {
           state.stickies.push(sticky);
+        }
+      }
+    }
+    if (Array.isArray(data.gridTables)) {
+      state.gridTables = state.gridTables ?? [];
+      for (const table of data.gridTables) {
+        if (!state.gridTables.some((t) => t.id === table.id)) {
+          state.gridTables.push(normalizeGridTable(table));
         }
       }
     }

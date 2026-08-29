@@ -23,6 +23,7 @@ SPA vanilla TS + DDD. Build: Vite 5, tsc strict. Persist: `localStorage` key `ka
 | `links` | `Link` | Link / URL |
 | `comments` | `Comment` | Comentário |
 | `estimations` | `EstimationLog` | Registro de estimativa |
+| `gridTables` | `GridTable` | Planilha/tabela dentro do card |
 
 ## Política de Testes
 

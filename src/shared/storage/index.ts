@@ -1,4 +1,4 @@
-import { AppState, Product, BacklogItem, Link, Image, AudioRecording, Sticky, StickyAudio, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
+import { AppState, Product, BacklogItem, Link, Image, AudioRecording, Sticky, StickyAudio, GridTable, GridColumn, GridRow, TaskClassification, ProductCategory, PaletteId, PALETTES, emptyState } from "@shared/types";
 import { eventBus } from "@shared/events";
 import { putBlob, getBlob, deleteBlob, clearBlobs, getAllBlobKeys, dataUrlToBlob, blobToDataUrl } from "./blob-store";
 
@@ -27,7 +27,28 @@ export function reviveState(raw: unknown): AppState {
     images: Array.isArray(data.images) ? data.images.map(normalizeImage) : base.images,
     audios: Array.isArray(data.audios) ? data.audios.map(normalizeAudioRecording) : base.audios,
     estimations: Array.isArray(data.estimations) ? data.estimations : base.estimations,
-    stickies: Array.isArray(data.stickies) ? data.stickies.map(normalizeSticky) : base.stickies
+    stickies: Array.isArray(data.stickies) ? data.stickies.map(normalizeSticky) : base.stickies,
+    gridTables: Array.isArray(data.gridTables) ? data.gridTables.map(normalizeGridTable) : base.gridTables
+  };
+}
+
+export function normalizeGridTable(table: GridTable): GridTable {
+  const columns: GridColumn[] = Array.isArray((table as any).columns)
+    ? (table as any).columns.map((c: GridColumn) => ({ ...c, name: (c as any).name ?? "" }))
+    : [];
+  const rows: GridRow[] = Array.isArray((table as any).rows)
+    ? (table as any).rows.map((r: GridRow) => ({
+        ...r,
+        cells: (r as any).cells && typeof (r as any).cells === "object" ? (r as any).cells : {}
+      }))
+    : [];
+  return {
+    ...table,
+    backlogItemId: (table as any).backlogItemId ?? "",
+    name: (table as any).name ?? "",
+    createdAt: (table as any).createdAt ?? new Date().toISOString(),
+    columns,
+    rows
   };
 }
 

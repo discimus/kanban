@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AppState, Product } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
-  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], audios: [], estimations: [] };
+  const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], audios: [], estimations: [], gridTables: [] };
   return {
     state,
     mockStore: {
@@ -21,7 +21,8 @@ vi.mock("@shared/storage", () => ({
   reviveState: (r: unknown) => r,
   normalizeProduct: (p: unknown) => p,
   normalizeBacklogItem: (b: unknown) => b,
-  normalizeLink: (l: unknown) => l
+  normalizeLink: (l: unknown) => l,
+  normalizeGridTable: (t: unknown) => t
 }));
 vi.mock("@shared/events", () => ({ eventBus: mockEventBus }));
 
@@ -40,6 +41,7 @@ beforeEach(() => {
   state.comments.length = 0;
   state.images.length = 0;
   state.estimations.length = 0;
+  state.gridTables!.length = 0;
   mockStore.update.mockClear();
   mockEventBus.emit.mockClear();
 });
@@ -242,6 +244,67 @@ describe("validateAndImport", () => {
     expect(state.stickies![0].audios).toHaveLength(1);
   });
 
+  it("gridTable with missing backlogItemId is rejected", () => {
+    const json = JSON.stringify({
+      products: [validProduct()],
+      gridTables: [{ id: "g1", name: "Tabela", columns: [], rows: [] }]
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/gridTable/);
+  });
+
+  it("gridTable with non-array rows is rejected", () => {
+    const json = JSON.stringify({
+      products: [validProduct()],
+      gridTables: [{ id: "g1", backlogItemId: "b1", columns: [], rows: "nope" }]
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("rows");
+  });
+
+  it("valid gridTables are merged on import", () => {
+    const json = JSON.stringify({
+      products: [validProduct()],
+      backlogItems: [{ id: "b1", productId: "p1", title: "Item", description: "", priority: "medium", status: "todo", storyPoints: 1, classification: "task" }],
+      tasks: [],
+      links: [],
+      comments: [],
+      estimations: [],
+      gridTables: [{
+        id: "g1",
+        backlogItemId: "b1",
+        name: "Tabela",
+        columns: [{ id: "c1", name: "Coluna 1" }],
+        rows: [{ id: "r1", cells: { c1: "x" } }]
+      }]
+    });
+    const result = validateAndImport(json);
+    expect(result.success).toBe(true);
+    expect(state.gridTables).toHaveLength(1);
+    expect(state.gridTables![0].rows[0].cells.c1).toBe("x");
+  });
+
+  it("overwrite removes gridTables of replaced backlog items", () => {
+    state.products = [validProduct({ id: "p1", name: "Antigo" }) as Product];
+    state.backlogItems = [
+      { id: "b1", productId: "p1", title: "Item velho", description: "", priority: "medium" as const, status: "todo" as const, storyPoints: 1, classification: "task" as const, createdAt: "2024-01-01T00:00:00.000Z", archivedAt: null, completedAt: null }
+    ];
+    state.gridTables = [{ id: "g1", backlogItemId: "b1", name: "T", columns: [], rows: [], createdAt: "2025-01-01T00:00:00.000Z" }];
+    const json = JSON.stringify({
+      products: [validProduct({ id: "p1", name: "Novo" })],
+      backlogItems: [{ id: "b2", productId: "p1", title: "Item novo", description: "", priority: "high" as const, status: "doing" as const, storyPoints: 2, classification: "task" as const, createdAt: "2025-01-01T00:00:00.000Z", archivedAt: null, completedAt: null }],
+      tasks: [],
+      links: [],
+      comments: [],
+      estimations: []
+    });
+    const result = validateAndImport(json, true);
+    expect(result.success).toBe(true);
+    expect(state.gridTables).toHaveLength(0);
+  });
+
   it("checkImportConflicts returns conflicts when product exists", () => {
     state.products = [validProduct({ id: "p1", name: "Existente" }) as Product];
     const json = JSON.stringify({
@@ -338,5 +401,21 @@ describe("exportProductState", () => {
     expect(result!.tasks).toHaveLength(1);
     expect(result!.links).toHaveLength(1);
     expect(result!.estimations).toHaveLength(1);
+  });
+
+  it("includes only gridTables bound to the product backlog items", () => {
+    state.products = [validProduct({ id: "p1" }) as Product];
+    state.backlogItems = [
+      { id: "b1", productId: "p1", title: "B1", description: "", priority: "medium" as const, status: "todo" as const, storyPoints: 1, classification: "task" as const, createdAt: "2024-01-01T00:00:00.000Z", archivedAt: null, completedAt: null }
+    ];
+    state.gridTables = [
+      { id: "g1", backlogItemId: "b1", name: "T", columns: [], rows: [], createdAt: "2025-01-01T00:00:00.000Z" },
+      { id: "g2", backlogItemId: "outro-card", name: "T", columns: [], rows: [], createdAt: "2025-01-01T00:00:00.000Z" }
+    ];
+
+    const result = exportProductState("p1");
+    expect(result).not.toBeNull();
+    expect(result!.gridTables).toHaveLength(1);
+    expect(result!.gridTables![0].id).toBe("g1");
   });
 });

@@ -115,6 +115,26 @@ export const pt: Record<string, string> = {
   "card.nAcesso": "{n} acesso",
   "card.nAcessos": "{n} acessos",
   "card.acessosInfo": "{n} acessos · {last}",
+  "card.adicionarTabela": "Adicionar tabela",
+  "card.abrirTabela": "Abrir tabela",
+  "card.excluirTabela": "Excluir tabela",
+  "card.excluirTabelaConfirm": "Excluir a tabela do card \"{{text}}\"?",
+
+  /* ====== Grid ====== */
+  "grid.tituloModal": "Tabela",
+  "grid.tabelaPadrao": "Tabela",
+  "grid.colunaPadrao": "Coluna 1",
+  "grid.novaColuna": "Nova coluna",
+  "grid.adicionarColuna": "Adicionar coluna",
+  "grid.adicionarLinha": "Adicionar linha",
+  "grid.renomear": "Renomear",
+  "grid.excluirColuna": "Excluir coluna",
+  "grid.opcoesColuna": "Opções da coluna",
+  "grid.excluirColunaConfirm": "Excluir a coluna \"{{text}}\"? Os dados dessa coluna serão removidos.",
+  "grid.excluirLinha": "Excluir linha",
+  "grid.excluirLinhaConfirm": "Excluir esta linha?",
+  "grid.abrirEditor": "Abrir editor da tabela",
+  "grid.resumo": "Tabela: {n} linhas × {m} colunas",
 
   /* ====== Audio ====== */
   "audio.parar": "Parar",

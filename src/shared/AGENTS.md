@@ -4,7 +4,7 @@
 
 **TODAS** as interfaces de entidade + `AppState` + constantes. Consulte **sempre** este arquivo primeiro.
 
-- `AppState`: `{ products, backlogItems, tasks, links, comments, estimations }`
+- `AppState`: `{ products, backlogItems, tasks, links, comments, estimations, images, audios, stickies, gridTables }`
 - Enums: `KanbanStatus`, `Priority`, `TaskClassification`, `TaskStatus`, `ProductStatus`, `ProductCategory`
 - `emptyState()` — factory para estado vazio
 

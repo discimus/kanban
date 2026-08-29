@@ -9,6 +9,7 @@
 | `link` | Link | domain/, application/, infrastructure/ |
 | `comment` | Comment | domain/, application/, infrastructure/ |
 | `estimation` | EstimationLog | domain/, application/, infrastructure/ |
+| `grid` | GridTable | domain/, application/, infrastructure/ |
 
 Cada contexto segue: `domain/` (factories + pure fns), `application/` (services), `infrastructure/` (repositories).
 
@@ -37,4 +38,4 @@ method(id: string, value: X): Entity {
 
 ## Cascade
 
-Ao deletar `BacklogItem` → remover `tasks`, `links`, `comments`, `estimations` vinculados (`backlogItemId`). Feito em `backlog.repository.ts`.
+Ao deletar `BacklogItem` → remover `tasks`, `links`, `comments`, `estimations`, `gridTables` vinculados (`backlogItemId`). Feito em `backlog.repository.ts`.

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import "fake-indexeddb/auto";
-import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage, normalizeAudioRecording, normalizeSticky, store } from "@shared/storage";
-import { emptyState, type Link, type Image, type AudioRecording, type Product, type BacklogItem, type Sticky } from "@shared/types";
+import { reviveState, normalizeProduct, normalizeBacklogItem, normalizeLink, normalizeImage, normalizeAudioRecording, normalizeSticky, normalizeGridTable, store } from "@shared/storage";
+import { emptyState, type Link, type Image, type AudioRecording, type Product, type BacklogItem, type Sticky, type GridTable } from "@shared/types";
 import { getBlob, putBlob, clearBlobs } from "./blob-store";
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
@@ -819,5 +819,61 @@ describe("Store blob hydration and persistence", () => {
     store.replaceState({ ...emptyState(), stickies: [makeStickyWithAudio("")] });
     await store.hydrate();
     expect(store.getState().stickies![0].audios![0].dataUrl).toBe("");
+  });
+});
+
+function makeGridTable(overrides: Partial<GridTable> = {}): GridTable {
+  return {
+    id: "g1",
+    backlogItemId: "b1",
+    name: "Tabela",
+    columns: [{ id: "c1", name: "Coluna 1" }],
+    rows: [{ id: "r1", cells: { c1: "valor" } }],
+    createdAt: "2026-01-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+describe("normalizeGridTable", () => {
+  it("defaults missing columns and rows to empty arrays", () => {
+    const legacy = { id: "g1", backlogItemId: "b1" } as unknown as GridTable;
+    const result = normalizeGridTable(legacy);
+    expect(result.columns).toEqual([]);
+    expect(result.rows).toEqual([]);
+  });
+
+  it("preserves valid columns and rows", () => {
+    const table = makeGridTable();
+    const result = normalizeGridTable(table);
+    expect(result.columns).toEqual(table.columns);
+    expect(result.rows).toEqual(table.rows);
+  });
+
+  it("normalizes rows without cells to empty cells object", () => {
+    const legacy = {
+      id: "g1",
+      backlogItemId: "b1",
+      name: "Tabela",
+      columns: [{ id: "c1", name: "Coluna 1" }],
+      rows: [{ id: "r1" }],
+      createdAt: "2026-01-01T00:00:00.000Z",
+    } as unknown as GridTable;
+    const result = normalizeGridTable(legacy);
+    expect(result.rows[0].cells).toEqual({});
+  });
+});
+
+describe("reviveState with gridTables", () => {
+  it("preserves gridTables when present in raw state", () => {
+    const table = makeGridTable();
+    const state = { gridTables: [table] };
+    const result = reviveState(state);
+    expect(result.gridTables).toEqual([table]);
+  });
+
+  it("defaults gridTables to empty array when missing", () => {
+    const state = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], estimations: [] };
+    const result = reviveState(state);
+    expect(result.gridTables).toEqual([]);
   });
 });

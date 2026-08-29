@@ -15,6 +15,9 @@ import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { stickyService } from "@contexts/sticky/application/sticky.service";
 import { openBacklogForm } from "@ui/modal/backlog-form";
+import { renderGridTable } from "@ui/components/grid-table";
+import { gridService } from "@contexts/grid/application/grid.service";
+import { openGridModal } from "@ui/modal/grid-modal";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { showToast } from "@ui/components/notification";
 import { timeAgo, formatDate } from "@shared/utils";
@@ -208,6 +211,15 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const isArchived = !!item.archivedAt;
   const recording = recorder.getActive(item.id);
   const readOnly = locked || isArchived;
+  const gridTable = gridService.getForBacklogItem(item.id);
+  const addTable = (): void => {
+    gridService.create({
+      backlogItemId: item.id,
+      name: t("grid.tabelaPadrao"),
+      columnName: t("grid.colunaPadrao")
+    });
+    openGridModal(item.id, readOnly);
+  };
   const taskList = el("div", { class: "card__tasks" }, []);
 
   const renderTasks = (taskItems: Task[]): void => {
@@ -703,7 +715,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             { label: t("card.comentario"), icon: "chat", action: locked ? lockedAlert : addComment },
             { label: t("card.link"), icon: "link", action: locked ? lockedAlert : addLink },
             { label: t("card.imagem"), icon: "add_photo_alternate", action: locked ? lockedAlert : addImage },
-            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r)) }
+            { label: t("card.audio"), icon: "mic", action: locked ? lockedAlert : () => recorder.start(item.id, (r) => saveStoppedRecording(item.id, r)) },
+            ...(gridTable ? [] : [{ label: t("card.adicionarTabela"), icon: "table_rows", action: locked ? lockedAlert : addTable }])
           ]},
           {
             label: t("card.copiarTitulo"),
@@ -721,6 +734,23 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             icon: "sticky_note_2",
             action: locked ? lockedAlert : () => convertToNote(item)
           }]),
+          ...(gridTable ? [
+            {
+              label: t("card.abrirTabela"),
+              icon: "table_rows",
+              action: locked ? lockedAlert : () => openGridModal(item.id, readOnly)
+            },
+            {
+              label: t("card.excluirTabela"),
+              icon: "table_rows_off",
+              danger: true,
+              action: locked ? lockedAlert : () => {
+                showConfirm(t("card.excluirTabelaConfirm"), item.title).then((ok) => {
+                  if (ok) gridService.delete(gridTable.id);
+                });
+              }
+            }
+          ] : []),
           { label: t("card.arquivar"), icon: "archive", action: () => backlogService.archive(item.id) },
           {
             label: t("card.excluir"),
@@ -807,18 +837,36 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
   const commentCount = commentService.byBacklogItem(item.id).length;
   const imageCount = imageService.byBacklogItem(item.id).length;
   const audioCount = audioService.byBacklogItem(item.id).length;
-  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0 || audioCount > 0;
+  const hasContent = item.description !== "" || tasks.length > 0 || linkCount > 0 || commentCount > 0 || imageCount > 0 || audioCount > 0 || !!gridTable;
 
   const bodyExpanded = expandedCards.get(item.id) === true;
   const cardBody = el("div", {
     class: `card__body${bodyExpanded ? " card__body--expanded" : ""}`
   }, []);
 
+  const expandCard = (): void => {
+    if (cardBody.classList.contains("card__body--expanded")) return;
+    expandedCards.set(item.id, true);
+    cardBody.classList.add("card__body--expanded");
+    if (expandBtn) {
+      expandBtn.replaceChildren(icon("expand_less"), el("span", { class: "card__expand-btn-text" }, [t("card.recolher")]));
+    }
+  };
+
   if (item.description) {
     cardBody.append(el("p", { class: "card__desc" }, [item.description]));
   }
 
-  cardBody.append(taskList, linkList, imageList, audioList, commentList);
+  const gridSlot = el("div", { class: "card__grid" }, []);
+  if (gridTable) {
+    gridSlot.append(renderGridTable(gridTable, {
+      readOnly,
+      onEdit: expandCard,
+      onExpand: () => openGridModal(item.id, readOnly)
+    }));
+  }
+
+  cardBody.append(taskList, linkList, imageList, audioList, commentList, gridSlot);
 
   const cardChildren: (Node | null)[] = [
     menu,
@@ -834,6 +882,10 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
       ]),
       el("div", { class: "card__trailing" }, [
         audioCount > 0 ? el("span", { class: "badge badge--audio", title: t("card.comAudio") }, [icon("graphic_eq")]) : null,
+        gridTable ? el("span", {
+          class: "badge badge--grid",
+          title: t("grid.resumo", { n: gridTable.rows.length, m: gridTable.columns.length })
+        }, [icon("table_rows"), `${gridTable.rows.length}×${gridTable.columns.length}`]) : null,
         minimal ? el("span", { class: "card__time", title: fullDateTime(item.createdAt) }, [relativeTime(item.createdAt)]) : null,
         pointsBtn
       ])
@@ -878,6 +930,10 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
             cardActionBtn("chat", t("card.adicionarComentario"), locked ? lockedAlert : addComment),
             cardActionBtn("link", t("card.adicionarLink"), locked ? lockedAlert : addLink),
             cardActionBtn("add_photo_alternate", t("card.adicionarImagem"), locked ? lockedAlert : addImage),
+            cardActionBtn("table_rows", gridTable ? t("card.abrirTabela") : t("card.adicionarTabela"), locked ? lockedAlert : () => {
+              if (gridTable) openGridModal(item.id, readOnly);
+              else addTable();
+            }),
             renderRecordingControl(recorder, item.id, (r) => saveStoppedRecording(item.id, r))
           ]);
       footer.append(actionsFooter);

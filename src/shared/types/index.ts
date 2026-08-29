@@ -197,6 +197,25 @@ export interface EstimationLog {
   comment: string;
 }
 
+export interface GridColumn {
+  id: ID;
+  name: string;
+}
+
+export interface GridRow {
+  id: ID;
+  cells: Record<ID, string>;
+}
+
+export interface GridTable {
+  id: ID;
+  backlogItemId: ID;
+  name: string;
+  columns: GridColumn[];
+  rows: GridRow[];
+  createdAt: ISODate;
+}
+
 export interface StickyLink {
   id: ID;
   url: string;
@@ -254,6 +273,8 @@ export interface AppState {
   estimations: EstimationLog[];
   /** Presente em `emptyState()`/`reviveState()`; opcional para compatibilidade com dados legados e mocks. */
   stickies?: Sticky[];
+  /** Presente em `emptyState()`/`reviveState()`; opcional para compatibilidade com dados legados e mocks. */
+  gridTables?: GridTable[];
 }
 
 export function emptyState(): AppState {
@@ -266,6 +287,7 @@ export function emptyState(): AppState {
     images: [],
     audios: [],
     estimations: [],
-    stickies: []
+    stickies: [],
+    gridTables: []
   };
 }

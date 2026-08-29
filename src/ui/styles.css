@@ -4650,4 +4650,276 @@ h4 {
   padding: 4px 0;
 }
 
+/* ====== Grid (tabela dentro do card) — MD3 Data Table ====== */
+
+.badge--grid {
+  width: auto;
+  padding: 0 6px;
+  gap: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge--grid .material-symbols-outlined {
+  font-size: 0.85rem;
+}
+
+.card__grid {
+  padding: 8px 0 4px;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.grid__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--md-surface);
+}
+
+.grid__table {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.grid__cell {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+  min-width: 120px;
+  max-width: 260px;
+}
+
+.grid__table tr:last-child .grid__cell {
+  border-bottom: none;
+}
+
+.grid__cell:last-child {
+  border-right: none;
+}
+
+.grid__cell--header {
+  background: var(--md-surface-container-low);
+  border-bottom: 1px solid var(--md-outline);
+  position: relative;
+}
+
+.grid__row--header {
+  height: 36px;
+}
+
+.grid__col-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid__col-label:hover {
+  background: var(--md-surface-container-high);
+}
+
+.grid__cell--header .grid__col-menu-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 26px;
+  height: 26px;
+  min-height: 26px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--md-on-surface-variant);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid__cell--header .grid__col-menu-btn:hover {
+  background: var(--md-surface-container-high);
+}
+
+.grid__col-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.grid__input,
+.grid__header-input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  padding: 7px 10px;
+  outline: none;
+  box-shadow: none;
+}
+
+.grid__input:focus,
+.grid__header-input:focus {
+  background: var(--md-surface-container-low);
+  box-shadow: inset 0 0 0 2px var(--md-primary);
+}
+
+.grid__input:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.grid__addcol-wrap {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  text-align: center;
+  border: none;
+}
+
+.grid__addcol {
+  width: 100%;
+  height: 100%;
+  min-height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid__addcol:hover {
+  background: var(--md-surface-container-high);
+  color: var(--md-primary);
+}
+
+.grid__row-del {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.grid__row:hover .grid__row-del {
+  opacity: 1;
+}
+
+.grid__row-del:hover {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
+  opacity: 1;
+}
+
+.grid__cell--rowdel {
+  min-width: 32px;
+  width: 32px;
+  text-align: center;
+  padding: 4px;
+}
+
+.grid__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grid__add-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--md-primary);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.grid__add-row:hover {
+  background: var(--md-primary-container);
+}
+
+.grid__badge {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.grid__expand {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.grid__expand:hover {
+  background: var(--md-surface-container-high);
+  color: var(--md-primary);
+}
+
+.grid--maximized {
+  gap: 10px;
+}
+
+.grid--maximized .grid__scroll {
+  border-radius: var(--radius);
+}
+
+.grid--maximized .grid__input,
+.grid--maximized .grid__header-input {
+  padding: 9px 12px;
+}
+
+.grid-modal {
+  min-height: 240px;
+}
+
+@media (max-width: 720px) {
+  .grid__scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 

@@ -40,7 +40,10 @@ export type DomainEvent =
   | "backlog:auto-archived"
   | "backlog:product-changed"
   | "product:archived"
-  | "product:restored";
+  | "product:restored"
+  | "grid:table-created"
+  | "grid:table-updated"
+  | "grid:table-deleted";
 
 type Handler = (payload?: unknown) => void;
 
