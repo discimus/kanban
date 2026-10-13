@@ -144,6 +144,8 @@ export const en: Record<string, string> = {
   "audio.erroGravar": "Error recording audio.",
   "audio.erroSalvar": "Could not save the audio. Check the size and try again.",
   "audio.progress": "Playing audio",
+  "audio.velocidade": "Playback speed",
+  "audio.velocidadeAtual": "Playback speed: {rate}. Tap to change",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Keyboard Shortcuts",

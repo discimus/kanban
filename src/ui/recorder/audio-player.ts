@@ -11,6 +11,12 @@ export interface AudioPlayerControls {
   progressBar: HTMLDivElement;
   /** Shows total duration at rest and remaining time (`–mm:ss`) while playing. */
   durationEl: HTMLSpanElement;
+  /**
+   * Sets the playback speed (1, 1.5, 2…). The value is re-applied after the
+   * media loads and on every `play`, since some browsers reset `playbackRate`
+   * when the source is (re)loaded.
+   */
+  setPlaybackRate: (rate: number) => void;
 }
 
 export interface AudioProgress {
@@ -72,6 +78,15 @@ export function createAudioPlayer(
   const playBtn = el("button", { class: "card__audio-play", "aria-label": t("card.reproduzirAudio"), type: "button" }, [icon("play_arrow")]) as HTMLButtonElement;
   const playIcon = () => playBtn.querySelector(".material-symbols-outlined")!;
   let playing = false;
+
+  let playbackRate = 1;
+  const applyPlaybackRate = (): void => {
+    if (player.playbackRate !== playbackRate) player.playbackRate = playbackRate;
+  };
+  const setPlaybackRate = (rate: number): void => {
+    playbackRate = Number.isFinite(rate) && rate > 0 ? rate : 1;
+    applyPlaybackRate();
+  };
 
   const durationEl = el("span", { class: "card__audio-duration" }) as HTMLSpanElement;
   durationEl.textContent = formatDuration(knownDuration ?? 0);
@@ -142,9 +157,11 @@ export function createAudioPlayer(
 
   player.addEventListener("play", () => {
     playing = true;
+    applyPlaybackRate();
     playIcon().textContent = "pause";
     startProgress();
   });
+  player.addEventListener("loadedmetadata", applyPlaybackRate);
   player.addEventListener("pause", () => {
     playing = false;
     playIcon().textContent = "play_arrow";
@@ -156,5 +173,5 @@ export function createAudioPlayer(
     stopProgress();
   });
 
-  return { player, playBtn, progressBar, durationEl };
+  return { player, playBtn, progressBar, durationEl, setPlaybackRate };
 }

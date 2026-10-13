@@ -7,8 +7,8 @@ import { imageService } from "@contexts/image/application/image.service";
 import { audioService } from "@contexts/audio/application/audio.service";
 import { extensionForMimeType, MicPermissionError, type RecordedAudio } from "@ui/recorder/audio-recorder";
 import { createInlineRecorder, renderRecordingControl, renderRecorderTimer } from "@ui/recorder/inline-recorder";
-import { createAudioPlayer } from "@ui/recorder/audio-player";
-import { createAudioCascade, type AudioCascade, type CascadeEntry } from "@ui/recorder/audio-cascade";
+import type { AudioCascade } from "@ui/recorder/audio-cascade";
+import { renderAudioList } from "@ui/recorder/audio-list";
 import { releaseAudioPlaybackUrl } from "@ui/recorder/audio-url";
 import { eventBus } from "@shared/events";
 import { backlogService } from "@contexts/product/application/backlog.service";
@@ -465,45 +465,29 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   const audioList = el("div", { class: "card__audios" }, []);
   let cascade: AudioCascade | null = null;
+  let audioRate = 1;
 
   const renderAudios = (): void => {
     const audios = audioService.byBacklogItem(item.id);
     cascade?.stop();
     for (const a of audios) releaseAudioPlaybackUrl(a.dataUrl);
     clear(audioList);
-    const entries: CascadeEntry[] = [];
-    for (const a of audios) {
-      const { player, playBtn, progressBar, durationEl } = createAudioPlayer(a.dataUrl, () => showToast(t("audio.erroGravar"), "error"), a.duration, a.mimeType);
-
-      const downloadBtn = el("button", { class: "card__audio-action", "aria-label": t("card.downloadAudio"), type: "button" }, [icon("download")]);
-      downloadBtn.addEventListener("click", () => downloadImage(a.dataUrl, a.filename));
-
-      const delBtn = el("button", { class: "card__audio-action card__audio-action--delete", "aria-label": t("card.excluirAudio"), type: "button" }, [icon("delete")]);
-      delBtn.disabled = readOnly;
-      if (!readOnly) {
-        delBtn.addEventListener("click", () => {
-          showConfirm(t("card.excluirAudio"), a.filename).then((ok) => {
-            if (ok) {
-              audioService.delete(a.id);
-              releaseAudioPlaybackUrl(a.dataUrl);
-            }
-          });
+    cascade = renderAudioList(audioList, {
+      audios,
+      readOnly,
+      initialRate: audioRate,
+      onRateChange: (rate) => { audioRate = rate; },
+      onError: () => showToast(t("audio.erroGravar"), "error"),
+      onDownload: (a) => downloadImage(a.dataUrl, a.filename),
+      onDelete: (a) => {
+        showConfirm(t("card.excluirAudio"), a.filename).then((ok) => {
+          if (ok) {
+            audioService.delete(a.id);
+            releaseAudioPlaybackUrl(a.dataUrl);
+          }
         });
       }
-
-      const row = el("div", { class: "card__audio", "data-id": a.id }, [
-        playBtn,
-        el("span", { class: "card__audio-name" }, [a.filename]),
-        durationEl,
-        player,
-        downloadBtn,
-        delBtn,
-        progressBar
-      ]);
-      audioList.append(row);
-      entries.push({ player, playBtn, row });
-    }
-    cascade = createAudioCascade(entries, { onError: () => showToast(t("audio.erroGravar"), "error") });
+    });
   };
   renderAudios();
 

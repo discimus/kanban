@@ -144,6 +144,8 @@ export const pt: Record<string, string> = {
   "audio.erroGravar": "Erro ao gravar o áudio.",
   "audio.erroSalvar": "Não foi possível salvar o áudio. Verifique o tamanho e tente novamente.",
   "audio.progress": "Reproduzindo áudio",
+  "audio.velocidade": "Velocidade de reprodução",
+  "audio.velocidadeAtual": "Velocidade de reprodução: {rate}. Toque para alterar",
 
   /* ====== Help / Shortcuts ====== */
   "help.title": "Atalhos do teclado",
