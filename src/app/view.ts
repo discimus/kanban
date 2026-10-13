@@ -6,6 +6,7 @@ import { renderProductHeader } from "@ui/components/planning";
 import { renderBoard, renderNotesBoard } from "@ui/board/board";
 import { renderStatistics } from "@ui/components/statistics";
 import { renderThemeMenu } from "@ui/components/theme-menu";
+import { renderDensityMenu } from "@ui/components/density-menu";
 import { renderHelpMenu } from "@ui/components/help-menu";
 import { renderLocaleMenu } from "@ui/components/locale-menu";
 import { renderDrawerBtn } from "@ui/components/drawer-btn";
@@ -232,7 +233,7 @@ export function renderApp(root: HTMLElement): void {
   }
 
   layout.append(sidebar, scrim, content, resizer);
-  root.append(layout, renderLocaleMenu(), renderThemeMenu(), renderHelpMenu(), renderDrawerBtn(() => setDrawer(true)));
+  root.append(layout, renderLocaleMenu(), renderThemeMenu(), renderDensityMenu(), renderHelpMenu(), renderDrawerBtn(() => setDrawer(true)));
 
   requestAnimationFrame(() => {
     const list = root.querySelector(".product-list");

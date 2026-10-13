@@ -223,6 +223,11 @@ export const pt: Record<string, string> = {
   "form.tituloSubtarefa": "Título da subtarefa",
   "form.url": "URL",
 
+  /* ====== Density ====== */
+  "density.compacto": "Modo compacto",
+  "density.ativado": "Modo compacto: ativado. Toque para desativar",
+  "density.desativado": "Modo compacto: desativado. Toque para ativar",
+
   /* ====== Settings ====== */
   "settings.title": "Configurações do Projeto",
   "settings.exibirPrioridade": "Exibir prioridade das tarefas",

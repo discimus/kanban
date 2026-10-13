@@ -1,6 +1,7 @@
 import { eventBus } from "@shared/events";
 import { renderApp } from "./view";
 import { applyTheme, getTheme } from "@ui/theme";
+import { applyDensity, getDensity } from "@ui/density";
 import { store } from "@shared/storage";
 import { showConfirm, showOnboarding } from "@ui/components/dialog";
 import { productService } from "@contexts/product/application/product.service";
@@ -21,6 +22,7 @@ const appRoot: HTMLElement = root;
 
 async function boot(): Promise<void> {
   applyTheme(getTheme());
+  applyDensity(getDensity());
   await store.hydrate();
   runAutoArchive();
   renderApp(appRoot);

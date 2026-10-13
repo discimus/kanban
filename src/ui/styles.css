@@ -3795,6 +3795,45 @@ h4 {
   font-size: 1.375rem;
 }
 
+/* Density toggle — fixed bottom-right, stacked above locale button */
+.density-btn {
+  position: fixed;
+  bottom: 172px;
+  right: 16px;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--md-surface-container-high);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.density-btn:hover {
+  background: var(--md-surface-container-highest);
+  border-color: var(--md-outline);
+}
+
+.density-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.density-btn[aria-pressed="true"] {
+  background: var(--md-primary-container);
+  border-color: var(--md-primary);
+  color: var(--md-on-primary-container);
+}
+
+.density-btn .material-symbols-outlined {
+  font-size: 1.375rem;
+}
+
 .drawer-btn {
   display: none;
   position: fixed;
@@ -4065,6 +4104,13 @@ h4 {
     height: 48px;
     font-size: 1.5rem;
     line-height: 1;
+  }
+
+  .density-btn {
+    bottom: 124px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
   }
 
   .help-btn {
@@ -5095,5 +5141,100 @@ button.badge--grid:focus-visible {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ============================================================
+   Compact density mode
+   Toggled by the .density-btn (data-density="compact" on <html>).
+   Only spacing (padding/gap/margins) and column width change — font
+   sizes and interactive hit areas stay untouched to preserve
+   legibility and the MD3 touch-target minimum (~44–48px). The
+   attribute-qualified selectors outrank both the base rules and the
+   viewport media queries, so compact + mobile combine correctly.
+   ============================================================ */
+:root[data-density="compact"] .content {
+  padding: 14px;
+}
+
+:root[data-density="compact"] .content__subtitle {
+  margin-bottom: 10px;
+}
+
+:root[data-density="compact"] .sidebar {
+  padding: 14px;
+  gap: 8px;
+}
+
+:root[data-density="compact"] .product-list {
+  gap: 6px;
+}
+
+:root[data-density="compact"] .product-item {
+  padding: 8px 10px;
+}
+
+:root[data-density="compact"] .board-wrapper {
+  gap: 8px;
+}
+
+:root[data-density="compact"] .board {
+  gap: 8px;
+}
+
+:root[data-density="compact"] .board__columns {
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+:root[data-density="compact"] .column__header {
+  padding: 10px 12px;
+}
+
+:root[data-density="compact"] .column__body {
+  padding: 8px;
+  gap: 8px;
+}
+
+:root[data-density="compact"] .card {
+  padding: 10px;
+}
+
+:root[data-density="compact"] .card__footer {
+  margin-top: 8px;
+}
+
+:root[data-density="compact"] .board-toolbar {
+  gap: 8px;
+}
+
+:root[data-density="compact"] .board--notes {
+  gap: 16px;
+}
+
+:root[data-density="compact"] .notes-group {
+  gap: 6px;
+}
+
+:root[data-density="compact"] .notes-group__cards {
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+:root[data-density="compact"] .sticky-block {
+  padding: 8px;
+  gap: 6px;
+}
+
+:root[data-density="compact"] .sticky-row {
+  gap: 8px;
+}
+
+:root[data-density="compact"] .modal__body {
+  padding: 18px;
+}
+
+:root[data-density="compact"] .dialog {
+  padding: 20px;
+}
+
 
 
