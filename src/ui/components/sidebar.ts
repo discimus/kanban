@@ -8,6 +8,7 @@ import { openNotesForm } from "@ui/modal/notes-form";
 import { getStorageUsage, ensureStorageQuotaLoaded, isStorageQuotaLoaded, getProductIdsWithAudio } from "@shared/storage/storage-usage";
 import { store } from "@shared/storage";
 import { t, loc } from "@shared/i18n";
+import { countActiveByCategory, type ProductCounts } from "@ui/components/sidebar-counts";
 
 let archivedOpen = false;
 let filterCategory: ProductCategory | null = null;
@@ -54,15 +55,20 @@ const SORT_LABELS: Record<SortOption, string> = {
   "created-asc": "sidebar.sort.oldest",
 };
 
-function renderFilterBar(onChange?: () => void): HTMLElement {
+function renderFilterBar(counts: ProductCounts, onChange?: () => void): HTMLElement {
   const bar = el("div", { class: "filter-bar" }, []);
 
   const chips = el("div", { class: "filter-bar--chips" }, []);
 
   const allChip = el("button", {
     class: `chip chip--filter${filterCategory === null ? " chip--selected" : ""}`,
-    type: "button"
-  }, [t("sidebar.todas")]);
+    type: "button",
+    title: `${t("sidebar.todas")} (${counts.total})`,
+    "aria-pressed": filterCategory === null ? "true" : "false"
+  }, [
+    t("sidebar.todas"),
+    el("span", { class: "chip__count" }, [`(${counts.total})`])
+  ]);
   allChip.addEventListener("click", () => {
     if (filterCategory !== null) {
       filterCategory = null;
@@ -73,11 +79,18 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
 
   for (const cat of PRODUCT_CATEGORIES) {
     const isSelected = filterCategory === cat.value;
+    const count = counts.byCategory[cat.value] ?? 0;
+    const label = categoryLabel(cat.value);
     const chip = el("button", {
       class: `chip chip--compact${isSelected ? ` chip--${cat.value} chip--selected` : " chip--filter"}`,
       type: "button",
-      title: cat.label
-    }, [icon(cat.icon)]);
+      title: `${label} (${count})`,
+      "aria-label": `${label} (${count})`,
+      "aria-pressed": isSelected ? "true" : "false"
+    }, [
+      icon(cat.icon),
+      el("span", { class: "chip__count" }, [`(${count})`])
+    ]);
     chip.addEventListener("click", () => {
       filterCategory = filterCategory === cat.value ? null : cat.value;
       onChange?.();
@@ -148,6 +161,7 @@ function renderFilterBar(onChange?: () => void): HTMLElement {
 
 export function renderSidebar(products: Product[], selectedId: string | null, onSelect: (id: string) => void, onNewProject?: () => void, onFilterChange?: () => void, onPinToggle?: (id: string, action: "pin" | "unpin") => void, highlightedId?: string, onOpenStorage?: () => void): HTMLElement {
   const productsWithAudio = getProductIdsWithAudio(store.getState());
+  const counts = countActiveByCategory(products);
   let active = products.filter(p => !p.archivedAt);
 
   if (filterCategory !== null) {
@@ -347,7 +361,7 @@ export function renderSidebar(products: Product[], selectedId: string | null, on
     el("p", { class: "sidebar__subtitle" }, [t("sidebar.subtitle")]),
     actionsBar,
     el("h2", { class: "sidebar__section" }, [t("sidebar.projetos")]),
-    renderFilterBar(onFilterChange),
+    renderFilterBar(counts, onFilterChange),
     list,
     storageBar
   ]);

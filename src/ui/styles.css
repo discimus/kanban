@@ -1890,6 +1890,25 @@ button.chip--todo:hover {
   padding: 0 0 10px;
 }
 
+.sidebar .filter-bar--chips {
+  gap: 6px;
+}
+
+.sidebar .chip--compact {
+  gap: 2px;
+}
+
+.sidebar .chip__count {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.sidebar .chip--selected .chip__count {
+  opacity: 0.9;
+}
+
 .card__actions {
   display: flex;
   align-items: center;
