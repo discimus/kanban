@@ -11,8 +11,10 @@ import {
   addStickyLink,
   markStickyLinkVisited,
   removeStickyLink,
+  changeStickyLinkUrl,
   addStickyComment,
   removeStickyComment,
+  editStickyComment,
   addStickyImage,
   removeStickyImage,
   addStickyAudio,
@@ -256,6 +258,33 @@ describe("removeStickyLink", () => {
   });
 });
 
+describe("changeStickyLinkUrl", () => {
+  it("updates the matching URL, trims it and preserves visit metadata", () => {
+    const sticky = {
+      ...createSticky({ productId: "p1" }),
+      links: [
+        { id: "l1", url: "https://old.com", visitedAt: "2026-07-12T14:30:00.000Z", visitCount: 3 },
+        { id: "l2", url: "https://other.com", visitedAt: null }
+      ]
+    };
+    const updated = changeStickyLinkUrl(sticky, "l1", "  https://new.com  ");
+    expect(updated.links[0].url).toBe("https://new.com");
+    expect(updated.links[0].visitedAt).toBe("2026-07-12T14:30:00.000Z");
+    expect(updated.links[0].visitCount).toBe(3);
+    expect(updated.links[1]).toBe(sticky.links[1]);
+  });
+
+  it("throws Error when the URL is empty", () => {
+    const sticky = { ...createSticky({ productId: "p1" }), links: [{ id: "l1", url: "https://a.com", visitedAt: null }] };
+    expect(() => changeStickyLinkUrl(sticky, "l1", "   ")).toThrow("A URL do link é obrigatória.");
+  });
+
+  it("throws Error when the link does not exist", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => changeStickyLinkUrl(sticky, "ghost", "https://a.com")).toThrow("Link não encontrado.");
+  });
+});
+
 describe("addStickyComment", () => {
   it("appends a comment to the sticky", () => {
     const sticky = createSticky({ productId: "p1" });
@@ -287,6 +316,32 @@ describe("removeStickyComment", () => {
     const updated = removeStickyComment(sticky, removedId);
     expect(updated.comments).toHaveLength(1);
     expect(updated.comments.some((c) => c.id === removedId)).toBe(false);
+  });
+});
+
+describe("editStickyComment", () => {
+  it("updates the matching text, trims it and sets updatedAt", () => {
+    const sticky = {
+      ...createSticky({ productId: "p1" }),
+      comments: [
+        { id: "c1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" },
+        { id: "c2", text: "Outro", createdAt: "2024-01-01T00:00:00.000Z" }
+      ]
+    };
+    const updated = editStickyComment(sticky, "c1", "  Olá editado  ");
+    expect(updated.comments[0].text).toBe("Olá editado");
+    expect(updated.comments[0].updatedAt).toBeTypeOf("string");
+    expect(updated.comments[1]).toBe(sticky.comments[1]);
+  });
+
+  it("throws Error when the text is empty", () => {
+    const sticky = { ...createSticky({ productId: "p1" }), comments: [{ id: "c1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" }] };
+    expect(() => editStickyComment(sticky, "c1", "   ")).toThrow("O texto do comentário é obrigatório.");
+  });
+
+  it("throws Error when the comment does not exist", () => {
+    const sticky = createSticky({ productId: "p1" });
+    expect(() => editStickyComment(sticky, "ghost", "Olá")).toThrow("Comentário não encontrado.");
   });
 });
 

@@ -206,6 +206,25 @@ describe("stickyService", () => {
     });
   });
 
+  describe("changeLinkUrl", () => {
+    it("updates the link URL, saves and emits sticky:link-updated", () => {
+      state.stickies = [makeSticky({ links: [{ id: "l1", url: "https://old.com", visitedAt: null }] })];
+      const result = stickyService.changeLinkUrl("s1", "l1", "https://new.com");
+      expect(result.links[0].url).toBe("https://new.com");
+      expect(state.stickies![0].links[0].url).toBe("https://new.com");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:link-updated", result);
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => stickyService.changeLinkUrl("ghost", "l1", "https://x.com")).toThrow("Card não encontrado.");
+    });
+
+    it("throws when link not found", () => {
+      state.stickies = [makeSticky()];
+      expect(() => stickyService.changeLinkUrl("s1", "ghost", "https://x.com")).toThrow("Link não encontrado.");
+    });
+  });
+
   describe("addComment", () => {
     it("adds a comment and emits sticky:comment-added", () => {
       state.stickies = [makeSticky()];
@@ -221,6 +240,26 @@ describe("stickyService", () => {
       const result = stickyService.removeComment("s1", "c1");
       expect(result.comments).toHaveLength(0);
       expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:comment-removed", result);
+    });
+  });
+
+  describe("editComment", () => {
+    it("updates the comment text, saves and emits sticky:comment-updated", () => {
+      state.stickies = [makeSticky({ comments: [{ id: "c1", text: "Olá", createdAt: "2024-01-01T00:00:00.000Z" }] })];
+      const result = stickyService.editComment("s1", "c1", "Olá editado");
+      expect(result.comments[0].text).toBe("Olá editado");
+      expect(result.comments[0].updatedAt).toBeTypeOf("string");
+      expect(state.stickies![0].comments[0].text).toBe("Olá editado");
+      expect(mockEventBus.emit).toHaveBeenCalledWith("sticky:comment-updated", result);
+    });
+
+    it("throws when sticky not found", () => {
+      expect(() => stickyService.editComment("ghost", "c1", "Olá")).toThrow("Card não encontrado.");
+    });
+
+    it("throws when comment not found", () => {
+      state.stickies = [makeSticky()];
+      expect(() => stickyService.editComment("s1", "ghost", "Olá")).toThrow("Comentário não encontrado.");
     });
   });
 

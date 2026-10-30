@@ -15,6 +15,12 @@ export function openStickyForm({ productId, sticky }: StickyFormTarget): void {
   const description = textArea(sticky?.description ?? "", t("form.descricao"));
   const error = errorText();
 
+  const linkInputs: { linkId: string; original: string; input: HTMLInputElement }[] = [];
+  const linksSection = sticky ? buildLinksSection(sticky, linkInputs) : null;
+
+  const commentInputs: { commentId: string; original: string; input: HTMLInputElement }[] = [];
+  const commentsSection = sticky ? buildCommentsSection(sticky, commentInputs) : null;
+
   const submit = () => {
     const titleValue = title.value.trim();
     if (!titleValue) {
@@ -24,6 +30,14 @@ export function openStickyForm({ productId, sticky }: StickyFormTarget): void {
     }
     try {
       if (sticky) {
+        for (const { linkId, original, input } of linkInputs) {
+          const value = input.value.trim();
+          if (value && value !== original) stickyService.changeLinkUrl(sticky.id, linkId, value);
+        }
+        for (const { commentId, original, input } of commentInputs) {
+          const value = input.value.trim();
+          if (value && value !== original) stickyService.editComment(sticky.id, commentId, value);
+        }
         stickyService.updateContent(sticky.id, { title: titleValue, description: description.value });
       } else {
         const created = stickyService.create({ productId, title: titleValue, description: description.value });
@@ -38,6 +52,8 @@ export function openStickyForm({ productId, sticky }: StickyFormTarget): void {
   const body = el("div", { class: "form" }, [
     field(t("form.titulo"), title),
     field(t("form.descricao"), description),
+    linksSection,
+    commentsSection,
     error,
     formActions(t("form.salvar"), submit)
   ]);
@@ -50,4 +66,40 @@ export function openStickyForm({ productId, sticky }: StickyFormTarget): void {
   });
 
   openModal({ title: sticky ? t("sticky.editarNota") : t("sticky.novoCard"), body });
+}
+
+function buildLinksSection(
+  sticky: Sticky,
+  linkInputs: { linkId: string; original: string; input: HTMLInputElement }[]
+): HTMLElement | null {
+  if (sticky.links.length === 0) return null;
+
+  const rows = sticky.links.map((link) => {
+    const input = textInput(link.url, t("form.url"));
+    linkInputs.push({ linkId: link.id, original: link.url, input });
+    return input;
+  });
+
+  return el("div", { class: "field" }, [
+    el("span", { class: "field__label" }, [t("form.links")]),
+    ...rows
+  ]);
+}
+
+function buildCommentsSection(
+  sticky: Sticky,
+  commentInputs: { commentId: string; original: string; input: HTMLInputElement }[]
+): HTMLElement | null {
+  if (sticky.comments.length === 0) return null;
+
+  const rows = sticky.comments.map((comment) => {
+    const input = textInput(comment.text, t("form.editarComentario"));
+    commentInputs.push({ commentId: comment.id, original: comment.text, input });
+    return input;
+  });
+
+  return el("div", { class: "field" }, [
+    el("span", { class: "field__label" }, [t("form.comentarios")]),
+    ...rows
+  ]);
 }

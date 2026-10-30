@@ -76,6 +76,16 @@ export function removeStickyLink(sticky: Sticky, linkId: string): Sticky {
   return { ...sticky, links: sticky.links.filter((l) => l.id !== linkId) };
 }
 
+export function changeStickyLinkUrl(sticky: Sticky, linkId: string, url: string): Sticky {
+  const trimmed = url?.trim();
+  if (!trimmed) throw new Error("A URL do link é obrigatória.");
+  if (!sticky.links.some((l) => l.id === linkId)) throw new Error("Link não encontrado.");
+  return {
+    ...sticky,
+    links: sticky.links.map((l) => (l.id === linkId ? { ...l, url: trimmed } : l))
+  };
+}
+
 export function addStickyComment(sticky: Sticky, props: AddStickyCommentProps): Sticky {
   const text = props.text?.trim();
   if (!text) throw new Error("O texto do comentário é obrigatório.");
@@ -85,6 +95,18 @@ export function addStickyComment(sticky: Sticky, props: AddStickyCommentProps): 
 
 export function removeStickyComment(sticky: Sticky, commentId: string): Sticky {
   return { ...sticky, comments: sticky.comments.filter((c) => c.id !== commentId) };
+}
+
+export function editStickyComment(sticky: Sticky, commentId: string, text: string): Sticky {
+  const trimmed = text?.trim();
+  if (!trimmed) throw new Error("O texto do comentário é obrigatório.");
+  if (!sticky.comments.some((c) => c.id === commentId)) throw new Error("Comentário não encontrado.");
+  return {
+    ...sticky,
+    comments: sticky.comments.map((c) =>
+      c.id === commentId ? { ...c, text: trimmed, updatedAt: nowISO() } : c
+    )
+  };
 }
 
 export function addStickyImage(sticky: Sticky, props: AddStickyImageProps): Sticky {

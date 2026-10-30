@@ -11,9 +11,11 @@ import {
   AddStickyLinkProps,
   markStickyLinkVisited,
   removeStickyLink,
+  changeStickyLinkUrl,
   addStickyComment,
   AddStickyCommentProps,
   removeStickyComment,
+  editStickyComment,
   addStickyImage,
   AddStickyImageProps,
   removeStickyImage,
@@ -110,6 +112,15 @@ export const stickyService = {
     return updated;
   },
 
+  changeLinkUrl(id: string, linkId: string, url: string): Sticky {
+    const existing = stickyRepository.findById(id);
+    if (!existing) throw new Error("Card não encontrado.");
+    const updated = changeStickyLinkUrl(existing, linkId, url);
+    stickyRepository.save(updated);
+    eventBus.emit("sticky:link-updated", updated);
+    return updated;
+  },
+
   addComment(id: string, props: AddStickyCommentProps): Sticky {
     const existing = stickyRepository.findById(id);
     if (!existing) throw new Error("Card não encontrado.");
@@ -125,6 +136,15 @@ export const stickyService = {
     const updated = removeStickyComment(existing, commentId);
     stickyRepository.save(updated);
     eventBus.emit("sticky:comment-removed", updated);
+    return updated;
+  },
+
+  editComment(id: string, commentId: string, text: string): Sticky {
+    const existing = stickyRepository.findById(id);
+    if (!existing) throw new Error("Card não encontrado.");
+    const updated = editStickyComment(existing, commentId, text);
+    stickyRepository.save(updated);
+    eventBus.emit("sticky:comment-updated", updated);
     return updated;
   },
 
