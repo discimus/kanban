@@ -22,22 +22,60 @@ export function formatDate(iso: string | null): string {
   return localeDateString(d);
 }
 
-export function timeAgo(iso: string | null): string {
-  if (!iso) return "";
+type RelativeUnit =
+  | "agora"
+  | "minuto"
+  | "minutos"
+  | "hora"
+  | "horas"
+  | "dia"
+  | "dias"
+  | "mes"
+  | "meses"
+  | "ano"
+  | "anos";
+
+interface RelativeParts {
+  unit: RelativeUnit;
+  n: number;
+}
+
+function relativeParts(iso: string | null): RelativeParts | null {
+  if (!iso) return null;
   const diff = Date.now() - new Date(iso).getTime();
-  if (diff < 0) return t("utils.visitadoAgora");
+  if (Number.isNaN(diff)) return null;
+  if (diff < 0) return { unit: "agora", n: 0 };
   const seg = Math.floor(diff / 1000);
-  if (seg < 60) return t("utils.visitadoAgora");
+  if (seg < 60) return { unit: "agora", n: 0 };
   const min = Math.floor(seg / 60);
-  if (min < 60) return t(min === 1 ? "utils.haMinuto" : "utils.haMinutos", { n: min });
+  if (min < 60) return { unit: min === 1 ? "minuto" : "minutos", n: min };
   const hr = Math.floor(min / 60);
-  if (hr < 24) return t(hr === 1 ? "utils.haHora" : "utils.haHoras", { n: hr });
+  if (hr < 24) return { unit: hr === 1 ? "hora" : "horas", n: hr };
   const dias = Math.floor(hr / 24);
-  if (dias < 30) return t(dias === 1 ? "utils.haDia" : "utils.haDias", { n: dias });
+  if (dias < 30) return { unit: dias === 1 ? "dia" : "dias", n: dias };
   const meses = Math.floor(dias / 30);
-  if (meses < 12) return t(meses === 1 ? "utils.haMes" : "utils.haMeses", { n: meses });
+  if (meses < 12) return { unit: meses === 1 ? "mes" : "meses", n: meses };
   const anos = Math.floor(meses / 12);
-  return t(anos === 1 ? "utils.haAno" : "utils.haAnos", { n: anos });
+  return { unit: anos === 1 ? "ano" : "anos", n: anos };
+}
+
+function unitSuffix(unit: RelativeUnit): string {
+  return unit.charAt(0).toUpperCase() + unit.slice(1);
+}
+
+export function timeAgo(iso: string | null): string {
+  const parts = relativeParts(iso);
+  if (!parts) return "";
+  if (parts.unit === "agora") return t("utils.visitadoAgora");
+  return t(`utils.ha${unitSuffix(parts.unit)}`, { n: parts.n });
+}
+
+/** Relative completion label, e.g. "Concluído há 3 horas". Empty when unavailable. */
+export function completedAgo(iso: string | null): string {
+  const parts = relativeParts(iso);
+  if (!parts) return "";
+  if (parts.unit === "agora") return t("card.concluidoAgora");
+  return t(`card.concluidoHa${unitSuffix(parts.unit)}`, { n: parts.n });
 }
 
 export function toDateInputValue(iso: string | null): string {

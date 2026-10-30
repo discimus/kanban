@@ -119,6 +119,18 @@ export const en: Record<string, string> = {
   "card.abrirTabela": "Open table",
   "card.excluirTabela": "Delete table",
   "card.excluirTabelaConfirm": "Delete the table on card \"{{text}}\"?",
+  "card.concluidoEm": "Completed on {date}",
+  "card.concluidoAgora": "Completed just now",
+  "card.concluidoHaMinuto": "Completed {n} minute ago",
+  "card.concluidoHaMinutos": "Completed {n} minutes ago",
+  "card.concluidoHaHora": "Completed {n} hour ago",
+  "card.concluidoHaHoras": "Completed {n} hours ago",
+  "card.concluidoHaDia": "Completed {n} day ago",
+  "card.concluidoHaDias": "Completed {n} days ago",
+  "card.concluidoHaMes": "Completed {n} month ago",
+  "card.concluidoHaMeses": "Completed {n} months ago",
+  "card.concluidoHaAno": "Completed {n} year ago",
+  "card.concluidoHaAnos": "Completed {n} years ago",
 
   /* ====== Grid ====== */
   "grid.tituloModal": "Table",

@@ -20,7 +20,7 @@ import { gridService } from "@contexts/grid/application/grid.service";
 import { openGridModal } from "@ui/modal/grid-modal";
 import { showAlert, showConfirm } from "@ui/components/dialog";
 import { showToast } from "@ui/components/notification";
-import { timeAgo, formatDate } from "@shared/utils";
+import { timeAgo, formatDate, completedAgo } from "@shared/utils";
 import { t, loc, localeDateTimeString } from "@shared/i18n";
 import { openModal, closeModal } from "../modal";
 import { field, select, errorText } from "@ui/components/forms";
@@ -849,6 +849,19 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
 
   cardBody.append(taskList, linkList, imageList, audioList, commentList, gridSlot);
 
+  const completedAt = !minimal && item.status === "done" ? item.completedAt : null;
+  const completedLabel = completedAt ? completedAgo(completedAt) : "";
+  const completedChip = completedAt && completedLabel
+    ? el("span", {
+        class: "chip chip--compact card__completed",
+        title: t("card.concluidoEm", { date: fullDateTime(completedAt) }),
+        "aria-label": completedLabel
+      }, [
+        icon("check_circle"),
+        el("span", {}, [completedLabel])
+      ])
+    : null;
+
   const cardChildren: (Node | null)[] = [
     menu,
     el("div", { class: "card__top" }, [
@@ -859,7 +872,8 @@ export function backlogCard(item: BacklogItem, locked = false, showPriority = tr
           medium: "remove",
           high: "arrow_upward",
           critical: "priority_high"
-        }[item.priority])]) : null
+        }[item.priority])]) : null,
+        completedChip
       ]),
       el("div", { class: "card__trailing" }, [
         audioCount > 0 ? el("span", { class: "badge badge--audio", title: t("card.comAudio") }, [icon("graphic_eq")]) : null,

@@ -119,6 +119,18 @@ export const pt: Record<string, string> = {
   "card.abrirTabela": "Abrir tabela",
   "card.excluirTabela": "Excluir tabela",
   "card.excluirTabelaConfirm": "Excluir a tabela do card \"{{text}}\"?",
+  "card.concluidoEm": "Concluído em {date}",
+  "card.concluidoAgora": "Concluído agora",
+  "card.concluidoHaMinuto": "Concluído há {n} minuto",
+  "card.concluidoHaMinutos": "Concluído há {n} minutos",
+  "card.concluidoHaHora": "Concluído há {n} hora",
+  "card.concluidoHaHoras": "Concluído há {n} horas",
+  "card.concluidoHaDia": "Concluído há {n} dia",
+  "card.concluidoHaDias": "Concluído há {n} dias",
+  "card.concluidoHaMes": "Concluído há {n} mês",
+  "card.concluidoHaMeses": "Concluído há {n} meses",
+  "card.concluidoHaAno": "Concluído há {n} ano",
+  "card.concluidoHaAnos": "Concluído há {n} anos",
 
   /* ====== Grid ====== */
   "grid.tituloModal": "Tabela",

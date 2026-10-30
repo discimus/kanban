@@ -106,7 +106,7 @@ export const backlogService = {
       throw new Error("O projeto está concluído, cancelado ou arquivado. Não é possível mover os itens.");
     }
     if (existing.status === status) return existing;
-    const completedAt = status === "done" ? (existing.completedAt ?? nowISO()) : null;
+    const completedAt = status === "done" ? nowISO() : null;
     const updated: BacklogItem = { ...existing, status, completedAt };
     backlogRepository.save(updated);
     eventBus.emit("backlog:moved", updated);

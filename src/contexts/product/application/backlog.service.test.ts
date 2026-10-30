@@ -219,6 +219,36 @@ describe("backlogService", () => {
       expect(mockEventBus.emit).not.toHaveBeenCalledWith("backlog:moved", expect.anything());
       expect(productService.recomputeStatus).not.toHaveBeenCalled();
     });
+
+    it("sets completedAt when moving to done", () => {
+      state.backlogItems = [makeBacklogItem({ status: "doing", completedAt: null })];
+      const result = backlogService.move("b1", "done");
+      expect(result.status).toBe("done");
+      expect(result.completedAt).toBeTypeOf("string");
+      expect(Number.isNaN(Date.parse(result.completedAt as string))).toBe(false);
+    });
+
+    it("overwrites an existing completedAt when moving to done again", () => {
+      const previous = "2020-01-01T00:00:00.000Z";
+      state.backlogItems = [makeBacklogItem({ status: "doing", completedAt: previous })];
+      const result = backlogService.move("b1", "done");
+      expect(result.completedAt).not.toBe(previous);
+    });
+
+    it("clears completedAt when leaving done", () => {
+      state.backlogItems = [makeBacklogItem({ status: "done", completedAt: "2020-01-01T00:00:00.000Z" })];
+      const result = backlogService.move("b1", "doing");
+      expect(result.completedAt).toBeNull();
+    });
+
+    it("keeps completedAt when moving done to done", () => {
+      const completed = "2020-01-01T00:00:00.000Z";
+      state.backlogItems = [makeBacklogItem({ status: "done", completedAt: completed })];
+      const existing = state.backlogItems[0];
+      const result = backlogService.move("b1", "done");
+      expect(result).toBe(existing);
+      expect(result.completedAt).toBe(completed);
+    });
   });
 
   describe("delete", () => {

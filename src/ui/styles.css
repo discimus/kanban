@@ -1545,6 +1545,17 @@ button.chip--refactor:hover {
   color: var(--md-on-secondary);
 }
 
+.card__completed {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.card__completed .material-symbols-outlined {
+  color: var(--success);
+}
+
 .chip--development {
   background: var(--md-primary-container);
   color: var(--md-on-primary-container);
