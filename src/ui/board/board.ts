@@ -4,7 +4,7 @@ import { KANBAN_COLUMNS, KanbanStatus, BacklogItem, ProductCategory, TaskClassif
 import { backlogService } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
 import { showAlert } from "@ui/components/dialog";
-import { showConfetti } from "@ui/components/confetti";
+import { confettiOrigin, showConfetti } from "@ui/components/confetti";
 import { backlogCard } from "./card";
 import { openShortcutsHelp } from "@ui/components/help-menu";
 import { openBacklogForm } from "@ui/modal/backlog-form";
@@ -201,10 +201,14 @@ function renderColumn(
       if (!id) return;
       try {
         backlogService.move(id, status);
-        const card = document.querySelector<HTMLElement>(`[data-id="${id}"]`);
-        if (status === "done" && card) {
-          const rect = card.getBoundingClientRect();
-          showConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        if (status === "done") {
+          requestAnimationFrame(() => {
+            const card = document.querySelector<HTMLElement>(`[data-id="${id}"]`);
+            if (!card) return;
+            const origin = confettiOrigin(card.getBoundingClientRect());
+            if (!origin) return;
+            showConfetti(origin.x, origin.y);
+          });
         }
         flashCard(id);
       } catch (e) {

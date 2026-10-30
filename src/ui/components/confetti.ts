@@ -1,4 +1,26 @@
-const COLORS = ["#4f5bd5", "#ff8a00", "#e91e63", "#00bfa5", "#7c4dff", "#ff6d00"];
+const COLORS = ["var(--md-primary)", "var(--md-secondary)", "var(--md-tertiary)", "var(--md-error)"];
+
+export interface ConfettiViewport {
+  width: number;
+  height: number;
+}
+
+export function confettiOrigin(
+  rect: DOMRect,
+  viewport: ConfettiViewport = { width: window.innerWidth, height: window.innerHeight }
+): { x: number; y: number } | null {
+  const left = Math.max(rect.left, 0);
+  const top = Math.max(rect.top, 0);
+  const right = Math.min(rect.right, viewport.width);
+  const bottom = Math.min(rect.bottom, viewport.height);
+
+  if (right <= left || bottom <= top) return null;
+
+  return {
+    x: left + (right - left) / 2,
+    y: top + (bottom - top) / 2
+  };
+}
 
 function createPiece(): HTMLElement {
   const color = COLORS[Math.floor(Math.random() * COLORS.length)];
@@ -26,7 +48,7 @@ function createPiece(): HTMLElement {
     child = document.createElementNS(ns, "polygon");
     child.setAttribute("points", `${size / 2},0 ${size},${size} 0,${size}`);
   }
-  child.setAttribute("fill", color);
+  child.style.fill = color;
   svg.append(child);
 
   const dx = (Math.random() - 0.5) * 220;
@@ -44,6 +66,10 @@ function createPiece(): HTMLElement {
 }
 
 export function showConfetti(x: number, y: number): void {
+  if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
   const existing = document.querySelector(".confetti");
   if (existing) existing.remove();
 
