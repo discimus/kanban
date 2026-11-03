@@ -142,6 +142,19 @@ describe("productService", () => {
       const result = productService.edit("p1", { name: "P", description: "", category: "business" });
       expect(result.category).toBe("business");
     });
+
+    it("persists reviewAutoDoneDays", () => {
+      state.products = [makeProduct()];
+      const result = productService.edit("p1", { reviewAutoDoneDays: 7 });
+      expect(result.reviewAutoDoneDays).toBe(7);
+      expect(productService.get("p1")?.reviewAutoDoneDays).toBe(7);
+    });
+
+    it("clears reviewAutoDoneDays when set to null", () => {
+      state.products = [makeProduct({ reviewAutoDoneDays: 3 })];
+      const result = productService.edit("p1", { reviewAutoDoneDays: null });
+      expect(result.reviewAutoDoneDays).toBeNull();
+    });
   });
 
   describe("setStatus", () => {

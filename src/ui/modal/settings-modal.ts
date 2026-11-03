@@ -1,5 +1,5 @@
 import { el } from "@ui/components/dom";
-import { formActions, errorText, paletteSelector } from "@ui/components/forms";
+import { formActions, errorText, paletteSelector, select } from "@ui/components/forms";
 import { openModal, closeModal } from "../modal";
 import { productService } from "@contexts/product/application/product.service";
 import { Product } from "@shared/types";
@@ -20,6 +20,31 @@ export function openProductSettings(product: Product): void {
   const showReviewCb = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   showReviewCb.checked = product.showReview !== false;
 
+  const reviewAutoDoneSel = select(
+    [
+      { value: "", label: t("form.nunca") },
+      { value: "1", label: t("form.umDia") },
+      { value: "3", label: t("form.tresDias") },
+      { value: "7", label: t("form.seteDias") },
+      { value: "14", label: t("form.catorzeDias") },
+      { value: "30", label: t("form.trintaDias") }
+    ],
+    product.reviewAutoDoneDays != null ? String(product.reviewAutoDoneDays) : ""
+  );
+
+  const reviewAutoField = el("label", { class: "field" }, [
+    el("span", { class: "field__label" }, [t("settings.reviewAutoDoneAfter")]),
+    reviewAutoDoneSel,
+    el("span", { class: "field__description" }, [t("settings.reviewAutoDoneDesc")])
+  ]);
+
+  const syncReviewAuto = (): void => {
+    reviewAutoField.style.display = showReviewCb.checked ? "" : "none";
+  };
+
+  showReviewCb.addEventListener("change", syncReviewAuto);
+  syncReviewAuto();
+
   const error = errorText();
   const pal = paletteSelector(product.palette);
 
@@ -28,6 +53,7 @@ export function openProductSettings(product: Product): void {
       productService.edit(product.id, {
         ...(!isNotes && { showPriority: showPriority.checked }),
         ...(!isNotes && { showReview: showReviewCb.checked }),
+        ...(!isNotes && { reviewAutoDoneDays: reviewAutoDoneSel.value ? Number(reviewAutoDoneSel.value) : null }),
         autoPasteLinks: autoPasteCb.checked,
         autoPasteImages: autoPasteImageCb.checked,
         palette: pal.value
@@ -67,6 +93,7 @@ export function openProductSettings(product: Product): void {
         el("span", { class: "field__description" }, [t("settings.exibirReviewDesc")])
       ])
     ])]),
+    ...(isNotes ? [] : [reviewAutoField]),
     el("label", { class: "field" }, [
       el("span", { class: "field__label" }, [t("palette.label")]),
       pal.element,

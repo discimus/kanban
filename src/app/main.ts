@@ -5,7 +5,7 @@ import { applyDensity, getDensity } from "@ui/density";
 import { store } from "@shared/storage";
 import { showConfirm, showOnboarding } from "@ui/components/dialog";
 import { productService } from "@contexts/product/application/product.service";
-import { runAutoArchive } from "@contexts/product/application/backlog.service";
+import { runAutoArchive, runAutoCompleteReview } from "@contexts/product/application/backlog.service";
 import { showToast } from "@ui/components/notification";
 import { createExampleData } from "@contexts/product/domain/example-data";
 import { t } from "@shared/i18n";
@@ -24,8 +24,14 @@ async function boot(): Promise<void> {
   applyTheme(getTheme());
   applyDensity(getDensity());
   await store.hydrate();
+  runAutoCompleteReview();
   runAutoArchive();
   renderApp(appRoot);
+
+  setInterval(() => {
+    runAutoCompleteReview();
+    runAutoArchive();
+  }, 60 * 60 * 1000);
 
   eventBus.on("state:changed", () => {
     renderApp(appRoot);
@@ -42,6 +48,11 @@ async function boot(): Promise<void> {
   eventBus.on("backlog:auto-archived", (count) => {
     const label = Number(count) === 1 ? t("main.cardArquivadoSingle") : t("main.cardsArquivados");
     showToast(`${count} ${label} automaticamente`, "archive");
+  });
+
+  eventBus.on("backlog:auto-completed", (count) => {
+    const label = Number(count) === 1 ? t("main.cardConcluidoSingle") : t("main.cardsConcluidos");
+    showToast(`${count} ${label}`, "check_circle");
   });
 
   eventBus.on("product:pending-completion", (productId) => {

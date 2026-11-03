@@ -25,7 +25,8 @@ export function createBacklogItem(props: CreateBacklogItemProps): BacklogItem {
     classification: props.classification ?? "task",
     createdAt: new Date().toISOString(),
     archivedAt: null,
-    completedAt: null
+    completedAt: null,
+    reviewEnteredAt: null
   };
 }
 
@@ -54,7 +55,8 @@ export function changeProduct(item: BacklogItem, newProductId: string, classific
     status: "todo",
     classification: classification ?? item.classification,
     archivedAt: null,
-    completedAt: null
+    completedAt: null,
+    reviewEnteredAt: null
   };
 }
 

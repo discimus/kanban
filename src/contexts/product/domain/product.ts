@@ -25,6 +25,7 @@ export function createProduct(props: CreateProductProps): Product {
     autoPasteLinks: true,
     autoPasteImages: true,
     showReview: (props.category ?? "development") === "development",
+    reviewAutoDoneDays: null,
     palette: props.palette ?? "indigo",
     archivedAt: null,
     pinnedAt: null

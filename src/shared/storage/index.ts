@@ -7,7 +7,13 @@ const STORAGE_KEY = "kanban-ddd-state";
 const VALID_CLASSIFICATIONS: TaskClassification[] = ["task", "bug", "refactor", "idea", "pending", "improvement", "meeting", "content", "project", "note", "exercise", "todo"];
 
 export function normalizeBacklogItem(item: BacklogItem): BacklogItem {
-  const base: BacklogItem = { ...item, archivedAt: (item as any).archivedAt ?? null, completedAt: (item as any).completedAt ?? null, createdAt: (item as any).createdAt ?? new Date().toISOString() };
+  const base: BacklogItem = {
+    ...item,
+    archivedAt: (item as any).archivedAt ?? null,
+    completedAt: (item as any).completedAt ?? null,
+    ...("reviewEnteredAt" in item ? { reviewEnteredAt: (item as any).reviewEnteredAt ?? null } : {}),
+    createdAt: (item as any).createdAt ?? new Date().toISOString()
+  };
   if (!VALID_CLASSIFICATIONS.includes(item.classification)) {
     return { ...base, classification: "task" };
   }
@@ -93,6 +99,7 @@ export function normalizeProduct(product: Product): Product {
     autoPasteLinks: (product as any).autoPasteLinks !== false,
     autoPasteImages: (product as any).autoPasteImages !== false,
     showReview: (product as any).showReview !== false,
+    ...("reviewAutoDoneDays" in product ? { reviewAutoDoneDays: (product as any).reviewAutoDoneDays ?? null } : {}),
     palette: palette && validPaletteIds.includes(palette) ? (palette as PaletteId) : "indigo",
     archivedAt: (product as any).archivedAt ?? null,
     pinnedAt: (product as any).pinnedAt ?? null

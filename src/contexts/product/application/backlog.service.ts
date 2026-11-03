@@ -106,20 +106,8 @@ export const backlogService = {
       throw new Error("O projeto está concluído, cancelado ou arquivado. Não é possível mover os itens.");
     }
     if (existing.status === status) return existing;
-    const completedAt = status === "done" ? nowISO() : null;
-    const updated: BacklogItem = { ...existing, status, completedAt };
-    backlogRepository.save(updated);
-    eventBus.emit("backlog:moved", updated);
-    productService.recomputeStatus(updated.productId);
-    runAutoArchive();
-
-    if (productService.allItemsDone(updated.productId)) {
-      const product = productService.get(updated.productId);
-      if (product && product.status !== "completed") {
-        eventBus.emit("product:pending-completion", updated.productId);
-      }
-    }
-
+    const updated = applyMove(existing, status);
+    runAfterMove(updated);
     return updated;
   },
 
@@ -205,6 +193,72 @@ export const backlogService = {
     return updated;
   }
 };
+
+function applyMove(existing: BacklogItem, status: KanbanStatus): BacklogItem {
+  const now = nowISO();
+  const updated: BacklogItem = {
+    ...existing,
+    status,
+    completedAt: status === "done" ? now : null,
+    reviewEnteredAt: status === "review" ? now : null
+  };
+  backlogRepository.save(updated);
+  eventBus.emit("backlog:moved", updated);
+  productService.recomputeStatus(updated.productId);
+  return updated;
+}
+
+function notifyPendingCompletion(productId: string): void {
+  if (!productService.allItemsDone(productId)) return;
+  const product = productService.get(productId);
+  if (product && product.status !== "completed") {
+    eventBus.emit("product:pending-completion", productId);
+  }
+}
+
+function runAfterMove(updated: BacklogItem): void {
+  const autoCompletedProducts = runAutoCompleteReview();
+  runAutoArchive();
+  if (!autoCompletedProducts.has(updated.productId)) {
+    notifyPendingCompletion(updated.productId);
+  }
+}
+
+/**
+ * Moves cards from Review to Done once the project's configured period
+ * (`reviewAutoDoneDays`) has elapsed since they entered Review.
+ * Cards from legacy data without `reviewEnteredAt` start counting now.
+ * Returns the ids of the products that had at least one card completed.
+ */
+export function runAutoCompleteReview(): Set<string> {
+  const products = new Map<string, Product>(productRepository.all().map((p) => [p.id, p]));
+  const completedProducts = new Set<string>();
+  let count = 0;
+
+  for (const item of backlogRepository.all()) {
+    if (item.status !== "review" || item.archivedAt) continue;
+    const product = products.get(item.productId);
+    if (!product || product.status === "completed" || product.status === "canceled" || product.archivedAt) continue;
+    const days = product.reviewAutoDoneDays;
+    if (!days || days <= 0) continue;
+
+    if (!item.reviewEnteredAt) {
+      backlogRepository.save({ ...item, reviewEnteredAt: nowISO() });
+      continue;
+    }
+
+    const elapsed = Date.now() - new Date(item.reviewEnteredAt).getTime();
+    if (elapsed >= days * 86400000) {
+      applyMove(item, "done");
+      completedProducts.add(item.productId);
+      count++;
+    }
+  }
+
+  if (count > 0) eventBus.emit("backlog:auto-completed", count);
+  for (const productId of completedProducts) notifyPendingCompletion(productId);
+  return completedProducts;
+}
 
 export function runAutoArchive(): void {
   const items = backlogRepository.all();
