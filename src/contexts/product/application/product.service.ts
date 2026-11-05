@@ -21,7 +21,7 @@ export const productService = {
     return product;
   },
 
-  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; autoPasteImages?: boolean; showReview?: boolean; palette?: PaletteId }): Product {
+  edit(id: string, changes: { name?: string; description?: string; showPriority?: boolean; category?: ProductCategory; autoArchiveDays?: number | null; autoPasteLinks?: boolean; autoPasteImages?: boolean; showReview?: boolean; reviewAutoDoneDays?: number | null; palette?: PaletteId }): Product {
     const existing = productRepository.findById(id);
     if (!existing) throw new Error("Projeto não encontrado.");
     if (changes.name !== undefined) assertValidProductName(changes.name);
@@ -46,6 +46,7 @@ export const productService = {
       autoPasteLinks: changes.autoPasteLinks ?? existing.autoPasteLinks,
       autoPasteImages: changes.autoPasteImages ?? existing.autoPasteImages,
       showReview: changes.showReview ?? existing.showReview,
+      reviewAutoDoneDays: changes.reviewAutoDoneDays !== undefined ? changes.reviewAutoDoneDays : existing.reviewAutoDoneDays ?? null,
       palette: changes.palette ?? existing.palette
     };
     productRepository.save(updated);

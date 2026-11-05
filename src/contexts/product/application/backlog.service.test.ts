@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { AppState } from "@shared/types";
+import type { AppState, Product } from "@shared/types";
 
 const { state, mockStore, mockEventBus } = vi.hoisted(() => {
   const state: AppState = { products: [], backlogItems: [], tasks: [], links: [], comments: [], images: [], audios: [], estimations: [] };
@@ -53,8 +53,9 @@ vi.mock("@contexts/product/application/product.service", () => ({
   }
 }));
 
-import { backlogService } from "@contexts/product/application/backlog.service";
+import { backlogService, runAutoCompleteReview } from "@contexts/product/application/backlog.service";
 import { productService } from "@contexts/product/application/product.service";
+import { productRepository } from "@contexts/product/infrastructure/product.repository";
 
 function makeBacklogItem(overrides: Record<string, unknown> = {}) {
   return {
@@ -69,6 +70,28 @@ function makeBacklogItem(overrides: Record<string, unknown> = {}) {
     createdAt: "2024-01-01T00:00:00.000Z",
     archivedAt: null,
     completedAt: null,
+    reviewEnteredAt: null,
+    ...overrides
+  };
+}
+
+function makeProduct(overrides: Partial<Product> = {}): Product {
+  return {
+    id: "p1",
+    name: "P",
+    description: "",
+    createdAt: "2024-01-01T00:00:00.000Z",
+    status: "backlog",
+    showPriority: true,
+    category: "development",
+    autoArchiveDays: null,
+    autoPasteLinks: true,
+    autoPasteImages: true,
+    showReview: true,
+    reviewAutoDoneDays: null,
+    palette: "indigo",
+    archivedAt: null,
+    pinnedAt: null,
     ...overrides
   };
 }
@@ -248,6 +271,85 @@ describe("backlogService", () => {
       const result = backlogService.move("b1", "done");
       expect(result).toBe(existing);
       expect(result.completedAt).toBe(completed);
+    });
+  });
+
+  describe("review timestamp", () => {
+    it("sets reviewEnteredAt when moving to review", () => {
+      state.backlogItems = [makeBacklogItem({ status: "doing" })];
+      const result = backlogService.move("b1", "review");
+      expect(result.reviewEnteredAt).toBeTypeOf("string");
+      expect(Number.isNaN(Date.parse(result.reviewEnteredAt as string))).toBe(false);
+    });
+
+    it("clears reviewEnteredAt when leaving review", () => {
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: "2025-01-01T00:00:00.000Z" })];
+      const result = backlogService.move("b1", "doing");
+      expect(result.reviewEnteredAt).toBeNull();
+    });
+  });
+
+  describe("runAutoCompleteReview", () => {
+    beforeEach(() => {
+      state.products = [makeProduct({ reviewAutoDoneDays: 1 })];
+      vi.mocked(productRepository.all).mockImplementation(() => state.products);
+      vi.mocked(productService.get).mockReturnValue(makeProduct({ reviewAutoDoneDays: 1 }));
+      vi.mocked(productService.allItemsDone).mockReturnValue(false);
+    });
+
+    it("does nothing when the project has no configured period", () => {
+      state.products = [makeProduct({ reviewAutoDoneDays: null })];
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: "2020-01-01T00:00:00.000Z" })];
+      runAutoCompleteReview();
+      expect(state.backlogItems[0].status).toBe("review");
+    });
+
+    it("does nothing before the configured period", () => {
+      const recent = new Date(Date.now() - 3600000).toISOString();
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: recent })];
+      runAutoCompleteReview();
+      expect(state.backlogItems[0].status).toBe("review");
+    });
+
+    it("moves to done after the configured period", () => {
+      const old = new Date(Date.now() - 2 * 86400000).toISOString();
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: old })];
+      runAutoCompleteReview();
+      expect(state.backlogItems[0].status).toBe("done");
+      expect(state.backlogItems[0].completedAt).toBeTypeOf("string");
+      expect(state.backlogItems[0].reviewEnteredAt).toBeNull();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("backlog:auto-completed", 1);
+    });
+
+    it("seeds reviewEnteredAt for legacy cards without it", () => {
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: undefined })];
+      runAutoCompleteReview();
+      expect(state.backlogItems[0].status).toBe("review");
+      expect(state.backlogItems[0].reviewEnteredAt).toBeTypeOf("string");
+    });
+
+    it("skips archived cards", () => {
+      const old = new Date(Date.now() - 2 * 86400000).toISOString();
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: old, archivedAt: "2025-01-01T00:00:00.000Z" })];
+      runAutoCompleteReview();
+      expect(state.backlogItems[0].status).toBe("review");
+    });
+
+    it("skips items from completed products", () => {
+      state.products = [makeProduct({ status: "completed", reviewAutoDoneDays: 1 })];
+      vi.mocked(productService.get).mockReturnValue(makeProduct({ status: "completed", reviewAutoDoneDays: 1 }));
+      const old = new Date(Date.now() - 2 * 86400000).toISOString();
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: old })];
+      runAutoCompleteReview();
+      expect(state.backlogItems[0].status).toBe("review");
+    });
+
+    it("notifies pending completion for affected products", () => {
+      vi.mocked(productService.allItemsDone).mockReturnValue(true);
+      const old = new Date(Date.now() - 2 * 86400000).toISOString();
+      state.backlogItems = [makeBacklogItem({ status: "review", reviewEnteredAt: old })];
+      runAutoCompleteReview();
+      expect(mockEventBus.emit).toHaveBeenCalledWith("product:pending-completion", "p1");
     });
   });
 

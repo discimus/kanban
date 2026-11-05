@@ -45,6 +45,11 @@ describe("createBacklogItem", () => {
     expect(item.completedAt).toBeNull();
   });
 
+  it("reviewEnteredAt defaults to null", () => {
+    const item = createBacklogItem(validProps);
+    expect(item.reviewEnteredAt).toBeNull();
+  });
+
   it("trims title whitespace", () => {
     const item = createBacklogItem({ productId: "p1", title: "  Hello  " });
     expect(item.title).toBe("Hello");
@@ -153,6 +158,11 @@ describe("changeProduct", () => {
     const result = changeProduct(active, "p2");
     expect(result.archivedAt).toBeNull();
     expect(result.completedAt).toBeNull();
+  });
+
+  it("clears reviewEnteredAt", () => {
+    const result = changeProduct({ ...item, reviewEnteredAt: "2025-01-01T00:00:00.000Z" }, "p2");
+    expect(result.reviewEnteredAt).toBeNull();
   });
 
   it("overrides classification when classification param is provided", () => {

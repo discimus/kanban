@@ -250,6 +250,8 @@ export const en: Record<string, string> = {
   "settings.colarImagemDesc": "When adding an image, automatically pastes clipboard content.",
   "settings.exibirReview": "Show Review column",
   "settings.exibirReviewDesc": "Shows the Review column on the Kanban board.",
+  "settings.reviewAutoDoneDesc": "Moves cards in Review to Done after the selected period. Choose Never to disable.",
+  "settings.reviewAutoDoneAfter": "Move to Done after",
 
   /* ====== Statistics ====== */
   "stats.visaoGeral": "Overview",
@@ -280,6 +282,8 @@ export const en: Record<string, string> = {
   "main.cardArquivado": "Card archived",
   "main.cardsArquivados": "cards archived",
   "main.cardArquivadoSingle": "card archived",
+  "main.cardsConcluidos": "cards moved to Done automatically",
+  "main.cardConcluidoSingle": "card moved to Done automatically",
   "main.concluirProjeto": "All cards are in \"Done\". Would you like to complete the project \"{{text}}\"?\n\nCompleted projects become read-only.",
 
   /* ====== Modal ====== */

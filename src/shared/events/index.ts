@@ -40,6 +40,7 @@ export type DomainEvent =
   | "sticky:audio-added"
   | "sticky:audio-removed"
   | "backlog:auto-archived"
+  | "backlog:auto-completed"
   | "backlog:product-changed"
   | "product:archived"
   | "product:restored"

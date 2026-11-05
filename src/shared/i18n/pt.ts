@@ -250,6 +250,8 @@ export const pt: Record<string, string> = {
   "settings.colarImagemDesc": "Ao adicionar uma imagem, cola automaticamente o conteúdo da área de transferência.",
   "settings.exibirReview": "Exibir coluna Review",
   "settings.exibirReviewDesc": "Mostra a coluna Review no quadro Kanban.",
+  "settings.reviewAutoDoneDesc": "Move os cards em Review para Done após o período selecionado. Escolha Nunca para desativar.",
+  "settings.reviewAutoDoneAfter": "Mover para Done após",
 
   /* ====== Statistics ====== */
   "stats.visaoGeral": "Visão Geral",
@@ -280,6 +282,8 @@ export const pt: Record<string, string> = {
   "main.cardArquivado": "Card arquivado",
   "main.cardsArquivados": "cards arquivados",
   "main.cardArquivadoSingle": "card arquivado",
+  "main.cardsConcluidos": "cards movidos para Done automaticamente",
+  "main.cardConcluidoSingle": "card movido para Done automaticamente",
   "main.concluirProjeto": "Todos os cards estão em \"Done\". Deseja concluir o projeto \"{{text}}\"?\n\nProjetos concluídos ficam em modo somente leitura.",
 
   /* ====== Modal ====== */

@@ -61,6 +61,11 @@ describe("createProduct", () => {
     expect(product.showReview).toBe(false);
   });
 
+  it("returns reviewAutoDoneDays as null", () => {
+    const product = createProduct({ name: "My Project" });
+    expect(product.reviewAutoDoneDays).toBeNull();
+  });
+
   it("trims whitespace from name", () => {
     const product = createProduct({ name: "  Hello World  " });
     expect(product.name).toBe("Hello World");

@@ -265,6 +265,30 @@ describe("normalizeProduct", () => {
     expect(result.showReview).toBe(false);
   });
 
+  it("leaves reviewAutoDoneDays undefined for legacy product without it", () => {
+    const legacy = {
+      id: "p1",
+      name: "Old",
+      description: "",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      status: "backlog",
+      showPriority: true,
+      category: "development",
+      autoArchiveDays: null,
+      autoPasteLinks: true,
+      autoPasteImages: true,
+      showReview: true,
+    } as unknown as Product;
+    const result = normalizeProduct(legacy);
+    expect(result.reviewAutoDoneDays).toBeUndefined();
+  });
+
+  it("preserves reviewAutoDoneDays when set", () => {
+    const product = makeProduct({ reviewAutoDoneDays: 7 });
+    const result = normalizeProduct(product);
+    expect(result.reviewAutoDoneDays).toBe(7);
+  });
+
   it("sets autoPasteImages to true for legacy product without it", () => {
     const legacy = {
       id: "p1",
@@ -444,6 +468,29 @@ describe("normalizeBacklogItem", () => {
     } as unknown as BacklogItem;
     const result = normalizeBacklogItem(legacy);
     expect(result.completedAt).toBeNull();
+  });
+
+  it("leaves reviewEnteredAt undefined for legacy backlogItem without it", () => {
+    const legacy = {
+      id: "b1",
+      productId: "p1",
+      title: "Old Item",
+      description: "",
+      priority: "low",
+      status: "review",
+      storyPoints: 1,
+      classification: "task",
+      archivedAt: null,
+      completedAt: null,
+    } as unknown as BacklogItem;
+    const result = normalizeBacklogItem(legacy);
+    expect(result.reviewEnteredAt).toBeUndefined();
+  });
+
+  it("preserves reviewEnteredAt when set", () => {
+    const item = makeBacklogItem({ reviewEnteredAt: "2026-07-13T00:00:00.000Z" });
+    const result = normalizeBacklogItem(item);
+    expect(result.reviewEnteredAt).toBe("2026-07-13T00:00:00.000Z");
   });
 });
 

@@ -125,6 +125,8 @@ export interface Product {
   autoPasteLinks: boolean;
   autoPasteImages: boolean;
   showReview: boolean;
+  /** Prazo em dias para mover cards de Review para Done automaticamente. `null` desativa. */
+  reviewAutoDoneDays?: number | null;
   palette: PaletteId;
   archivedAt: ISODate | null;
   pinnedAt: ISODate | null;
@@ -142,6 +144,8 @@ export interface BacklogItem {
   createdAt: ISODate;
   archivedAt: ISODate | null;
   completedAt: ISODate | null;
+  /** Momento em que o card entrou em Review; usado pela automação Review → Done. */
+  reviewEnteredAt?: ISODate | null;
 }
 
 export interface Task {
